@@ -1,14 +1,33 @@
+/**
+ * Modelo alinhado ao contrato HTTP `/missao-consumidor` (camelCase).
+ * Não usar `missao_fk` / `consumidor_fk` — stubs UML, não o contrato da API.
+ * `consumidorId` vem só do JWT no backend; o body de conclusão envia apenas `missaoId`.
+ */
 export interface MissaoConsumidor {
-    id_missao_consumidor: number;
-    missao_fk: number;
-    consumidor_fk: number;
-    data_criacao: Date;
-    data_atualizacao: Date;
+    id: number;
+    missaoId: number;
+    consumidorId: number;
+    nomeMissao: string;
+    pontoRecompensa: number;
+    dataCriacao: Date;
+    dataAtualizacao: Date;
 }
 
-export interface RequisicaoCriarMissaoConsumidor {
-    missao_fk: number;
-    consumidor_fk: number;
+export interface RequisicaoConcluirMissao {
+    missaoId: number;
 }
 
-export type RequisicaoAtualizarMissaoConsumidor = Partial<RequisicaoCriarMissaoConsumidor>;
+export interface RespostaConcluirMissao {
+    missaoConsumidor: MissaoConsumidor;
+    consumidor: {
+        id: number;
+        cpf: string;
+        pontos: number;
+        nivel: number;
+        sexoId: number | null;
+        lojistaId: number | null;
+        usuarioId: number;
+        dataCriacao: Date;
+        dataAtualizacao: Date;
+    };
+}
