@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { listarSexos } from "@/modules/sexos/services/servicoSexo";
 import { Sexo } from "@/modules/sexos/types/sexo.types";
-import { NavModulos } from "@/shared/components/NavModulos";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarConsumidor,
@@ -179,7 +178,6 @@ export function CrudConsumidores() {
                     <p className="mt-1 text-sm text-slate-600">
                         Perfil de consumidor. O usuário precisa ter endereço cadastrado.
                     </p>
-                    <NavModulos atual="/consumidores" />
                 </div>
 
                 <button

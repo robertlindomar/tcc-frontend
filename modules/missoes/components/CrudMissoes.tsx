@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { NavModulos } from "@/shared/components/NavModulos";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarMissao,
@@ -170,7 +169,6 @@ export function CrudMissoes() {
                     <p className="mt-1 text-sm text-slate-600">
                         Gerencie cadastro, edição e exclusão de missões.
                     </p>
-                    <NavModulos atual="/missoes" />
                 </div>
 
                 <button

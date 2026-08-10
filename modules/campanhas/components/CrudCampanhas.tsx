@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { NavModulos } from "@/shared/components/NavModulos";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarCampanha,
@@ -161,7 +160,6 @@ export function CrudCampanhas() {
                     <p className="mt-1 text-sm text-slate-600">
                         Gerencie cadastro, edição e exclusão de campanhas.
                     </p>
-                    <NavModulos atual="/campanhas" />
                 </div>
 
                 <button

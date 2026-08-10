@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { NavModulos } from "@/shared/components/NavModulos";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarUsuario,
@@ -173,7 +172,6 @@ export function CrudUsuarios() {
                     <p className="mt-1 text-sm text-slate-600">
                         Gerencie cadastro, edição e exclusão de usuários.
                     </p>
-                    <NavModulos atual="/usuarios" />
                 </div>
 
                 <button

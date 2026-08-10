@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { listarCampanhas } from "@/modules/campanhas/services/servicoCampanha";
 import { Campanha } from "@/modules/campanhas/types/campanha.types";
-import { NavModulos } from "@/shared/components/NavModulos";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarSorteio,
@@ -169,7 +168,6 @@ export function CrudSorteios() {
                     <p className="mt-1 text-sm text-slate-600">
                         Gerencie cadastro, edição e exclusão de sorteios.
                     </p>
-                    <NavModulos atual="/sorteios" />
                 </div>
 
                 <button

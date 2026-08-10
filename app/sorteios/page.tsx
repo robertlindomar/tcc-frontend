@@ -1,14 +1,13 @@
 import { ExigirAutenticacao } from "@/modules/auth/components/ExigirAutenticacao";
 import { CrudSorteios } from "@/modules/sorteios/components/CrudSorteios";
+import { LayoutAutenticado } from "@/shared/components/layout/LayoutAutenticado";
 
-export default function SorteiosPage() {
+export default function Page() {
     return (
-        <main className="min-h-screen bg-slate-50 p-6 text-slate-900">
-            <div className="mx-auto max-w-7xl">
-                <ExigirAutenticacao>
-                    <CrudSorteios />
-                </ExigirAutenticacao>
-            </div>
-        </main>
+        <ExigirAutenticacao>
+            <LayoutAutenticado>
+                <CrudSorteios />
+            </LayoutAutenticado>
+        </ExigirAutenticacao>
     );
 }

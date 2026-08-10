@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { NavModulos } from "@/shared/components/NavModulos";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     concluirMissao,
@@ -94,7 +93,6 @@ export function PainelMissoesConsumidor() {
                     Conclua missões informando o ID e acompanhe pontos, nível e
                     histórico.
                 </p>
-                <NavModulos atual="/missao-consumidores" />
             </div>
 
             {statusConsumidor && (

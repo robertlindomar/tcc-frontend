@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { NavModulos } from "@/shared/components/NavModulos";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { listarProdutos } from "@/modules/produtos/services/servicoProduto";
 import { Produto } from "@/modules/produtos/types/produto.types";
@@ -190,7 +189,6 @@ export function CrudPromocoes() {
                     <p className="mt-1 text-sm text-slate-600">
                         Gerencie cadastro, edição e exclusão de promoções.
                     </p>
-                    <NavModulos atual="/promocoes" />
                 </div>
 
                 <button

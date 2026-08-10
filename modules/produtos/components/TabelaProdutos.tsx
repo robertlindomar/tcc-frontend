@@ -2,6 +2,7 @@ import { Produto } from "../types/produto.types";
 
 interface TabelaProdutosProps {
     produtos: Produto[];
+    nomeCategoriaPorId?: Map<number, string>;
     onEditar: (produto: Produto) => void;
     onExcluir: (produto: Produto) => void;
     carregando?: boolean;
@@ -25,6 +26,7 @@ function formatarValor(valor: number) {
 
 export function TabelaProdutos({
     produtos,
+    nomeCategoriaPorId,
     onEditar,
     onExcluir,
     carregando = false,
@@ -66,7 +68,10 @@ export function TabelaProdutos({
                                 <td className="px-4 py-3 font-medium">{produto.nome}</td>
                                 <td className="px-4 py-3">{formatarValor(produto.valor)}</td>
                                 <td className="px-4 py-3">
-                                    {produto.categoriaId ?? "—"}
+                                    {produto.categoriaId != null
+                                        ? (nomeCategoriaPorId?.get(produto.categoriaId) ??
+                                          `#${produto.categoriaId}`)
+                                        : "—"}
                                 </td>
                                 <td className="px-4 py-3">
                                     {formatarData(produto.dataCriacao)}

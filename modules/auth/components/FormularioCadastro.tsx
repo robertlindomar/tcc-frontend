@@ -3,18 +3,14 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PapelUsuario } from "@/modules/usuarios/types/usuario.types";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { BotaoAuth } from "./BotaoAuth";
 import { CartaoAuth } from "./CartaoAuth";
 import { CampoFormulario } from "./CampoFormulario";
 import { cadastrarUsuario } from "../services/servicoAuth";
 
-const roles: Array<{ value: PapelUsuario; label: string }> = [
-    { value: "CONSUMIDOR", label: "Consumidor" },
-    { value: "LOJISTA", label: "Lojista" },
-    { value: "ASSOCIACAO", label: "Associação" },
-];
+/** Cadastro web público: apenas lojista (API ainda aceita CONSUMIDOR para o app mobile). */
+const PAPEL_CADASTRO_WEB = "LOJISTA" as const;
 
 export function FormularioCadastro() {
     const router = useRouter();
@@ -23,7 +19,6 @@ export function FormularioCadastro() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
-    const [role, setRole] = useState<PapelUsuario>("CONSUMIDOR");
 
     const [erro, setErro] = useState("");
     const [carregando, setCarregando] = useState(false);
@@ -50,7 +45,7 @@ export function FormularioCadastro() {
                 nome,
                 email,
                 senha,
-                role,
+                role: PAPEL_CADASTRO_WEB,
             });
 
             router.push("/login");
@@ -63,8 +58,8 @@ export function FormularioCadastro() {
 
     return (
         <CartaoAuth
-            titulo="Criar conta"
-            subtitulo="Cadastre-se para acessar o sistema"
+            titulo="Cadastro de lojista"
+            subtitulo="Crie sua conta para pré-cadastrar a loja na associação"
             rodape={
                 <p>
                     Já possui conta?{" "}
@@ -101,26 +96,6 @@ export function FormularioCadastro() {
                     required
                 />
 
-                <div className="space-y-1">
-                    <label htmlFor="role" className="text-sm font-medium text-slate-700">
-                        Tipo de conta
-                    </label>
-                    <select
-                        id="role"
-                        name="role"
-                        value={role}
-                        onChange={(event) => setRole(event.target.value as PapelUsuario)}
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        required
-                    >
-                        {roles.map((opcao) => (
-                            <option key={opcao.value} value={opcao.value}>
-                                {opcao.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
                 <CampoFormulario
                     label="Senha"
                     name="senha"
@@ -142,7 +117,7 @@ export function FormularioCadastro() {
                 />
 
                 <BotaoAuth type="submit" carregando={carregando}>
-                    Cadastrar
+                    Cadastrar lojista
                 </BotaoAuth>
             </form>
         </CartaoAuth>

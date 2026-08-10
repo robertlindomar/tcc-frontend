@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { NavModulos } from "@/shared/components/NavModulos";
+import { buscarUsuarioLogadoAtual } from "@/modules/auth/services/servicoAuth";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     aprovarLojista,
@@ -42,8 +42,13 @@ function parseInscricaoEstadual(valor: string): number | null | undefined {
 }
 
 export function CrudLojistas() {
+    const papel = buscarUsuarioLogadoAtual()?.usuario?.role;
+    const ehAssociacao = papel === "ASSOCIACAO";
+
     const [lojistas, setLojistas] = useState<Lojista[]>([]);
-    const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("");
+    const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>(
+        ehAssociacao ? "PENDENTE" : "",
+    );
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -222,20 +227,25 @@ export function CrudLojistas() {
         <section className="space-y-5">
             <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Lojistas</h1>
+                    <h1 className="text-2xl font-bold">
+                        {ehAssociacao ? "Fila de aprovação" : "Lojistas"}
+                    </h1>
                     <p className="mt-1 text-sm text-slate-600">
-                        Cadastro de lojistas e fila de aprovação (PENDENTE).
+                        {ehAssociacao
+                            ? "Analise solicitações de lojas da sua associação (PENDENTE)."
+                            : "Cadastro de lojistas e fila de aprovação (PENDENTE)."}
                     </p>
-                    <NavModulos atual="/lojistas" />
                 </div>
 
-                <button
-                    type="button"
-                    onClick={abrirCriacao}
-                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                    Novo lojista
-                </button>
+                {!ehAssociacao ? (
+                    <button
+                        type="button"
+                        onClick={abrirCriacao}
+                        className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                        Novo lojista
+                    </button>
+                ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-3">

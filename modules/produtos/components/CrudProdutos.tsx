@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { NavModulos } from "@/shared/components/NavModulos";
+import { listarCategorias } from "@/modules/categorias/services/servicoCategoria";
+import { Categoria } from "@/modules/categorias/types/categoria.types";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarProduto,
@@ -44,6 +45,7 @@ function parseCategoriaId(valor: string): number | null | undefined {
 
 export function CrudProdutos() {
     const [produtos, setProdutos] = useState<Produto[]>([]);
+    const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -58,13 +60,22 @@ export function CrudProdutos() {
         [produtoEditando],
     );
 
+    const nomeCategoriaPorId = useMemo(() => {
+        const mapa = new Map<number, string>();
+        for (const item of categorias) {
+            mapa.set(item.id, item.nome);
+        }
+        return mapa;
+    }, [categorias]);
+
     useEffect(() => {
         let cancelado = false;
 
-        listarProdutos()
-            .then((lista) => {
+        Promise.all([listarProdutos(), listarCategorias()])
+            .then(([listaProdutos, listaCategorias]) => {
                 if (!cancelado) {
-                    setProdutos(lista);
+                    setProdutos(listaProdutos);
+                    setCategorias(listaCategorias);
                 }
             })
             .catch((error: unknown) => {
@@ -186,7 +197,6 @@ export function CrudProdutos() {
                     <p className="mt-1 text-sm text-slate-600">
                         Gerencie cadastro, edição e exclusão de produtos.
                     </p>
-                    <NavModulos atual="/produtos" />
                 </div>
 
                 <button
@@ -207,6 +217,7 @@ export function CrudProdutos() {
             <div className="overflow-x-auto">
                 <TabelaProdutos
                     produtos={produtos}
+                    nomeCategoriaPorId={nomeCategoriaPorId}
                     onEditar={abrirEdicao}
                     onExcluir={setProdutoExcluindo}
                     carregando={carregando}
@@ -274,10 +285,8 @@ export function CrudProdutos() {
                             </label>
 
                             <label className="block text-sm font-medium text-slate-700">
-                                Categoria ID (opcional)
-                                <input
-                                    type="number"
-                                    min="1"
+                                Categoria (opcional)
+                                <select
                                     value={form.categoriaId}
                                     onChange={(event) =>
                                         setForm((atual) => ({
@@ -285,8 +294,15 @@ export function CrudProdutos() {
                                             categoriaId: event.target.value,
                                         }))
                                     }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
+                                    className="mt-1 w-full border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                >
+                                    <option value="">Sem categoria</option>
+                                    {categorias.map((item) => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.nome}
+                                        </option>
+                                    ))}
+                                </select>
                             </label>
 
                             <div className="flex justify-end gap-2 pt-2">

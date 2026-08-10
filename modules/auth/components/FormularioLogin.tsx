@@ -5,8 +5,26 @@ import { useRouter } from "next/navigation";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { BotaoAuth } from "./BotaoAuth";
 import { CampoFormulario } from "./CampoFormulario";
-import { entrar } from "../services/servicoAuth";
+import { homePorPapel } from "@/shared/components/layout/itensNavegacao";
+import { listarLojistas } from "@/modules/lojistas/services/servicoLojista";
+import { buscarUsuarioLogadoAtual, entrar } from "../services/servicoAuth";
 import { buscarToken } from "../services/servicoAuthApi";
+
+async function destinoAposLogin(papel: string | undefined): Promise<string> {
+    if (papel !== "LOJISTA") {
+        return homePorPapel(papel as "ASSOCIACAO" | "LOJISTA" | "CONSUMIDOR" | undefined);
+    }
+    try {
+        const lista = await listarLojistas();
+        const perfil = lista[0];
+        if (perfil?.status === "APROVADO") {
+            return "/produtos";
+        }
+    } catch {
+        // UX only — backend continua protegendo
+    }
+    return "/minha-loja";
+}
 
 export function FormularioLogin() {
     const router = useRouter();
@@ -26,7 +44,10 @@ export function FormularioLogin() {
 
         if (buscarToken()) {
             redirecionou.current = true;
-            router.replace("/usuarios");
+            const sessao = buscarUsuarioLogadoAtual();
+            void destinoAposLogin(sessao?.usuario?.role).then((href) => {
+                router.replace(href);
+            });
         }
     }, [router]);
 
@@ -37,13 +58,14 @@ export function FormularioLogin() {
         setCarregando(true);
 
         try {
-            await entrar({
+            const sessao = await entrar({
                 email,
                 senha,
             });
 
             redirecionou.current = true;
-            router.replace("/usuarios");
+            const href = await destinoAposLogin(sessao.usuario.role);
+            router.replace(href);
         } catch (error) {
             setErro(obterMensagemErroApi(error, "Erro ao fazer login."));
         } finally {
