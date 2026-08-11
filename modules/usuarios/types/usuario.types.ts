@@ -3,7 +3,7 @@ export type PapelUsuario = "ASSOCIACAO" | "LOJISTA" | "CONSUMIDOR";
 /**
  * Modelo de domínio usado pela UI.
  * Datas no cliente: `data_criacao` / `data_atualizacao`.
- * A API responde `createdAt` / `updatedAt` — mapear nos repositories/services.
+ * A API responde `dataCriacao` / `dataAtualizacao` — mapear nos repositories/services.
  */
 export interface Usuario {
     id: number;

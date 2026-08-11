@@ -18,8 +18,8 @@ type UsuarioApiResponse = {
     email: string;
     role: PapelUsuario;
     ativo: boolean;
-    createdAt: string;
-    updatedAt: string;
+    dataCriacao: string;
+    dataAtualizacao: string;
 };
 
 interface LoginApiResponse {
@@ -34,8 +34,8 @@ function mapUsuarioApi(usuario: UsuarioApiResponse): UsuarioSemSenha {
         email: usuario.email,
         role: usuario.role,
         ativo: usuario.ativo,
-        data_criacao: new Date(usuario.createdAt),
-        data_atualizacao: new Date(usuario.updatedAt),
+        data_criacao: new Date(usuario.dataCriacao),
+        data_atualizacao: new Date(usuario.dataAtualizacao),
     };
 }
 

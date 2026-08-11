@@ -13,6 +13,7 @@ export interface Lojista {
     status: StatusLojista;
     usuarioId: number;
     associacaoId: number;
+    enderecoId: number | null;
     dataCriacao: Date;
     dataAtualizacao: Date;
 }
@@ -23,6 +24,7 @@ export interface RequisicaoCriarLojista {
     cnpj: string;
     inscricaoEstadual?: number | null;
     associacaoId: number;
+    enderecoId?: number | null;
 }
 
 export interface RequisicaoAtualizarLojista {
@@ -30,6 +32,7 @@ export interface RequisicaoAtualizarLojista {
     razaoSocial: string;
     cnpj: string;
     inscricaoEstadual?: number | null;
+    enderecoId?: number | null;
 }
 
 export interface FiltroListarLojista {

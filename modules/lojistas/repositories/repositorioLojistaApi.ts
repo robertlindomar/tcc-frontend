@@ -17,6 +17,7 @@ type LojistaApiResponse = {
     status: StatusLojista;
     usuarioId: number;
     associacaoId: number;
+    enderecoId: number | null;
     dataCriacao: string;
     dataAtualizacao: string;
 };
@@ -31,6 +32,7 @@ function mapLojistaApi(item: LojistaApiResponse): Lojista {
         status: item.status,
         usuarioId: item.usuarioId,
         associacaoId: item.associacaoId,
+        enderecoId: item.enderecoId,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
     };
