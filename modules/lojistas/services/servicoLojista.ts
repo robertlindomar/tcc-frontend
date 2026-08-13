@@ -1,5 +1,6 @@
 import {
     FiltroListarLojista,
+    Lojista,
     RequisicaoAtualizarLojista,
     RequisicaoCriarLojista,
 } from "../types/lojista.types";
@@ -7,6 +8,12 @@ import { repositorioLojista } from "../repositories";
 
 export async function listarLojistas(filtro?: FiltroListarLojista) {
     return repositorioLojista.listar(filtro);
+}
+
+/** Perfil do lojista autenticado: GET /lojista já retorna só o próprio (ou []). */
+export async function buscarMeuPerfilLojista(): Promise<Lojista | null> {
+    const lista = await listarLojistas();
+    return lista[0] ?? null;
 }
 
 export async function buscarLojistaPorId(id: number) {

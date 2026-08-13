@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-    buscarUsuarioLogadoAtual,
-    sair,
-} from "@/modules/auth/services/servicoAuth";
+import { sair } from "@/modules/auth/services/servicoAuth";
+import { buscarMeuPerfilLojista } from "@/modules/lojistas/services/servicoLojista";
+import type { StatusLojista } from "@/modules/lojistas/types/lojista.types";
 import type { PapelUsuario } from "@/modules/usuarios/types/usuario.types";
+import { useSessaoUsuario } from "@/shared/hooks/useSessaoUsuario";
 import {
     itensNavegacaoPorPapel,
     tituloPainelPorPapel,
@@ -18,18 +18,36 @@ import {
 function ItemSidebar({
     item,
     ativo,
+    bloqueado,
     onNavigate,
 }: {
     item: ItemNavegacao;
     ativo: boolean;
+    bloqueado: boolean;
     onNavigate?: () => void;
 }) {
     const Icone = item.icone;
+    const classeBase =
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
+
+    if (bloqueado) {
+        return (
+            <span
+                className={`${classeBase} cursor-not-allowed text-slate-400`}
+                title="Disponível após a aprovação da sua loja"
+                aria-disabled
+            >
+                <Icone className="h-5 w-5 shrink-0" aria-hidden />
+                {item.label}
+            </span>
+        );
+    }
+
     return (
         <Link
             href={item.href}
             onClick={onNavigate}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+            className={`${classeBase} ${
                 ativo
                     ? "bg-primary-muted text-primary"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -43,9 +61,11 @@ function ItemSidebar({
 
 function ConteudoSidebar({
     papel,
+    statusLoja,
     onNavigate,
 }: {
     papel: PapelUsuario | null;
+    statusLoja: StatusLojista | null;
     onNavigate?: () => void;
 }) {
     const pathname = usePathname();
@@ -75,6 +95,9 @@ function ConteudoSidebar({
                         key={item.href}
                         item={item}
                         ativo={pathname === item.href}
+                        bloqueado={Boolean(
+                            item.exigeLojaAprovada && statusLoja !== "APROVADO",
+                        )}
                         onNavigate={onNavigate}
                     />
                 ))}
@@ -96,18 +119,32 @@ function ConteudoSidebar({
 
 export function LayoutAutenticado({ children }: { children: React.ReactNode }) {
     const [menuAberto, setMenuAberto] = useState(false);
-    const [nomeUsuario, setNomeUsuario] = useState("Usuário");
-    const [papel, setPapel] = useState<PapelUsuario | null>(null);
+    const { papel, nome: nomeUsuario } = useSessaoUsuario();
+    const [statusLoja, setStatusLoja] = useState<StatusLojista | null>(null);
 
+    // Menu do lojista sinaliza o que o backend libera só com loja APROVADA.
     useEffect(() => {
-        const sessao = buscarUsuarioLogadoAtual();
-        if (sessao?.usuario?.nome) {
-            setNomeUsuario(sessao.usuario.nome);
+        if (papel !== "LOJISTA") {
+            return;
         }
-        if (sessao?.usuario?.role) {
-            setPapel(sessao.usuario.role);
-        }
-    }, []);
+
+        let cancelado = false;
+
+        buscarMeuPerfilLojista()
+            .then((perfil) => {
+                if (!cancelado) {
+                    setStatusLoja(perfil?.status ?? null);
+                }
+            })
+            .catch(() => {
+                // Sem status conhecido o menu mantém os recursos comerciais
+                // bloqueados; a própria página explica o motivo.
+            });
+
+        return () => {
+            cancelado = true;
+        };
+    }, [papel]);
 
     const tituloHeader =
         papel === "ASSOCIACAO"
@@ -121,7 +158,7 @@ export function LayoutAutenticado({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex min-h-screen bg-background text-foreground">
             <aside className="hidden w-64 shrink-0 border-r border-border bg-sidebar lg:block">
-                <ConteudoSidebar papel={papel} />
+                <ConteudoSidebar papel={papel} statusLoja={statusLoja} />
             </aside>
 
             {menuAberto ? (
@@ -145,6 +182,7 @@ export function LayoutAutenticado({ children }: { children: React.ReactNode }) {
                         </div>
                         <ConteudoSidebar
                             papel={papel}
+                            statusLoja={statusLoja}
                             onNavigate={() => setMenuAberto(false)}
                         />
                     </aside>

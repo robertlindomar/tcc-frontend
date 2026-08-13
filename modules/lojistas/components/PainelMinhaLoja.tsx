@@ -5,8 +5,9 @@ import Link from "next/link";
 import { listarAssociacoes } from "@/modules/associacoes/services/servicoAssociacao";
 import { Associacao } from "@/modules/associacoes/types/associacao.types";
 import {
+    atualizarLojista,
+    buscarMeuPerfilLojista,
     criarLojista,
-    listarLojistas,
 } from "@/modules/lojistas/services/servicoLojista";
 import { Lojista, StatusLojista } from "@/modules/lojistas/types/lojista.types";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
@@ -30,6 +31,18 @@ const formInicial: FormState = {
 const MSG_REJEITADO =
     "Cadastro não aprovado. Entre em contato com a associação para mais informações.";
 
+const ROTULO_STATUS: Record<StatusLojista, string> = {
+    PENDENTE: "Em análise",
+    APROVADO: "Aprovada",
+    REJEITADO: "Não aprovada",
+};
+
+const ESTILO_STATUS: Record<StatusLojista, string> = {
+    PENDENTE: "border-amber-200 bg-amber-50 text-amber-900",
+    APROVADO: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    REJEITADO: "border-red-200 bg-red-50 text-red-800",
+};
+
 function parseInscricaoEstadual(valor: string): number | null | undefined {
     const trim = valor.trim();
     if (!trim) {
@@ -39,10 +52,15 @@ function parseInscricaoEstadual(valor: string): number | null | undefined {
     return Number.isNaN(numero) ? undefined : numero;
 }
 
-/** Perfil do lojista autenticado: GET /lojista já retorna só o próprio (ou []). */
-export async function buscarMeuPerfilLojista(): Promise<Lojista | null> {
-    const lista = await listarLojistas();
-    return lista[0] ?? null;
+function formularioDoPerfil(perfil: Lojista): FormState {
+    return {
+        nomeFantasia: perfil.nomeFantasia,
+        razaoSocial: perfil.razaoSocial,
+        cnpj: perfil.cnpj,
+        inscricaoEstadual:
+            perfil.inscricaoEstadual != null ? String(perfil.inscricaoEstadual) : "",
+        associacaoId: String(perfil.associacaoId),
+    };
 }
 
 export function PainelMinhaLoja() {
@@ -51,6 +69,8 @@ export function PainelMinhaLoja() {
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [erro, setErro] = useState("");
+    const [aviso, setAviso] = useState("");
+    const [editando, setEditando] = useState(false);
     const [form, setForm] = useState<FormState>(formInicial);
 
     useEffect(() => {
@@ -90,6 +110,7 @@ export function PainelMinhaLoja() {
     async function handleSubmit(event: FormEvent) {
         event.preventDefault();
         setErro("");
+        setAviso("");
 
         const associacaoId = Number(form.associacaoId);
         if (!Number.isInteger(associacaoId) || associacaoId <= 0) {
@@ -120,6 +141,45 @@ export function PainelMinhaLoja() {
         }
     }
 
+    function abrirEdicao() {
+        if (!perfil) return;
+        setForm(formularioDoPerfil(perfil));
+        setErro("");
+        setAviso("");
+        setEditando(true);
+    }
+
+    async function handleEditar(event: FormEvent) {
+        event.preventDefault();
+        if (!perfil) return;
+
+        setErro("");
+        setAviso("");
+
+        const inscricaoEstadual = parseInscricaoEstadual(form.inscricaoEstadual);
+        if (inscricaoEstadual === undefined) {
+            setErro("Inscrição estadual inválida.");
+            return;
+        }
+
+        setSalvando(true);
+        try {
+            const atualizado = await atualizarLojista(perfil.id, {
+                nomeFantasia: form.nomeFantasia.trim(),
+                razaoSocial: form.razaoSocial.trim(),
+                cnpj: form.cnpj.trim(),
+                inscricaoEstadual,
+            });
+            setPerfil(atualizado);
+            setEditando(false);
+            setAviso("Cadastro atualizado.");
+        } catch (error) {
+            setErro(obterMensagemErroApi(error, "Erro ao salvar dados da loja."));
+        } finally {
+            setSalvando(false);
+        }
+    }
+
     if (carregando) {
         return <p className="text-sm text-muted">Carregando…</p>;
     }
@@ -136,6 +196,12 @@ export function PainelMinhaLoja() {
             {erro ? (
                 <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {erro}
+                </div>
+            ) : null}
+
+            {aviso ? (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    {aviso}
                 </div>
             ) : null}
 
@@ -227,20 +293,113 @@ export function PainelMinhaLoja() {
                         {salvando ? "Enviando…" : "Enviar pré-cadastro"}
                     </button>
                 </form>
+            ) : editando ? (
+                <FormularioEdicao
+                    form={form}
+                    salvando={salvando}
+                    onChange={setForm}
+                    onCancelar={() => setEditando(false)}
+                    onSubmit={handleEditar}
+                />
             ) : (
-                <StatusPerfil status={perfil.status} loja={perfil} />
+                <StatusPerfil loja={perfil} onEditar={abrirEdicao} />
             )}
         </section>
     );
 }
 
-function StatusPerfil({
-    status,
-    loja,
+function FormularioEdicao({
+    form,
+    salvando,
+    onChange,
+    onCancelar,
+    onSubmit,
 }: {
-    status: StatusLojista;
-    loja: Lojista;
+    form: FormState;
+    salvando: boolean;
+    onChange: (atualizar: (atual: FormState) => FormState) => void;
+    onCancelar: () => void;
+    onSubmit: (event: FormEvent) => void;
 }) {
+    return (
+        <form
+            onSubmit={onSubmit}
+            className="space-y-4 rounded-[var(--radius)] border border-border bg-surface p-6 shadow-sm"
+        >
+            <p className="text-sm text-slate-600">
+                Corrija os dados enviados à associação. A associação continua sendo a
+                mesma do pré-cadastro.
+            </p>
+
+            <label className="block text-sm font-medium text-slate-700">
+                Nome fantasia
+                <input
+                    value={form.nomeFantasia}
+                    onChange={(e) =>
+                        onChange((a) => ({ ...a, nomeFantasia: e.target.value }))
+                    }
+                    className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                    required
+                />
+            </label>
+
+            <label className="block text-sm font-medium text-slate-700">
+                Razão social
+                <input
+                    value={form.razaoSocial}
+                    onChange={(e) =>
+                        onChange((a) => ({ ...a, razaoSocial: e.target.value }))
+                    }
+                    className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                    required
+                />
+            </label>
+
+            <label className="block text-sm font-medium text-slate-700">
+                CNPJ
+                <input
+                    value={form.cnpj}
+                    onChange={(e) => onChange((a) => ({ ...a, cnpj: e.target.value }))}
+                    className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                    required
+                />
+            </label>
+
+            <label className="block text-sm font-medium text-slate-700">
+                Inscrição estadual (opcional)
+                <input
+                    value={form.inscricaoEstadual}
+                    onChange={(e) =>
+                        onChange((a) => ({ ...a, inscricaoEstadual: e.target.value }))
+                    }
+                    className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                />
+            </label>
+
+            <div className="flex justify-end gap-2">
+                <button
+                    type="button"
+                    onClick={onCancelar}
+                    disabled={salvando}
+                    className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                >
+                    Cancelar
+                </button>
+                <button
+                    type="submit"
+                    disabled={salvando}
+                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                >
+                    {salvando ? "Salvando…" : "Salvar"}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+function StatusPerfil({ loja, onEditar }: { loja: Lojista; onEditar: () => void }) {
+    const status = loja.status;
+
     return (
         <div className="space-y-4 rounded-[var(--radius)] border border-border bg-surface p-6 shadow-sm">
             <div>
@@ -249,14 +408,16 @@ function StatusPerfil({
                 <p className="mt-1 text-sm text-slate-600">CNPJ: {loja.cnpj}</p>
             </div>
 
-            <p className="text-sm">
-                Status:{" "}
-                <span className="font-semibold text-slate-900">{status}</span>
+            <p
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${ESTILO_STATUS[status]}`}
+            >
+                Situação: {ROTULO_STATUS[status]}
             </p>
 
             {status === "PENDENTE" ? (
                 <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    Pré-cadastro enviado. Aguarde a associação aprovar ou recusar.
+                    Pré-cadastro enviado. Aguarde a associação aprovar ou recusar. Você
+                    ainda pode corrigir os dados enquanto aguarda.
                 </p>
             ) : null}
 
@@ -277,6 +438,14 @@ function StatusPerfil({
                     {MSG_REJEITADO}
                 </p>
             ) : null}
+
+            <button
+                type="button"
+                onClick={onEditar}
+                className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            >
+                Editar dados da loja
+            </button>
         </div>
     );
 }

@@ -9,6 +9,7 @@ import {
     Tags,
     Target,
     Trophy,
+    Users,
     type LucideIcon,
 } from "lucide-react";
 import type { PapelUsuario } from "@/modules/usuarios/types/usuario.types";
@@ -17,6 +18,8 @@ export type ItemNavegacao = {
     href: string;
     label: string;
     icone: LucideIcon;
+    /** Recurso comercial: só opera com loja APROVADA (regra do backend). */
+    exigeLojaAprovada?: boolean;
 };
 
 const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
@@ -26,16 +29,26 @@ const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
         { href: "/lojas-aprovadas", label: "Lojas aprovadas", icone: CheckCircle2 },
         { href: "/campanhas", label: "Campanhas", icone: Megaphone },
         { href: "/sorteios", label: "Sorteios", icone: Gift },
-        { href: "/categorias", label: "Categorias", icone: Tags },
         { href: "/associacoes", label: "Minha associação", icone: Building2 },
     ],
     LOJISTA: [
         { href: "/minha-loja", label: "Minha loja", icone: Store },
-        { href: "/produtos", label: "Produtos", icone: Package },
+        { href: "/produtos", label: "Produtos", icone: Package, exigeLojaAprovada: true },
         { href: "/categorias", label: "Categorias", icone: Tags },
-        { href: "/promocoes", label: "Promoções", icone: Megaphone },
-        { href: "/eventos", label: "Eventos", icone: Gift },
-        { href: "/missoes", label: "Missões", icone: Target },
+        {
+            href: "/promocoes",
+            label: "Promoções",
+            icone: Megaphone,
+            exigeLojaAprovada: true,
+        },
+        { href: "/eventos", label: "Eventos", icone: Gift, exigeLojaAprovada: true },
+        { href: "/missoes", label: "Missões", icone: Target, exigeLojaAprovada: true },
+        {
+            href: "/consumidores",
+            label: "Consumidores",
+            icone: Users,
+            exigeLojaAprovada: true,
+        },
     ],
     CONSUMIDOR: [
         { href: "/missao-consumidores", label: "Conclusões", icone: Trophy },

@@ -1,12 +1,15 @@
 import { ExigirAutenticacao } from "@/modules/auth/components/ExigirAutenticacao";
 import { CrudMissoes } from "@/modules/missoes/components/CrudMissoes";
+import { ExigirLojaAprovada } from "@/shared/components/acesso/ExigirLojaAprovada";
 import { LayoutAutenticado } from "@/shared/components/layout/LayoutAutenticado";
 
 export default function Page() {
     return (
         <ExigirAutenticacao>
             <LayoutAutenticado>
-                <CrudMissoes />
+                <ExigirLojaAprovada recurso="as missões">
+                    <CrudMissoes />
+                </ExigirLojaAprovada>
             </LayoutAutenticado>
         </ExigirAutenticacao>
     );

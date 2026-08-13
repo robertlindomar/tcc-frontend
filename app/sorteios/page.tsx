@@ -1,12 +1,15 @@
 import { ExigirAutenticacao } from "@/modules/auth/components/ExigirAutenticacao";
 import { CrudSorteios } from "@/modules/sorteios/components/CrudSorteios";
+import { ExigirPapel } from "@/shared/components/acesso/ExigirPapel";
 import { LayoutAutenticado } from "@/shared/components/layout/LayoutAutenticado";
 
 export default function Page() {
     return (
         <ExigirAutenticacao>
             <LayoutAutenticado>
-                <CrudSorteios />
+                <ExigirPapel papeis={["ASSOCIACAO"]}>
+                    <CrudSorteios />
+                </ExigirPapel>
             </LayoutAutenticado>
         </ExigirAutenticacao>
     );
