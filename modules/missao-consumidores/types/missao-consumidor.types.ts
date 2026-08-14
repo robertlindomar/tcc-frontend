@@ -1,7 +1,7 @@
 /**
  * Modelo alinhado ao contrato HTTP `/missao-consumidor` (camelCase).
  * Não usar `missao_fk` / `consumidor_fk` — stubs UML, não o contrato da API.
- * `consumidorId` vem só do JWT no backend; o body de conclusão envia apenas `missaoId`.
+ * `consumidorId` vem só do JWT no backend; o lab envia o payload/token do QR.
  */
 export interface MissaoConsumidor {
     id: number;
@@ -14,7 +14,7 @@ export interface MissaoConsumidor {
 }
 
 export interface RequisicaoConcluirMissao {
-    missaoId: number;
+    tokenQr: string;
 }
 
 export interface RespostaConcluirMissao {

@@ -12,6 +12,7 @@ type MissaoApiResponse = {
     descricao: string | null;
     pontoRecompensa: number;
     lojistaId: number;
+    tokenQr: string;
     dataCriacao: string;
     dataAtualizacao: string;
 };
@@ -23,6 +24,7 @@ function mapMissaoApi(item: MissaoApiResponse): Missao {
         descricao: item.descricao,
         pontoRecompensa: item.pontoRecompensa,
         lojistaId: item.lojistaId,
+        tokenQr: item.tokenQr,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
     };

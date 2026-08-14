@@ -9,6 +9,7 @@ import {
     listarMissoes,
 } from "../services/servicoMissao";
 import { Missao } from "../types/missao.types";
+import { ModalQrMissao } from "./ModalQrMissao";
 import { TabelaMissoes } from "./TabelaMissoes";
 
 type FormState = {
@@ -41,6 +42,7 @@ export function CrudMissoes() {
     const [modalAberto, setModalAberto] = useState(false);
     const [missaoEditando, setMissaoEditando] = useState<Missao | null>(null);
     const [missaoExcluindo, setMissaoExcluindo] = useState<Missao | null>(null);
+    const [missaoQr, setMissaoQr] = useState<Missao | null>(null);
     const [form, setForm] = useState<FormState>(formInicial);
 
     const tituloModal = useMemo(
@@ -191,6 +193,7 @@ export function CrudMissoes() {
                     missoes={missoes}
                     onEditar={abrirEdicao}
                     onExcluir={setMissaoExcluindo}
+                    onVerQr={setMissaoQr}
                     carregando={carregando}
                     excluindoId={excluindoId}
                 />
@@ -290,6 +293,10 @@ export function CrudMissoes() {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {missaoQr && (
+                <ModalQrMissao missao={missaoQr} onFechar={() => setMissaoQr(null)} />
             )}
 
             {missaoExcluindo && (

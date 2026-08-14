@@ -9,6 +9,7 @@ export interface Missao {
     descricao: string | null;
     pontoRecompensa: number;
     lojistaId: number;
+    tokenQr: string;
     dataCriacao: Date;
     dataAtualizacao: Date;
 }

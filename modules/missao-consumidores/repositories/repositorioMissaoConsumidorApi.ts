@@ -79,7 +79,7 @@ export const repositorioMissaoConsumidorApi: RepositorioMissaoConsumidor = {
         dados: RequisicaoConcluirMissao,
     ): Promise<RespostaConcluirMissao> {
         const response = await clienteHttp.post<RespostaConcluirMissaoApi>(
-            "/missao-consumidor",
+            "/missao-consumidor/concluir",
             dados,
         );
         return mapRespostaConcluirMissaoApi(response.data);

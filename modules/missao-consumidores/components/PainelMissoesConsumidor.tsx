@@ -18,7 +18,8 @@ export function PainelMissoesConsumidor() {
     const [historico, setHistorico] = useState<MissaoConsumidor[]>([]);
     const [statusConsumidor, setStatusConsumidor] =
         useState<StatusConsumidor | null>(null);
-    const [missaoId, setMissaoId] = useState("");
+    const [saldoAntes, setSaldoAntes] = useState<number | null>(null);
+    const [tokenQr, setTokenQr] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [concluindo, setConcluindo] = useState(false);
     const [erro, setErro] = useState("");
@@ -59,25 +60,29 @@ export function PainelMissoesConsumidor() {
         setErro("");
         setSucesso("");
 
-        const id = Number(missaoId);
-        if (!Number.isInteger(id) || id <= 0) {
-            setErro("Informe um ID de missão válido.");
+        const payload = tokenQr.trim();
+        if (!payload) {
+            setErro("Cole o payload do QR (tcc://missao/…) ou o token.");
             return;
         }
 
         setConcluindo(true);
 
         try {
-            const resposta = await concluirMissao({ missaoId: id });
+            const resposta = await concluirMissao({ tokenQr: payload });
+            const pontosDepois = resposta.consumidor.pontos;
+            const credito = resposta.missaoConsumidor.pontoRecompensa ?? 0;
+            const pontosAntes = pontosDepois - credito;
+            setSaldoAntes(pontosAntes);
             setHistorico((lista) => [resposta.missaoConsumidor, ...lista]);
             setStatusConsumidor({
-                pontos: resposta.consumidor.pontos,
+                pontos: pontosDepois,
                 nivel: resposta.consumidor.nivel,
             });
             setSucesso(
-                `Missão "${resposta.missaoConsumidor.nomeMissao}" concluída (+${resposta.missaoConsumidor.pontoRecompensa} pts).`,
+                `Missão "${resposta.missaoConsumidor.nomeMissao}" concluída. Saldo: ${pontosAntes} + ${credito} = ${pontosDepois}.`,
             );
-            setMissaoId("");
+            setTokenQr("");
         } catch (error) {
             setErro(obterMensagemErroApi(error, "Erro ao concluir missão."));
         } finally {
@@ -90,14 +95,15 @@ export function PainelMissoesConsumidor() {
             <div className="border-b border-slate-200 pb-5">
                 <h1 className="text-2xl font-bold">Missões concluídas</h1>
                 <p className="mt-1 text-sm text-slate-600">
-                    Conclua missões informando o ID e acompanhe pontos, nível e
-                    histórico.
+                    Lab: cole o conteúdo do QR da missão para simular a leitura no
+                    celular. O scanner real fica para o app.
                 </p>
             </div>
 
             {statusConsumidor && (
                 <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                     <span className="font-semibold">Seu progresso:</span>{" "}
+                    {saldoAntes !== null ? `${saldoAntes} → ` : ""}
                     {statusConsumidor.pontos} pontos · nível{" "}
                     {statusConsumidor.nivel}
                 </div>
@@ -120,14 +126,12 @@ export function PainelMissoesConsumidor() {
                 className="flex flex-col gap-3 border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end"
             >
                 <label className="block flex-1 text-sm font-medium text-slate-700">
-                    ID da missão
+                    Payload ou token do QR
                     <input
-                        type="number"
-                        min={1}
-                        step={1}
-                        value={missaoId}
-                        onChange={(event) => setMissaoId(event.target.value)}
-                        placeholder="Ex.: 1"
+                        type="text"
+                        value={tokenQr}
+                        onChange={(event) => setTokenQr(event.target.value)}
+                        placeholder="tcc://missao/…"
                         className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
                         required
                     />

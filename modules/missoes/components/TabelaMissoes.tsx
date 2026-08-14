@@ -4,6 +4,7 @@ interface TabelaMissoesProps {
     missoes: Missao[];
     onEditar: (missao: Missao) => void;
     onExcluir: (missao: Missao) => void;
+    onVerQr: (missao: Missao) => void;
     carregando?: boolean;
     excluindoId?: number | null;
 }
@@ -20,6 +21,7 @@ export function TabelaMissoes({
     missoes,
     onEditar,
     onExcluir,
+    onVerQr,
     carregando = false,
     excluindoId = null,
 }: TabelaMissoesProps) {
@@ -69,8 +71,15 @@ export function TabelaMissoes({
                                 <td className="px-4 py-3 text-right">
                                     <button
                                         type="button"
-                                        onClick={() => onEditar(missao)}
+                                        onClick={() => onVerQr(missao)}
                                         className="border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                    >
+                                        Ver QR
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => onEditar(missao)}
+                                        className="ml-2 border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
                                     >
                                         Editar
                                     </button>
