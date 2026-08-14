@@ -20,6 +20,10 @@ export async function atualizarEvento(id: number, dados: RequisicaoAtualizarEven
     return repositorioEvento.atualizar(id, dados);
 }
 
+export async function enviarImagemEvento(id: number, arquivo: File) {
+    return repositorioEvento.enviarImagem(id, arquivo);
+}
+
 export async function deletarEvento(id: number) {
     return repositorioEvento.deletar(id);
 }

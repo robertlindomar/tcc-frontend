@@ -1,4 +1,5 @@
 import { Produto } from "../types/produto.types";
+import { urlPublicaArquivo } from "@/shared/utils/urlPublicaArquivo";
 
 interface TabelaProdutosProps {
     produtos: Produto[];
@@ -37,6 +38,7 @@ export function TabelaProdutos({
             <table className="w-full min-w-[800px] text-sm">
                 <thead className="bg-slate-100 text-slate-700">
                     <tr>
+                        <th className="px-4 py-3 text-left font-semibold">Foto</th>
                         <th className="px-4 py-3 text-left font-semibold">Nome</th>
                         <th className="px-4 py-3 text-left font-semibold">Valor</th>
                         <th className="px-4 py-3 text-left font-semibold">Categoria</th>
@@ -48,7 +50,7 @@ export function TabelaProdutos({
                 <tbody className="divide-y divide-slate-200 text-slate-800">
                     {carregando && (
                         <tr>
-                            <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                                 Carregando produtos...
                             </td>
                         </tr>
@@ -56,7 +58,7 @@ export function TabelaProdutos({
 
                     {!carregando && produtos.length === 0 && (
                         <tr>
-                            <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                                 Nenhum produto cadastrado.
                             </td>
                         </tr>
@@ -65,6 +67,20 @@ export function TabelaProdutos({
                     {!carregando &&
                         produtos.map((produto) => (
                             <tr key={produto.id} className="hover:bg-slate-50">
+                                <td className="px-4 py-3">
+                                    {urlPublicaArquivo(produto.urlImagem) ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={urlPublicaArquivo(produto.urlImagem) ?? ""}
+                                            alt=""
+                                            className="h-12 w-12 border border-slate-200 object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-12 w-12 items-center justify-center border border-dashed border-slate-300 text-[10px] text-slate-500">
+                                            —
+                                        </div>
+                                    )}
+                                </td>
                                 <td className="px-4 py-3 font-medium">{produto.nome}</td>
                                 <td className="px-4 py-3">{formatarValor(produto.valor)}</td>
                                 <td className="px-4 py-3">

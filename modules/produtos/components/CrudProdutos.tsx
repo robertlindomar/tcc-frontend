@@ -8,10 +8,13 @@ import {
     atualizarProduto,
     criarProduto,
     deletarProduto,
+    enviarImagemProduto,
     listarProdutos,
 } from "../services/servicoProduto";
 import { Produto } from "../types/produto.types";
 import { TabelaProdutos } from "./TabelaProdutos";
+import { SeletorImagem } from "@/shared/components/midia/SeletorImagem";
+import { urlPublicaArquivo } from "@/shared/utils/urlPublicaArquivo";
 
 type FormState = {
     nome: string;
@@ -54,6 +57,8 @@ export function CrudProdutos() {
     const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
     const [produtoExcluindo, setProdutoExcluindo] = useState<Produto | null>(null);
     const [form, setForm] = useState<FormState>(formInicial);
+    const [arquivoImagem, setArquivoImagem] = useState<File | null>(null);
+    const [previewLocal, setPreviewLocal] = useState<string | null>(null);
 
     const tituloModal = useMemo(
         () => (produtoEditando ? "Editar produto" : "Novo produto"),
@@ -97,6 +102,8 @@ export function CrudProdutos() {
     function abrirCriacao() {
         setProdutoEditando(null);
         setForm(formInicial);
+        setArquivoImagem(null);
+        setPreviewLocal(null);
         setErro("");
         setModalAberto(true);
     }
@@ -109,6 +116,8 @@ export function CrudProdutos() {
             categoriaId:
                 produto.categoriaId != null ? String(produto.categoriaId) : "",
         });
+        setArquivoImagem(null);
+        setPreviewLocal(null);
         setErro("");
         setModalAberto(true);
     }
@@ -121,6 +130,8 @@ export function CrudProdutos() {
         setModalAberto(false);
         setProdutoEditando(null);
         setForm(formInicial);
+        setArquivoImagem(null);
+        setPreviewLocal(null);
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -149,14 +160,23 @@ export function CrudProdutos() {
             };
 
             if (produtoEditando) {
-                const atualizado = await atualizarProduto(produtoEditando.id, dados);
+                let atualizado = await atualizarProduto(produtoEditando.id, dados);
+                if (arquivoImagem) {
+                    atualizado = await enviarImagemProduto(
+                        produtoEditando.id,
+                        arquivoImagem,
+                    );
+                }
                 setProdutos((lista) =>
                     lista.map((item) =>
                         item.id === atualizado.id ? atualizado : item,
                     ),
                 );
             } else {
-                const criado = await criarProduto(dados);
+                let criado = await criarProduto(dados);
+                if (arquivoImagem) {
+                    criado = await enviarImagemProduto(criado.id, arquivoImagem);
+                }
                 setProdutos((lista) => [criado, ...lista]);
             }
 
@@ -304,6 +324,22 @@ export function CrudProdutos() {
                                     ))}
                                 </select>
                             </label>
+
+                            <SeletorImagem
+                                id="foto-produto"
+                                rotulo="Foto (opcional)"
+                                previewUrl={
+                                    previewLocal ??
+                                    urlPublicaArquivo(produtoEditando?.urlImagem)
+                                }
+                                onSelecionar={(arquivo) => {
+                                    setArquivoImagem(arquivo);
+                                    setPreviewLocal(
+                                        arquivo ? URL.createObjectURL(arquivo) : null,
+                                    );
+                                }}
+                                desabilitado={salvando}
+                            />
 
                             <div className="flex justify-end gap-2 pt-2">
                                 <button

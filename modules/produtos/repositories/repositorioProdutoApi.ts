@@ -12,6 +12,7 @@ type ProdutoApiResponse = {
     valor: number;
     categoriaId: number | null;
     lojistaId: number;
+    urlImagem: string | null;
     dataCriacao: string;
     dataAtualizacao: string;
 };
@@ -23,6 +24,7 @@ function mapProdutoApi(item: ProdutoApiResponse): Produto {
         valor: Number(item.valor),
         categoriaId: item.categoriaId,
         lojistaId: item.lojistaId,
+        urlImagem: item.urlImagem,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
     };
@@ -50,6 +52,16 @@ export const repositorioProdutoApi: RepositorioProduto = {
     ): Promise<Produto> {
         const response = await clienteHttp.put<ProdutoApiResponse>(
             `/produto/${id}`,
+            dados,
+        );
+        return mapProdutoApi(response.data);
+    },
+
+    async enviarImagem(id: number, arquivo: File): Promise<Produto> {
+        const dados = new FormData();
+        dados.append("arquivo", arquivo);
+        const response = await clienteHttp.put<ProdutoApiResponse>(
+            `/produto/${id}/imagem`,
             dados,
         );
         return mapProdutoApi(response.data);

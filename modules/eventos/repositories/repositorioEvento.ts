@@ -9,5 +9,6 @@ export interface RepositorioEvento {
     buscarPorId(id: number): Promise<Evento | null>;
     criar(dados: RequisicaoCriarEvento): Promise<Evento>;
     atualizar(id: number, dados: RequisicaoAtualizarEvento): Promise<Evento>;
+    enviarImagem(id: number, arquivo: File): Promise<Evento>;
     deletar(id: number): Promise<void>;
 }

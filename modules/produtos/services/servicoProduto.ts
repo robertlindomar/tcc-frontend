@@ -23,6 +23,10 @@ export async function atualizarProduto(
     return repositorioProduto.atualizar(id, dados);
 }
 
+export async function enviarImagemProduto(id: number, arquivo: File) {
+    return repositorioProduto.enviarImagem(id, arquivo);
+}
+
 export async function deletarProduto(id: number) {
     return repositorioProduto.deletar(id);
 }

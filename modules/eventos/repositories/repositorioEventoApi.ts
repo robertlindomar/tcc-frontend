@@ -11,6 +11,7 @@ type EventoApiResponse = {
     nome: string;
     descricao: string | null;
     lojistaId: number;
+    urlImagem: string | null;
     dataCriacao: string;
     dataAtualizacao: string;
 };
@@ -21,6 +22,7 @@ function mapEventoApi(item: EventoApiResponse): Evento {
         nome: item.nome,
         descricao: item.descricao,
         lojistaId: item.lojistaId,
+        urlImagem: item.urlImagem,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
     };
@@ -45,6 +47,16 @@ export const repositorioEventoApi: RepositorioEvento = {
     async atualizar(id: number, dados: RequisicaoAtualizarEvento): Promise<Evento> {
         const response = await clienteHttp.put<EventoApiResponse>(
             `/evento/${id}`,
+            dados,
+        );
+        return mapEventoApi(response.data);
+    },
+
+    async enviarImagem(id: number, arquivo: File): Promise<Evento> {
+        const dados = new FormData();
+        dados.append("arquivo", arquivo);
+        const response = await clienteHttp.put<EventoApiResponse>(
+            `/evento/${id}/imagem`,
             dados,
         );
         return mapEventoApi(response.data);

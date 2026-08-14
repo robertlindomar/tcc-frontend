@@ -9,5 +9,6 @@ export interface RepositorioProduto {
     buscarPorId(id: number): Promise<Produto | null>;
     criar(dados: RequisicaoCriarProduto): Promise<Produto>;
     atualizar(id: number, dados: RequisicaoAtualizarProduto): Promise<Produto>;
+    enviarImagem(id: number, arquivo: File): Promise<Produto>;
     deletar(id: number): Promise<void>;
 }

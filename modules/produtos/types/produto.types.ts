@@ -9,6 +9,7 @@ export interface Produto {
     valor: number;
     categoriaId: number | null;
     lojistaId: number;
+    urlImagem: string | null;
     dataCriacao: Date;
     dataAtualizacao: Date;
 }
