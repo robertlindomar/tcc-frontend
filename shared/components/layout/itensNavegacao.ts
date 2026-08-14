@@ -1,4 +1,5 @@
 import {
+    Award,
     Building2,
     CheckCircle2,
     Gift,
@@ -44,6 +45,12 @@ const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
         { href: "/eventos", label: "Eventos", icone: Gift, exigeLojaAprovada: true },
         { href: "/missoes", label: "Missões", icone: Target, exigeLojaAprovada: true },
         {
+            href: "/recompensas",
+            label: "Recompensas",
+            icone: Award,
+            exigeLojaAprovada: true,
+        },
+        {
             href: "/consumidores",
             label: "Consumidores",
             icone: Users,
@@ -52,6 +59,7 @@ const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
     ],
     CONSUMIDOR: [
         { href: "/missao-consumidores", label: "Conclusões", icone: Trophy },
+        { href: "/recompensas-consumidor", label: "Recompensas", icone: Award },
     ],
 };
 
