@@ -11,6 +11,6 @@ export interface RepositorioLojista {
     criar(dados: RequisicaoCriarLojista): Promise<Lojista>;
     atualizar(id: number, dados: RequisicaoAtualizarLojista): Promise<Lojista>;
     aprovar(id: number): Promise<Lojista>;
-    rejeitar(id: number): Promise<Lojista>;
+    rejeitar(id: number, justificativaRejeicao: string): Promise<Lojista>;
     deletar(id: number): Promise<void>;
 }

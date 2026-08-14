@@ -29,8 +29,7 @@ const formInicial: FormState = {
     associacaoId: "",
 };
 
-const MSG_REJEITADO =
-    "Cadastro não aprovado. Entre em contato com a associação para mais informações.";
+const MSG_REJEITADO = "Cadastro não aprovado";
 
 const ROTULO_STATUS: Record<StatusLojista, string> = {
     PENDENTE: "Em análise",
@@ -459,9 +458,17 @@ function StatusPerfil({ loja, onEditar }: { loja: Lojista; onEditar: () => void 
             ) : null}
 
             {status === "REJEITADO" ? (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                    {MSG_REJEITADO}
-                </p>
+                <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                    <p className="font-semibold">{MSG_REJEITADO}</p>
+                    {loja.justificativaRejeicao ? (
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-red-700">
+                                Motivo informado pela associação
+                            </p>
+                            <p className="mt-1 whitespace-pre-wrap">{loja.justificativaRejeicao}</p>
+                        </div>
+                    ) : null}
+                </div>
             ) : null}
 
             <button

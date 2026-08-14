@@ -9,6 +9,7 @@ import {
     rejeitarLojista,
 } from "../services/servicoLojista";
 import { Lojista } from "../types/lojista.types";
+import { ModalJustificativaRejeicao } from "./ModalJustificativaRejeicao";
 
 export function PainelPreCadastros() {
     const [lojistas, setLojistas] = useState<Lojista[]>([]);
@@ -17,6 +18,7 @@ export function PainelPreCadastros() {
     const [acaoId, setAcaoId] = useState<number | null>(null);
     const [erro, setErro] = useState("");
     const [detalhe, setDetalhe] = useState<Lojista | null>(null);
+    const [rejeitando, setRejeitando] = useState<Lojista | null>(null);
 
     useEffect(() => {
         let cancelado = false;
@@ -77,13 +79,14 @@ export function PainelPreCadastros() {
         }
     }
 
-    async function handleRejeitar(lojista: Lojista) {
+    async function handleRejeitar(lojista: Lojista, justificativaRejeicao: string) {
         setAcaoId(lojista.id);
         setErro("");
         try {
-            await rejeitarLojista(lojista.id);
+            await rejeitarLojista(lojista.id, justificativaRejeicao);
             setLojistas((lista) => lista.filter((item) => item.id !== lojista.id));
             setDetalhe(null);
+            setRejeitando(null);
         } catch (error) {
             setErro(obterMensagemErroApi(error, "Erro ao rejeitar pré-cadastro."));
         } finally {
@@ -187,7 +190,7 @@ export function PainelPreCadastros() {
                                                 title="Recusar"
                                                 aria-label={`Recusar ${lojista.nomeFantasia}`}
                                                 disabled={acaoId === lojista.id}
-                                                onClick={() => void handleRejeitar(lojista)}
+                                                onClick={() => setRejeitando(lojista)}
                                                 className="rounded-lg p-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
                                             >
                                                 <XCircle className="h-5 w-5" />
@@ -244,7 +247,7 @@ export function PainelPreCadastros() {
                             <button
                                 type="button"
                                 disabled={acaoId === detalhe.id}
-                                onClick={() => void handleRejeitar(detalhe)}
+                                onClick={() => setRejeitando(detalhe)}
                                 className="border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
                             >
                                 Recusar
@@ -260,6 +263,19 @@ export function PainelPreCadastros() {
                         </div>
                     </div>
                 </div>
+            ) : null}
+
+            {rejeitando ? (
+                <ModalJustificativaRejeicao
+                    nomeLoja={rejeitando.nomeFantasia}
+                    salvando={acaoId === rejeitando.id}
+                    onCancelar={() => {
+                        if (acaoId === null) {
+                            setRejeitando(null);
+                        }
+                    }}
+                    onConfirmar={(motivo) => void handleRejeitar(rejeitando, motivo)}
+                />
             ) : null}
         </section>
     );

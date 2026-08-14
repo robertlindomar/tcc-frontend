@@ -18,6 +18,7 @@ type LojistaApiResponse = {
     usuarioId: number;
     associacaoId: number;
     enderecoId: number | null;
+    justificativaRejeicao: string | null;
     dataCriacao: string;
     dataAtualizacao: string;
 };
@@ -33,6 +34,7 @@ function mapLojistaApi(item: LojistaApiResponse): Lojista {
         usuarioId: item.usuarioId,
         associacaoId: item.associacaoId,
         enderecoId: item.enderecoId,
+        justificativaRejeicao: item.justificativaRejeicao,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
     };
@@ -74,9 +76,10 @@ export const repositorioLojistaApi: RepositorioLojista = {
         return mapLojistaApi(response.data);
     },
 
-    async rejeitar(id: number): Promise<Lojista> {
+    async rejeitar(id: number, justificativaRejeicao: string): Promise<Lojista> {
         const response = await clienteHttp.patch<LojistaApiResponse>(
             `/lojista/${id}/rejeitar`,
+            { justificativaRejeicao },
         );
         return mapLojistaApi(response.data);
     },

@@ -14,6 +14,7 @@ export interface Lojista {
     usuarioId: number;
     associacaoId: number;
     enderecoId: number | null;
+    justificativaRejeicao: string | null;
     dataCriacao: Date;
     dataAtualizacao: Date;
 }

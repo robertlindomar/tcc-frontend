@@ -12,6 +12,7 @@ import {
     rejeitarLojista,
 } from "../services/servicoLojista";
 import { Lojista, StatusLojista } from "../types/lojista.types";
+import { ModalJustificativaRejeicao } from "./ModalJustificativaRejeicao";
 import { TabelaLojistas } from "./TabelaLojistas";
 
 type FormState = {
@@ -57,6 +58,7 @@ export function CrudLojistas() {
     const [modalAberto, setModalAberto] = useState(false);
     const [lojistaEditando, setLojistaEditando] = useState<Lojista | null>(null);
     const [lojistaExcluindo, setLojistaExcluindo] = useState<Lojista | null>(null);
+    const [lojistaRejeitando, setLojistaRejeitando] = useState<Lojista | null>(null);
     const [form, setForm] = useState<FormState>(formInicial);
 
     const tituloModal = useMemo(
@@ -221,15 +223,16 @@ export function CrudLojistas() {
         }
     }
 
-    async function handleRejeitar(lojista: Lojista) {
+    async function handleRejeitar(lojista: Lojista, justificativaRejeicao: string) {
         setAcaoStatusId(lojista.id);
         setErro("");
 
         try {
-            const atualizado = await rejeitarLojista(lojista.id);
+            const atualizado = await rejeitarLojista(lojista.id, justificativaRejeicao);
             setLojistas((lista) =>
                 lista.map((item) => (item.id === atualizado.id ? atualizado : item)),
             );
+            setLojistaRejeitando(null);
         } catch (error) {
             setErro(obterMensagemErroApi(error, "Erro ao rejeitar lojista."));
         } finally {
@@ -292,7 +295,7 @@ export function CrudLojistas() {
                     onEditar={abrirEdicao}
                     onExcluir={setLojistaExcluindo}
                     onAprovar={handleAprovar}
-                    onRejeitar={handleRejeitar}
+                    onRejeitar={setLojistaRejeitando}
                     carregando={carregando}
                     excluindoId={excluindoId}
                     acaoStatusId={acaoStatusId}
@@ -460,6 +463,21 @@ export function CrudLojistas() {
                     </div>
                 </div>
             )}
+
+            {lojistaRejeitando ? (
+                <ModalJustificativaRejeicao
+                    nomeLoja={lojistaRejeitando.nomeFantasia}
+                    salvando={acaoStatusId === lojistaRejeitando.id}
+                    onCancelar={() => {
+                        if (acaoStatusId === null) {
+                            setLojistaRejeitando(null);
+                        }
+                    }}
+                    onConfirmar={(motivo) =>
+                        void handleRejeitar(lojistaRejeitando, motivo)
+                    }
+                />
+            ) : null}
         </section>
     );
 }
