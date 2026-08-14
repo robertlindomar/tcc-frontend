@@ -9,5 +9,6 @@ export interface RepositorioPromocao {
     buscarPorId(id: number): Promise<Promocao | null>;
     criar(dados: RequisicaoCriarPromocao): Promise<Promocao>;
     atualizar(id: number, dados: RequisicaoAtualizarPromocao): Promise<Promocao>;
+    desativar(id: number): Promise<Promocao>;
     deletar(id: number): Promise<void>;
 }

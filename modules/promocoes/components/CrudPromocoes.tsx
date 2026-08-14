@@ -8,6 +8,7 @@ import {
     atualizarPromocao,
     criarPromocao,
     deletarPromocao,
+    desativarPromocao,
     listarPromocoes,
 } from "../services/servicoPromocao";
 import { Promocao } from "../types/promocao.types";
@@ -17,12 +18,14 @@ type FormState = {
     descricao: string;
     preco: string;
     produtoId: string;
+    duracaoDias: string;
 };
 
 const formInicial: FormState = {
     descricao: "",
     preco: "",
     produtoId: "",
+    duracaoDias: "7",
 };
 
 function parsePreco(valor: string): number | undefined {
@@ -40,10 +43,14 @@ export function CrudPromocoes() {
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
+    const [desativandoId, setDesativandoId] = useState<number | null>(null);
     const [erro, setErro] = useState("");
     const [modalAberto, setModalAberto] = useState(false);
     const [promocaoEditando, setPromocaoEditando] = useState<Promocao | null>(null);
     const [promocaoExcluindo, setPromocaoExcluindo] = useState<Promocao | null>(null);
+    const [promocaoDesativando, setPromocaoDesativando] = useState<Promocao | null>(
+        null,
+    );
     const [form, setForm] = useState<FormState>(formInicial);
 
     const tituloModal = useMemo(
@@ -100,6 +107,7 @@ export function CrudPromocoes() {
             descricao: promocao.descricao ?? "",
             preco: String(promocao.preco),
             produtoId: String(promocao.produtoId),
+            duracaoDias: "7",
         });
         setErro("");
         setModalAberto(true);
@@ -131,24 +139,34 @@ export function CrudPromocoes() {
             return;
         }
 
+        const duracaoDias = Number(form.duracaoDias);
+        if (!Number.isInteger(duracaoDias) || duracaoDias < 1) {
+            setErro("Informe a duração em dias (mínimo 1).");
+            return;
+        }
+
         setSalvando(true);
 
         try {
-            const dados = {
-                descricao: form.descricao.trim() || null,
-                preco,
-                produtoId,
-            };
-
             if (promocaoEditando) {
-                const atualizado = await atualizarPromocao(promocaoEditando.id, dados);
+                const atualizado = await atualizarPromocao(promocaoEditando.id, {
+                    descricao: form.descricao.trim() || null,
+                    preco,
+                    produtoId,
+                    duracaoDias,
+                });
                 setPromocoes((lista) =>
                     lista.map((item) =>
                         item.id === atualizado.id ? atualizado : item,
                     ),
                 );
             } else {
-                const criado = await criarPromocao(dados);
+                const criado = await criarPromocao({
+                    descricao: form.descricao.trim() || null,
+                    preco,
+                    produtoId,
+                    duracaoDias,
+                });
                 setPromocoes((lista) => [criado, ...lista]);
             }
 
@@ -181,13 +199,35 @@ export function CrudPromocoes() {
         }
     }
 
+    async function confirmarDesativacao() {
+        if (!promocaoDesativando) {
+            return;
+        }
+
+        setDesativandoId(promocaoDesativando.id);
+        setErro("");
+
+        try {
+            const atualizado = await desativarPromocao(promocaoDesativando.id);
+            setPromocoes((lista) =>
+                lista.map((item) => (item.id === atualizado.id ? atualizado : item)),
+            );
+            setPromocaoDesativando(null);
+        } catch (error) {
+            setErro(obterMensagemErroApi(error, "Erro ao desativar promoção."));
+        } finally {
+            setDesativandoId(null);
+        }
+    }
+
     return (
         <section className="space-y-5">
             <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">Promoções</h1>
                     <p className="mt-1 text-sm text-slate-600">
-                        Gerencie cadastro, edição e exclusão de promoções.
+                        Cadastre promoções com duração em dias. Desativar mantém o
+                        histórico; excluir remove o registro.
                     </p>
                 </div>
 
@@ -211,9 +251,11 @@ export function CrudPromocoes() {
                     promocoes={promocoes}
                     nomeProdutoPorId={nomeProdutoPorId}
                     onEditar={abrirEdicao}
+                    onDesativar={setPromocaoDesativando}
                     onExcluir={setPromocaoExcluindo}
                     carregando={carregando}
                     excluindoId={excluindoId}
+                    desativandoId={desativandoId}
                 />
             </div>
 
@@ -283,6 +325,24 @@ export function CrudPromocoes() {
                             </label>
 
                             <label className="block text-sm font-medium text-slate-700">
+                                Duração da promoção (dias) *
+                                <input
+                                    type="number"
+                                    min={1}
+                                    step={1}
+                                    value={form.duracaoDias}
+                                    onChange={(event) =>
+                                        setForm((atual) => ({
+                                            ...atual,
+                                            duracaoDias: event.target.value,
+                                        }))
+                                    }
+                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                    required
+                                />
+                            </label>
+
+                            <label className="block text-sm font-medium text-slate-700">
                                 Descrição (opcional)
                                 <textarea
                                     value={form.descricao}
@@ -315,6 +375,38 @@ export function CrudPromocoes() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {promocaoDesativando && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
+                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
+                        <h2 className="text-xl font-semibold text-slate-900">
+                            Desativar promoção
+                        </h2>
+                        <p className="mt-2 text-sm text-slate-600">
+                            A promoção deixa de valer, mas o registro permanece. Não há
+                            reativação nesta versão.
+                        </p>
+                        <div className="mt-6 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPromocaoDesativando(null)}
+                                disabled={desativandoId !== null}
+                                className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmarDesativacao}
+                                disabled={desativandoId !== null}
+                                className="bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {desativandoId ? "Desativando..." : "Desativar"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

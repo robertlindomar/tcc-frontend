@@ -3,6 +3,7 @@ import {
     Promocao,
     RequisicaoAtualizarPromocao,
     RequisicaoCriarPromocao,
+    StatusVigenciaPromocao,
 } from "../types/promocao.types";
 import { RepositorioPromocao } from "./repositorioPromocao";
 
@@ -11,6 +12,10 @@ type PromocaoApiResponse = {
     descricao: string | null;
     preco: number;
     produtoId: number;
+    ativa: boolean;
+    dataInicio: string;
+    dataFim: string;
+    statusVigencia: StatusVigenciaPromocao;
     dataCriacao: string;
     dataAtualizacao: string;
 };
@@ -21,6 +26,10 @@ function mapPromocaoApi(item: PromocaoApiResponse): Promocao {
         descricao: item.descricao,
         preco: Number(item.preco),
         produtoId: item.produtoId,
+        ativa: item.ativa,
+        dataInicio: new Date(item.dataInicio),
+        dataFim: new Date(item.dataFim),
+        statusVigencia: item.statusVigencia,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
     };
@@ -49,6 +58,13 @@ export const repositorioPromocaoApi: RepositorioPromocao = {
         const response = await clienteHttp.put<PromocaoApiResponse>(
             `/promocao/${id}`,
             dados,
+        );
+        return mapPromocaoApi(response.data);
+    },
+
+    async desativar(id: number): Promise<Promocao> {
+        const response = await clienteHttp.patch<PromocaoApiResponse>(
+            `/promocao/${id}/desativar`,
         );
         return mapPromocaoApi(response.data);
     },
