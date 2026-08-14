@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { listarLojistas } from "../services/servicoLojista";
@@ -12,24 +12,39 @@ export function PainelLojasAprovadas() {
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
 
-    const carregar = useCallback(async () => {
-        setCarregando(true);
-        setErro("");
-        try {
-            const lista = await listarLojistas({ status: "APROVADO" });
-            setLojistas(lista);
-        } catch (error) {
-            setErro(
-                obterMensagemErroApi(error, "Erro ao carregar lojas aprovadas."),
-            );
-        } finally {
-            setCarregando(false);
-        }
-    }, []);
-
     useEffect(() => {
+        let cancelado = false;
+
+        async function carregar() {
+            setCarregando(true);
+            setErro("");
+            try {
+                const lista = await listarLojistas({ status: "APROVADO" });
+                if (!cancelado) {
+                    setLojistas(lista);
+                }
+            } catch (error) {
+                if (!cancelado) {
+                    setErro(
+                        obterMensagemErroApi(
+                            error,
+                            "Erro ao carregar lojas aprovadas.",
+                        ),
+                    );
+                }
+            } finally {
+                if (!cancelado) {
+                    setCarregando(false);
+                }
+            }
+        }
+
         void carregar();
-    }, [carregar]);
+
+        return () => {
+            cancelado = true;
+        };
+    }, []);
 
     const filtrados = useMemo(() => {
         const termo = busca.trim().toLowerCase();

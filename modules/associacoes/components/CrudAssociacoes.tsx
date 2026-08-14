@@ -1,13 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
-import {
-    atualizarAssociacao,
-    criarAssociacao,
-    deletarAssociacao,
-    listarAssociacoes,
-} from "../services/servicoAssociacao";
+import { atualizarAssociacao, listarAssociacoes } from "../services/servicoAssociacao";
 import { Associacao } from "../types/associacao.types";
 import { TabelaAssociacoes } from "./TabelaAssociacoes";
 
@@ -34,24 +29,21 @@ function parseInscricaoEstadual(valor: string): number | null | undefined {
     return Number.isNaN(numero) ? undefined : numero;
 }
 
+/**
+ * `GET /associacao` já devolve somente a associação do usuário logado. Criar
+ * outra não faz sentido (é 1:1 com a conta) e excluir sairia do ar sozinho, por
+ * isso a tela só lista e edita.
+ */
 export function CrudAssociacoes() {
     const [associacoes, setAssociacoes] = useState<Associacao[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
-    const [excluindoId, setExcluindoId] = useState<number | null>(null);
     const [erro, setErro] = useState("");
-    const [modalAberto, setModalAberto] = useState(false);
+    const [aviso, setAviso] = useState("");
     const [associacaoEditando, setAssociacaoEditando] = useState<Associacao | null>(
         null,
     );
-    const [associacaoExcluindo, setAssociacaoExcluindo] =
-        useState<Associacao | null>(null);
     const [form, setForm] = useState<FormState>(formInicial);
-
-    const tituloModal = useMemo(
-        () => (associacaoEditando ? "Editar associação" : "Nova associação"),
-        [associacaoEditando],
-    );
 
     useEffect(() => {
         let cancelado = false;
@@ -65,7 +57,7 @@ export function CrudAssociacoes() {
             .catch((error: unknown) => {
                 if (!cancelado) {
                     setErro(
-                        obterMensagemErroApi(error, "Erro ao carregar associações."),
+                        obterMensagemErroApi(error, "Erro ao carregar a associação."),
                     );
                 }
             })
@@ -80,13 +72,6 @@ export function CrudAssociacoes() {
         };
     }, []);
 
-    function abrirCriacao() {
-        setAssociacaoEditando(null);
-        setForm(formInicial);
-        setErro("");
-        setModalAberto(true);
-    }
-
     function abrirEdicao(associacao: Associacao) {
         setAssociacaoEditando(associacao);
         setForm({
@@ -99,7 +84,7 @@ export function CrudAssociacoes() {
                     : "",
         });
         setErro("");
-        setModalAberto(true);
+        setAviso("");
     }
 
     function fecharModal() {
@@ -107,7 +92,6 @@ export function CrudAssociacoes() {
             return;
         }
 
-        setModalAberto(false);
         setAssociacaoEditando(null);
         setForm(formInicial);
     }
@@ -115,6 +99,10 @@ export function CrudAssociacoes() {
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setErro("");
+
+        if (!associacaoEditando) {
+            return;
+        }
 
         const inscricaoEstadual = parseInscricaoEstadual(form.inscricaoEstadual);
         if (inscricaoEstadual === undefined) {
@@ -125,112 +113,72 @@ export function CrudAssociacoes() {
         setSalvando(true);
 
         try {
-            if (associacaoEditando) {
-                const atualizado = await atualizarAssociacao(associacaoEditando.id, {
-                    nomeFantasia: form.nomeFantasia,
-                    razaoSocial: form.razaoSocial,
-                    cnpj: form.cnpj,
-                    inscricaoEstadual,
-                });
+            const atualizado = await atualizarAssociacao(associacaoEditando.id, {
+                nomeFantasia: form.nomeFantasia,
+                razaoSocial: form.razaoSocial,
+                cnpj: form.cnpj,
+                inscricaoEstadual,
+            });
 
-                setAssociacoes((lista) =>
-                    lista.map((item) =>
-                        item.id === atualizado.id ? atualizado : item,
-                    ),
-                );
-            } else {
-                const criado = await criarAssociacao({
-                    nomeFantasia: form.nomeFantasia,
-                    razaoSocial: form.razaoSocial,
-                    cnpj: form.cnpj,
-                    inscricaoEstadual,
-                });
-                setAssociacoes((lista) => [criado, ...lista]);
-            }
-
-            fecharModal();
+            setAssociacoes((lista) =>
+                lista.map((item) => (item.id === atualizado.id ? atualizado : item)),
+            );
+            setAssociacaoEditando(null);
+            setForm(formInicial);
+            setAviso("Dados da associação atualizados.");
         } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao salvar associação."));
+            setErro(obterMensagemErroApi(error, "Erro ao salvar a associação."));
         } finally {
             setSalvando(false);
         }
     }
 
-    async function confirmarExclusao() {
-        if (!associacaoExcluindo) {
-            return;
-        }
-
-        setExcluindoId(associacaoExcluindo.id);
-        setErro("");
-
-        try {
-            await deletarAssociacao(associacaoExcluindo.id);
-            setAssociacoes((lista) =>
-                lista.filter((item) => item.id !== associacaoExcluindo.id),
-            );
-            setAssociacaoExcluindo(null);
-        } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao excluir associação."));
-        } finally {
-            setExcluindoId(null);
-        }
-    }
-
     return (
         <section className="space-y-5">
-            <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">Associações</h1>
-                    <p className="mt-1 text-sm text-slate-600">
-                        Gerencie cadastro, edição e exclusão de associações.
-                    </p>
-                </div>
+            <header className="border-b border-slate-200 pb-5">
+                <h1 className="text-2xl font-bold">Minha associação</h1>
+                <p className="mt-1 text-sm text-slate-600">
+                    Dados cadastrais da associação que você administra.
+                </p>
+            </header>
 
-                <button
-                    type="button"
-                    onClick={abrirCriacao}
-                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                    Nova associação
-                </button>
-            </div>
-
-            {erro && (
+            {erro ? (
                 <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {erro}
                 </div>
-            )}
+            ) : null}
+
+            {aviso ? (
+                <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    {aviso}
+                </div>
+            ) : null}
 
             <div className="overflow-x-auto">
                 <TabelaAssociacoes
                     associacoes={associacoes}
                     onEditar={abrirEdicao}
-                    onExcluir={setAssociacaoExcluindo}
                     carregando={carregando}
-                    excluindoId={excluindoId}
                 />
             </div>
 
-            {modalAberto && (
+            {associacaoEditando ? (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
                     <div className="w-full max-w-lg bg-white p-6 shadow-xl">
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-semibold text-slate-900">
-                                    {tituloModal}
+                                    Editar associação
                                 </h2>
                                 <p className="mt-1 text-sm text-slate-600">
-                                    {associacaoEditando
-                                        ? "Altere os dados da associação."
-                                        : "Informe os dados para cadastrar uma associação."}
+                                    Altere os dados da associação.
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 onClick={fecharModal}
                                 className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
-                                aria-label="Fechar modal"
+                                aria-label="Fechar"
                             >
                                 x
                             </button>
@@ -320,40 +268,7 @@ export function CrudAssociacoes() {
                         </form>
                     </div>
                 </div>
-            )}
-
-            {associacaoExcluindo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                        <h2 className="text-xl font-semibold text-slate-900">
-                            Excluir associação
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-600">
-                            Confirma a exclusão de {associacaoExcluindo.nomeFantasia}?
-                            Essa ação não poderá ser desfeita.
-                        </p>
-
-                        <div className="mt-6 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setAssociacaoExcluindo(null)}
-                                disabled={excluindoId !== null}
-                                className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={confirmarExclusao}
-                                disabled={excluindoId !== null}
-                                className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                {excluindoId ? "Excluindo..." : "Excluir"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            ) : null}
         </section>
     );
 }

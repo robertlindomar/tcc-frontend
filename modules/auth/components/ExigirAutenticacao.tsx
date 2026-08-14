@@ -23,15 +23,26 @@ export function ExigirAutenticacao({ children }: ExigirAutenticacaoProps) {
             return;
         }
 
-        const token = buscarToken();
+        let cancelado = false;
 
-        if (!token) {
-            setAutorizado(false);
-            router.replace("/login");
-            return;
-        }
+        // Leitura adiada: o efeito não altera estado de forma síncrona.
+        void Promise.resolve().then(() => {
+            if (cancelado) {
+                return;
+            }
 
-        setAutorizado(true);
+            if (!buscarToken()) {
+                setAutorizado(false);
+                router.replace("/login");
+                return;
+            }
+
+            setAutorizado(true);
+        });
+
+        return () => {
+            cancelado = true;
+        };
     }, [router]);
 
     if (!autorizado) {

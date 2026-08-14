@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { listarAssociacoes } from "@/modules/associacoes/services/servicoAssociacao";
 import { Associacao } from "@/modules/associacoes/types/associacao.types";
+import { CardEnderecoLoja } from "@/modules/enderecos/components/CardEnderecoLoja";
 import {
     atualizarLojista,
     buscarMeuPerfilLojista,
@@ -139,6 +140,22 @@ export function PainelMinhaLoja() {
         } finally {
             setSalvando(false);
         }
+    }
+
+    /** Endereço recém-criado passa a ser o endereço da loja (`lojista.enderecoId`). */
+    async function vincularEnderecoAoLojista(enderecoId: number) {
+        if (!perfil || perfil.enderecoId === enderecoId) {
+            return;
+        }
+
+        const atualizado = await atualizarLojista(perfil.id, {
+            nomeFantasia: perfil.nomeFantasia,
+            razaoSocial: perfil.razaoSocial,
+            cnpj: perfil.cnpj,
+            inscricaoEstadual: perfil.inscricaoEstadual,
+            enderecoId,
+        });
+        setPerfil(atualizado);
     }
 
     function abrirEdicao() {
@@ -304,6 +321,14 @@ export function PainelMinhaLoja() {
             ) : (
                 <StatusPerfil loja={perfil} onEditar={abrirEdicao} />
             )}
+
+            {perfil ? (
+                <CardEnderecoLoja
+                    usuarioId={perfil.usuarioId}
+                    enderecoVinculadoId={perfil.enderecoId}
+                    onEnderecoCriado={vincularEnderecoAoLojista}
+                />
+            ) : null}
         </section>
     );
 }

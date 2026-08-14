@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { buscarUsuarioLogadoAtual } from "@/modules/auth/services/servicoAuth";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
@@ -64,25 +64,39 @@ export function CrudLojistas() {
         [lojistaEditando],
     );
 
-    const carregarLista = useCallback(async () => {
-        setCarregando(true);
-        setErro("");
-
-        try {
-            const lista = await listarLojistas(
-                filtroStatus ? { status: filtroStatus } : undefined,
-            );
-            setLojistas(lista);
-        } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao carregar lojistas."));
-        } finally {
-            setCarregando(false);
-        }
-    }, [filtroStatus]);
-
     useEffect(() => {
+        let cancelado = false;
+
+        async function carregarLista() {
+            setCarregando(true);
+            setErro("");
+
+            try {
+                const lista = await listarLojistas(
+                    filtroStatus ? { status: filtroStatus } : undefined,
+                );
+                if (!cancelado) {
+                    setLojistas(lista);
+                }
+            } catch (error) {
+                if (!cancelado) {
+                    setErro(
+                        obterMensagemErroApi(error, "Erro ao carregar lojistas."),
+                    );
+                }
+            } finally {
+                if (!cancelado) {
+                    setCarregando(false);
+                }
+            }
+        }
+
         void carregarLista();
-    }, [carregarLista]);
+
+        return () => {
+            cancelado = true;
+        };
+    }, [filtroStatus]);
 
     function abrirCriacao() {
         setLojistaEditando(null);

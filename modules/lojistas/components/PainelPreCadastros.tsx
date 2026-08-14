@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Eye, Search, XCircle } from "lucide-react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
@@ -18,24 +18,39 @@ export function PainelPreCadastros() {
     const [erro, setErro] = useState("");
     const [detalhe, setDetalhe] = useState<Lojista | null>(null);
 
-    const carregar = useCallback(async () => {
-        setCarregando(true);
-        setErro("");
-        try {
-            const lista = await listarLojistas({ status: "PENDENTE" });
-            setLojistas(lista);
-        } catch (error) {
-            setErro(
-                obterMensagemErroApi(error, "Erro ao carregar pré-cadastros."),
-            );
-        } finally {
-            setCarregando(false);
-        }
-    }, []);
-
     useEffect(() => {
+        let cancelado = false;
+
+        async function carregar() {
+            setCarregando(true);
+            setErro("");
+            try {
+                const lista = await listarLojistas({ status: "PENDENTE" });
+                if (!cancelado) {
+                    setLojistas(lista);
+                }
+            } catch (error) {
+                if (!cancelado) {
+                    setErro(
+                        obterMensagemErroApi(
+                            error,
+                            "Erro ao carregar pré-cadastros.",
+                        ),
+                    );
+                }
+            } finally {
+                if (!cancelado) {
+                    setCarregando(false);
+                }
+            }
+        }
+
         void carregar();
-    }, [carregar]);
+
+        return () => {
+            cancelado = true;
+        };
+    }, []);
 
     const filtrados = useMemo(() => {
         const termo = busca.trim().toLowerCase();
