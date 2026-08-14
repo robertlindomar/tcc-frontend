@@ -26,10 +26,10 @@ const formInicial: FormState = {
 function parsePontoRecompensa(valor: string): number | undefined {
     const trim = valor.trim();
     if (!trim) {
-        return 0;
+        return undefined;
     }
     const numero = Number(trim);
-    return Number.isInteger(numero) && numero >= 0 ? numero : undefined;
+    return Number.isInteger(numero) && numero >= 1 ? numero : undefined;
 }
 
 export function CrudMissoes() {
@@ -107,7 +107,7 @@ export function CrudMissoes() {
 
         const pontoRecompensa = parsePontoRecompensa(form.pontoRecompensa);
         if (pontoRecompensa === undefined) {
-            setErro("Pontos de recompensa inválidos.");
+            setErro("Informe os pontos da missão (mínimo 1).");
             return;
         }
 
@@ -238,11 +238,12 @@ export function CrudMissoes() {
                             </label>
 
                             <label className="block text-sm font-medium text-slate-700">
-                                Pontos de recompensa (opcional)
+                                Pontos da missão *
                                 <input
                                     type="number"
-                                    min="0"
-                                    step="1"
+                                    min={1}
+                                    step={1}
+                                    required
                                     value={form.pontoRecompensa}
                                     onChange={(event) =>
                                         setForm((atual) => ({
@@ -251,7 +252,6 @@ export function CrudMissoes() {
                                         }))
                                     }
                                     className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    placeholder="0"
                                 />
                             </label>
 

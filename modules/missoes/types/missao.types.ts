@@ -16,7 +16,7 @@ export interface Missao {
 export interface RequisicaoCriarMissao {
     nome: string;
     descricao?: string | null;
-    pontoRecompensa?: number;
+    pontoRecompensa: number;
 }
 
 export interface RequisicaoAtualizarMissao {
