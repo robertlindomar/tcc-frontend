@@ -34,7 +34,7 @@ const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
     LOJISTA: [
         { href: "/minha-loja", label: "Minha loja", icone: Store },
         { href: "/produtos", label: "Produtos", icone: Package, exigeLojaAprovada: true },
-        { href: "/categorias", label: "Categorias", icone: Tags },
+        { href: "/categorias", label: "Categorias", icone: Tags, exigeLojaAprovada: true },
         {
             href: "/promocoes",
             label: "Promoções",

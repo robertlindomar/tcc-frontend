@@ -1,12 +1,15 @@
 import { ExigirAutenticacao } from "@/modules/auth/components/ExigirAutenticacao";
-import { PainelCategorias } from "@/modules/categorias/components/PainelCategorias";
+import { CrudCategorias } from "@/modules/categorias/components/CrudCategorias";
+import { ExigirLojaAprovada } from "@/shared/components/acesso/ExigirLojaAprovada";
 import { LayoutAutenticado } from "@/shared/components/layout/LayoutAutenticado";
 
 export default function Page() {
     return (
         <ExigirAutenticacao>
             <LayoutAutenticado>
-                <PainelCategorias />
+                <ExigirLojaAprovada recurso="as categorias">
+                    <CrudCategorias />
+                </ExigirLojaAprovada>
             </LayoutAutenticado>
         </ExigirAutenticacao>
     );

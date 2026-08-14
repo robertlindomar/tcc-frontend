@@ -9,6 +9,7 @@ import { RepositorioCategoria } from "./repositorioCategoria";
 type CategoriaApiResponse = {
     id: number;
     nome: string;
+    lojistaId: number;
     dataCriacao: string;
     dataAtualizacao: string;
 };
@@ -17,6 +18,7 @@ function mapCategoriaApi(item: CategoriaApiResponse): Categoria {
     return {
         id: item.id,
         nome: item.nome,
+        lojistaId: item.lojistaId,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
     };
