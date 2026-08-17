@@ -20,7 +20,6 @@ type FormState = {
     razaoSocial: string;
     cnpj: string;
     inscricaoEstadual: string;
-    associacaoId: string;
 };
 
 const formInicial: FormState = {
@@ -28,7 +27,6 @@ const formInicial: FormState = {
     razaoSocial: "",
     cnpj: "",
     inscricaoEstadual: "",
-    associacaoId: "",
 };
 
 type FiltroStatus = "" | StatusLojista;
@@ -117,7 +115,6 @@ export function CrudLojistas() {
                 lojista.inscricaoEstadual != null
                     ? String(lojista.inscricaoEstadual)
                     : "",
-            associacaoId: String(lojista.associacaoId),
         });
         setErro("");
         setModalAberto(true);
@@ -160,20 +157,11 @@ export function CrudLojistas() {
                     ),
                 );
             } else {
-                const associacaoId = Number(form.associacaoId);
-
-                if (!associacaoId || Number.isNaN(associacaoId)) {
-                    setErro("Informe uma associação válida.");
-                    setSalvando(false);
-                    return;
-                }
-
                 const criado = await criarLojista({
                     nomeFantasia: form.nomeFantasia,
                     razaoSocial: form.razaoSocial,
                     cnpj: form.cnpj,
                     inscricaoEstadual,
-                    associacaoId,
                 });
                 setLojistas((lista) => [criado, ...lista]);
             }
@@ -389,25 +377,6 @@ export function CrudLojistas() {
                                     className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
                                 />
                             </label>
-
-                            {!lojistaEditando && (
-                                <label className="block text-sm font-medium text-slate-700">
-                                    ID da associação
-                                    <input
-                                        type="number"
-                                        value={form.associacaoId}
-                                        onChange={(event) =>
-                                            setForm((atual) => ({
-                                                ...atual,
-                                                associacaoId: event.target.value,
-                                            }))
-                                        }
-                                        className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                        required
-                                        min={1}
-                                    />
-                                </label>
-                            )}
 
                             <div className="flex justify-end gap-2 pt-2">
                                 <button

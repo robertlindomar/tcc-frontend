@@ -24,7 +24,6 @@ export interface RequisicaoCriarLojista {
     razaoSocial: string;
     cnpj: string;
     inscricaoEstadual?: number | null;
-    associacaoId: number;
     enderecoId?: number | null;
 }
 

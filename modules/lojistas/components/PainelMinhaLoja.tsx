@@ -2,23 +2,22 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { listarAssociacoes } from "@/modules/associacoes/services/servicoAssociacao";
-import { Associacao } from "@/modules/associacoes/types/associacao.types";
 import { CardEnderecoLoja } from "@/modules/enderecos/components/CardEnderecoLoja";
 import {
     atualizarLojista,
     buscarMeuPerfilLojista,
     criarLojista,
+    reenviarLojistaParaAnalise,
 } from "@/modules/lojistas/services/servicoLojista";
 import { Lojista, StatusLojista } from "@/modules/lojistas/types/lojista.types";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { ModalConfirmarReenvio } from "./ModalConfirmarReenvio";
 
 type FormState = {
     nomeFantasia: string;
     razaoSocial: string;
     cnpj: string;
     inscricaoEstadual: string;
-    associacaoId: string;
 };
 
 const formInicial: FormState = {
@@ -26,10 +25,9 @@ const formInicial: FormState = {
     razaoSocial: "",
     cnpj: "",
     inscricaoEstadual: "",
-    associacaoId: "",
 };
 
-const MSG_REJEITADO = "Cadastro não aprovado";
+const MSG_REJEITADO = "Cadastro rejeitado";
 
 const ROTULO_STATUS: Record<StatusLojista, string> = {
     PENDENTE: "Em análise",
@@ -59,15 +57,15 @@ function formularioDoPerfil(perfil: Lojista): FormState {
         cnpj: perfil.cnpj,
         inscricaoEstadual:
             perfil.inscricaoEstadual != null ? String(perfil.inscricaoEstadual) : "",
-        associacaoId: String(perfil.associacaoId),
     };
 }
 
 export function PainelMinhaLoja() {
     const [perfil, setPerfil] = useState<Lojista | null>(null);
-    const [associacoes, setAssociacoes] = useState<Associacao[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
+    const [reenviando, setReenviando] = useState(false);
+    const [confirmarReenvio, setConfirmarReenvio] = useState(false);
     const [erro, setErro] = useState("");
     const [aviso, setAviso] = useState("");
     const [editando, setEditando] = useState(false);
@@ -80,13 +78,9 @@ export function PainelMinhaLoja() {
             setCarregando(true);
             setErro("");
             try {
-                const [meu, listaAssoc] = await Promise.all([
-                    buscarMeuPerfilLojista(),
-                    listarAssociacoes(),
-                ]);
+                const meu = await buscarMeuPerfilLojista();
                 if (cancelado) return;
                 setPerfil(meu);
-                setAssociacoes(listaAssoc);
             } catch (error) {
                 if (!cancelado) {
                     setErro(
@@ -112,12 +106,6 @@ export function PainelMinhaLoja() {
         setErro("");
         setAviso("");
 
-        const associacaoId = Number(form.associacaoId);
-        if (!Number.isInteger(associacaoId) || associacaoId <= 0) {
-            setErro("Selecione a associação.");
-            return;
-        }
-
         const inscricaoEstadual = parseInscricaoEstadual(form.inscricaoEstadual);
         if (inscricaoEstadual === undefined) {
             setErro("Inscrição estadual inválida.");
@@ -131,9 +119,9 @@ export function PainelMinhaLoja() {
                 razaoSocial: form.razaoSocial.trim(),
                 cnpj: form.cnpj.trim(),
                 inscricaoEstadual,
-                associacaoId,
             });
             setPerfil(criado);
+            setAviso("Cadastro enviado para análise.");
         } catch (error) {
             setErro(obterMensagemErroApi(error, "Erro ao enviar cadastro da loja."));
         } finally {
@@ -196,6 +184,24 @@ export function PainelMinhaLoja() {
         }
     }
 
+    async function confirmarEnvioParaAnalise() {
+        if (!perfil) return;
+        setErro("");
+        setReenviando(true);
+        try {
+            const atualizado = await reenviarLojistaParaAnalise(perfil.id);
+            setPerfil(atualizado);
+            setConfirmarReenvio(false);
+            setAviso("Cadastro enviado novamente para análise.");
+        } catch (error) {
+            setErro(
+                obterMensagemErroApi(error, "Erro ao reenviar cadastro para análise."),
+            );
+        } finally {
+            setReenviando(false);
+        }
+    }
+
     if (carregando) {
         return <p className="text-sm text-muted">Carregando…</p>;
     }
@@ -231,25 +237,6 @@ export function PainelMinhaLoja() {
                         <strong>pré-cadastro</strong>. A associação analisa e aprova
                         ou recusa a solicitação.
                     </p>
-
-                    <label className="block text-sm font-medium text-slate-700">
-                        Associação
-                        <select
-                            value={form.associacaoId}
-                            onChange={(e) =>
-                                setForm((a) => ({ ...a, associacaoId: e.target.value }))
-                            }
-                            className="mt-1 w-full border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500"
-                            required
-                        >
-                            <option value="">Selecione…</option>
-                            {associacoes.map((item) => (
-                                <option key={item.id} value={item.id}>
-                                    {item.nomeFantasia}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
 
                     <label className="block text-sm font-medium text-slate-700">
                         Nome fantasia
@@ -318,7 +305,11 @@ export function PainelMinhaLoja() {
                     onSubmit={handleEditar}
                 />
             ) : (
-                <StatusPerfil loja={perfil} onEditar={abrirEdicao} />
+                <StatusPerfil
+                    loja={perfil}
+                    onEditar={abrirEdicao}
+                    onReenviar={() => setConfirmarReenvio(true)}
+                />
             )}
 
             {perfil ? (
@@ -326,6 +317,16 @@ export function PainelMinhaLoja() {
                     usuarioId={perfil.usuarioId}
                     enderecoVinculadoId={perfil.enderecoId}
                     onEnderecoCriado={vincularEnderecoAoLojista}
+                />
+            ) : null}
+
+            {confirmarReenvio ? (
+                <ModalConfirmarReenvio
+                    salvando={reenviando}
+                    onCancelar={() => {
+                        if (!reenviando) setConfirmarReenvio(false);
+                    }}
+                    onConfirmar={() => void confirmarEnvioParaAnalise()}
                 />
             ) : null}
         </section>
@@ -421,7 +422,15 @@ function FormularioEdicao({
     );
 }
 
-function StatusPerfil({ loja, onEditar }: { loja: Lojista; onEditar: () => void }) {
+function StatusPerfil({
+    loja,
+    onEditar,
+    onReenviar,
+}: {
+    loja: Lojista;
+    onEditar: () => void;
+    onReenviar: () => void;
+}) {
     const status = loja.status;
 
     return (
@@ -458,16 +467,23 @@ function StatusPerfil({ loja, onEditar }: { loja: Lojista; onEditar: () => void 
             ) : null}
 
             {status === "REJEITADO" ? (
-                <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                <div className="space-y-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                     <p className="font-semibold">{MSG_REJEITADO}</p>
                     {loja.justificativaRejeicao ? (
                         <div>
                             <p className="text-xs font-medium uppercase tracking-wide text-red-700">
-                                Motivo informado pela associação
+                                Motivo
                             </p>
                             <p className="mt-1 whitespace-pre-wrap">{loja.justificativaRejeicao}</p>
                         </div>
                     ) : null}
+                    <button
+                        type="button"
+                        onClick={onReenviar}
+                        className="bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800"
+                    >
+                        Enviar novamente para análise
+                    </button>
                 </div>
             ) : null}
 

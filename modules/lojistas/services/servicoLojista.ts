@@ -39,6 +39,10 @@ export async function rejeitarLojista(id: number, justificativaRejeicao: string)
     return repositorioLojista.rejeitar(id, justificativaRejeicao);
 }
 
+export async function reenviarLojistaParaAnalise(id: number) {
+    return repositorioLojista.reenviarParaAnalise(id);
+}
+
 export async function deletarLojista(id: number) {
     return repositorioLojista.deletar(id);
 }

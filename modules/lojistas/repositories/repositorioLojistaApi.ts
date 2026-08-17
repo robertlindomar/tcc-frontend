@@ -84,6 +84,13 @@ export const repositorioLojistaApi: RepositorioLojista = {
         return mapLojistaApi(response.data);
     },
 
+    async reenviarParaAnalise(id: number): Promise<Lojista> {
+        const response = await clienteHttp.patch<LojistaApiResponse>(
+            `/lojista/${id}/reenviar`,
+        );
+        return mapLojistaApi(response.data);
+    },
+
     async deletar(id: number): Promise<void> {
         await clienteHttp.delete(`/lojista/${id}`);
     },
