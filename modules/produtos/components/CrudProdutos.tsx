@@ -150,6 +150,16 @@ export function CrudProdutos() {
             return;
         }
 
+        const legadoSemFoto = Boolean(produtoEditando && !produtoEditando.urlImagem);
+        if (!produtoEditando && !arquivoImagem) {
+            setErro("Selecione uma imagem do produto.");
+            return;
+        }
+        if (legadoSemFoto && !arquivoImagem) {
+            setErro("Este produto ainda não tem foto. Adicione uma imagem para salvar.");
+            return;
+        }
+
         setSalvando(true);
 
         try {
@@ -160,12 +170,21 @@ export function CrudProdutos() {
             };
 
             if (produtoEditando) {
-                let atualizado = await atualizarProduto(produtoEditando.id, dados);
-                if (arquivoImagem) {
+                let atualizado = produtoEditando;
+                if (arquivoImagem && !produtoEditando.urlImagem) {
                     atualizado = await enviarImagemProduto(
                         produtoEditando.id,
                         arquivoImagem,
                     );
+                    atualizado = await atualizarProduto(produtoEditando.id, dados);
+                } else {
+                    atualizado = await atualizarProduto(produtoEditando.id, dados);
+                    if (arquivoImagem) {
+                        atualizado = await enviarImagemProduto(
+                            produtoEditando.id,
+                            arquivoImagem,
+                        );
+                    }
                 }
                 setProdutos((lista) =>
                     lista.map((item) =>
@@ -173,10 +192,11 @@ export function CrudProdutos() {
                     ),
                 );
             } else {
-                let criado = await criarProduto(dados);
-                if (arquivoImagem) {
-                    criado = await enviarImagemProduto(criado.id, arquivoImagem);
+                if (!arquivoImagem) {
+                    setErro("Selecione uma imagem do produto.");
+                    return;
                 }
+                const criado = await criarProduto(dados, arquivoImagem);
                 setProdutos((lista) => [criado, ...lista]);
             }
 
@@ -255,8 +275,10 @@ export function CrudProdutos() {
                                 </h2>
                                 <p className="mt-1 text-sm text-slate-600">
                                     {produtoEditando
-                                        ? "Altere os dados do produto."
-                                        : "Informe os dados para cadastrar um produto."}
+                                        ? produtoEditando.urlImagem
+                                            ? "Altere os dados. A foto pode ser trocada, mas o produto não fica sem imagem."
+                                            : "Este produto ainda não tem foto. Adicione uma imagem para concluir a edição."
+                                        : "Informe os dados e uma foto para cadastrar o produto."}
                                 </p>
                             </div>
                             <button
@@ -327,7 +349,11 @@ export function CrudProdutos() {
 
                             <SeletorImagem
                                 id="foto-produto"
-                                rotulo="Foto (opcional)"
+                                rotulo={
+                                    produtoEditando?.urlImagem
+                                        ? "Foto (trocar)"
+                                        : "Foto"
+                                }
                                 previewUrl={
                                     previewLocal ??
                                     urlPublicaArquivo(produtoEditando?.urlImagem)
@@ -339,6 +365,7 @@ export function CrudProdutos() {
                                     );
                                 }}
                                 desabilitado={salvando}
+                                obrigatorio={!produtoEditando || !produtoEditando.urlImagem}
                             />
 
                             <div className="flex justify-end gap-2 pt-2">
@@ -352,7 +379,15 @@ export function CrudProdutos() {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={salvando}
+                                    disabled={
+                                        salvando ||
+                                        (!produtoEditando && !arquivoImagem) ||
+                                        Boolean(
+                                            produtoEditando &&
+                                                !produtoEditando.urlImagem &&
+                                                !arquivoImagem,
+                                        )
+                                    }
                                     className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {salvando ? "Salvando..." : "Salvar"}

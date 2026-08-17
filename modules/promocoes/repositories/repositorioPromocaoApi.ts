@@ -69,6 +69,13 @@ export const repositorioPromocaoApi: RepositorioPromocao = {
         return mapPromocaoApi(response.data);
     },
 
+    async reativar(id: number): Promise<Promocao> {
+        const response = await clienteHttp.patch<PromocaoApiResponse>(
+            `/promocao/${id}/reativar`,
+        );
+        return mapPromocaoApi(response.data);
+    },
+
     async deletar(id: number): Promise<void> {
         await clienteHttp.delete(`/promocao/${id}`);
     },

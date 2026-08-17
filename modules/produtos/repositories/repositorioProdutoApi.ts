@@ -41,8 +41,15 @@ export const repositorioProdutoApi: RepositorioProduto = {
         return mapProdutoApi(response.data);
     },
 
-    async criar(dados: RequisicaoCriarProduto): Promise<Produto> {
-        const response = await clienteHttp.post<ProdutoApiResponse>("/produto", dados);
+    async criar(dados: RequisicaoCriarProduto, arquivo: File): Promise<Produto> {
+        const corpo = new FormData();
+        corpo.append("nome", dados.nome);
+        corpo.append("valor", String(dados.valor));
+        if (dados.categoriaId != null) {
+            corpo.append("categoriaId", String(dados.categoriaId));
+        }
+        corpo.append("arquivo", arquivo);
+        const response = await clienteHttp.post<ProdutoApiResponse>("/produto", corpo);
         return mapProdutoApi(response.data);
     },
 

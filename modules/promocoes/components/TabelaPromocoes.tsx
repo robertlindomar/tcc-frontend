@@ -5,10 +5,12 @@ interface TabelaPromocoesProps {
     nomeProdutoPorId: Record<number, string>;
     onEditar: (promocao: Promocao) => void;
     onDesativar: (promocao: Promocao) => void;
+    onReativar: (promocao: Promocao) => void;
     onExcluir: (promocao: Promocao) => void;
     carregando?: boolean;
     excluindoId?: number | null;
     desativandoId?: number | null;
+    reativandoId?: number | null;
 }
 
 function formatarData(data: Date) {
@@ -41,10 +43,12 @@ export function TabelaPromocoes({
     nomeProdutoPorId,
     onEditar,
     onDesativar,
+    onReativar,
     onExcluir,
     carregando = false,
     excluindoId = null,
     desativandoId = null,
+    reativandoId = null,
 }: TabelaPromocoesProps) {
     return (
         <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
@@ -115,7 +119,18 @@ export function TabelaPromocoes({
                                                 ? "Desativando..."
                                                 : "Desativar"}
                                         </button>
-                                    ) : null}
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => onReativar(promocao)}
+                                            disabled={reativandoId === promocao.id}
+                                            className="ml-2 border border-emerald-200 px-3 py-1.5 font-medium text-emerald-800 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                            {reativandoId === promocao.id
+                                                ? "Reativando..."
+                                                : "Reativar"}
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={() => onExcluir(promocao)}

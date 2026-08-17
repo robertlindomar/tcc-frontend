@@ -10,6 +10,7 @@ import {
     deletarPromocao,
     desativarPromocao,
     listarPromocoes,
+    reativarPromocao,
 } from "../services/servicoPromocao";
 import { Promocao } from "../types/promocao.types";
 import { TabelaPromocoes } from "./TabelaPromocoes";
@@ -44,6 +45,7 @@ export function CrudPromocoes() {
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
     const [desativandoId, setDesativandoId] = useState<number | null>(null);
+    const [reativandoId, setReativandoId] = useState<number | null>(null);
     const [erro, setErro] = useState("");
     const [modalAberto, setModalAberto] = useState(false);
     const [promocaoEditando, setPromocaoEditando] = useState<Promocao | null>(null);
@@ -220,14 +222,34 @@ export function CrudPromocoes() {
         }
     }
 
+    async function handleReativar(promocao: Promocao) {
+        setReativandoId(promocao.id);
+        setErro("");
+        try {
+            const atualizado = await reativarPromocao(promocao.id);
+            setPromocoes((lista) =>
+                lista.map((item) => (item.id === atualizado.id ? atualizado : item)),
+            );
+            if (atualizado.statusVigencia === "EXPIRADA") {
+                setErro(
+                    "Promoção reativada, mas o prazo já venceu. Edite a duração para abrir uma nova janela.",
+                );
+            }
+        } catch (error) {
+            setErro(obterMensagemErroApi(error, "Erro ao reativar promoção."));
+        } finally {
+            setReativandoId(null);
+        }
+    }
+
     return (
         <section className="space-y-5">
             <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">Promoções</h1>
                     <p className="mt-1 text-sm text-slate-600">
-                        Cadastre promoções com duração em dias. Desativar mantém o
-                        histórico; excluir remove o registro.
+                        Cadastre promoções com duração em dias. Você pode desativar, reativar
+                        (sem estender o prazo) e excluir.
                     </p>
                 </div>
 
@@ -252,10 +274,12 @@ export function CrudPromocoes() {
                     nomeProdutoPorId={nomeProdutoPorId}
                     onEditar={abrirEdicao}
                     onDesativar={setPromocaoDesativando}
+                    onReativar={(promocao) => void handleReativar(promocao)}
                     onExcluir={setPromocaoExcluindo}
                     carregando={carregando}
                     excluindoId={excluindoId}
                     desativandoId={desativandoId}
+                    reativandoId={reativandoId}
                 />
             </div>
 
@@ -269,7 +293,7 @@ export function CrudPromocoes() {
                                 </h2>
                                 <p className="mt-1 text-sm text-slate-600">
                                     {promocaoEditando
-                                        ? "Altere os dados da promoção."
+                                        ? "Altere os dados. Se o prazo já venceu, informe uma nova duração — reativar sozinho não estende a vigência."
                                         : "Informe os dados para cadastrar uma promoção."}
                                 </p>
                             </div>
@@ -386,8 +410,8 @@ export function CrudPromocoes() {
                             Desativar promoção
                         </h2>
                         <p className="mt-2 text-sm text-slate-600">
-                            A promoção deixa de valer, mas o registro permanece. Não há
-                            reativação nesta versão.
+                            A promoção deixa de valer, mas o registro permanece. Depois
+                            você pode reativar sem alterar as datas.
                         </p>
                         <div className="mt-6 flex justify-end gap-2">
                             <button

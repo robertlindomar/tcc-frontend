@@ -12,8 +12,8 @@ export async function buscarProdutoPorId(id: number) {
     return repositorioProduto.buscarPorId(id);
 }
 
-export async function criarProduto(dados: RequisicaoCriarProduto) {
-    return repositorioProduto.criar(dados);
+export async function criarProduto(dados: RequisicaoCriarProduto, arquivo: File) {
+    return repositorioProduto.criar(dados, arquivo);
 }
 
 export async function atualizarProduto(

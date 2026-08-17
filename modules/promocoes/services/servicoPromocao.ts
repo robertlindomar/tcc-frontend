@@ -27,6 +27,10 @@ export async function desativarPromocao(id: number) {
     return repositorioPromocao.desativar(id);
 }
 
+export async function reativarPromocao(id: number) {
+    return repositorioPromocao.reativar(id);
+}
+
 export async function deletarPromocao(id: number) {
     return repositorioPromocao.deletar(id);
 }

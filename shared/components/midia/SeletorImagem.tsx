@@ -8,6 +8,7 @@ interface SeletorImagemProps {
     previewUrl: string | null;
     onSelecionar: (arquivo: File | null) => void;
     desabilitado?: boolean;
+    obrigatorio?: boolean;
 }
 
 export function SeletorImagem({
@@ -16,6 +17,7 @@ export function SeletorImagem({
     previewUrl,
     onSelecionar,
     desabilitado = false,
+    obrigatorio = false,
 }: SeletorImagemProps) {
     function handleChange(event: ChangeEvent<HTMLInputElement>) {
         const arquivo = event.target.files?.[0] ?? null;
@@ -32,6 +34,7 @@ export function SeletorImagem({
                     accept="image/jpeg,image/png,image/webp"
                     onChange={handleChange}
                     disabled={desabilitado}
+                    required={obrigatorio}
                     className="mt-1 block w-full text-sm text-slate-700 file:mr-3 file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5"
                 />
             </label>
