@@ -1,8 +1,10 @@
 import { clienteHttp } from "@/shared/services/clienteHttp";
 import {
     Consumidor,
+    ListagemVisitantesLoja,
     RequisicaoAtualizarConsumidor,
     RequisicaoCriarConsumidor,
+    VisitanteLoja,
 } from "../types/consumidor.types";
 import { RepositorioConsumidor } from "./repositorioConsumidor";
 
@@ -16,6 +18,20 @@ type ConsumidorApiResponse = {
     usuarioId: number;
     dataCriacao: string;
     dataAtualizacao: string;
+};
+
+type VisitanteLojaApiResponse = {
+    id: number;
+    nome: string;
+    quantidadeVisitas: number;
+    primeiraVisita: string;
+    ultimaVisita: string;
+};
+
+type ListagemVisitantesApiResponse = {
+    consumidores: VisitanteLojaApiResponse[];
+    consumidoresUnicos: number;
+    totalVisitas: number;
 };
 
 function mapConsumidorApi(item: ConsumidorApiResponse): Consumidor {
@@ -32,10 +48,25 @@ function mapConsumidorApi(item: ConsumidorApiResponse): Consumidor {
     };
 }
 
+function mapVisitanteApi(item: VisitanteLojaApiResponse): VisitanteLoja {
+    return {
+        id: item.id,
+        nome: item.nome,
+        quantidadeVisitas: item.quantidadeVisitas,
+        primeiraVisita: new Date(item.primeiraVisita),
+        ultimaVisita: new Date(item.ultimaVisita),
+    };
+}
+
 export const repositorioConsumidorApi: RepositorioConsumidor = {
-    async listar(): Promise<Consumidor[]> {
-        const response = await clienteHttp.get<ConsumidorApiResponse[]>("/consumidor");
-        return response.data.map(mapConsumidorApi);
+    async listar(): Promise<ListagemVisitantesLoja> {
+        const response = await clienteHttp.get<ListagemVisitantesApiResponse>("/consumidor");
+        const body = response.data;
+        return {
+            consumidores: body.consumidores.map(mapVisitanteApi),
+            consumidoresUnicos: body.consumidoresUnicos,
+            totalVisitas: body.totalVisitas,
+        };
     },
 
     async buscarPorId(id: number): Promise<Consumidor | null> {

@@ -3,15 +3,19 @@
 import { useEffect, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { listarConsumidores } from "../services/servicoConsumidor";
-import { Consumidor } from "../types/consumidor.types";
+import { ListagemVisitantesLoja } from "../types/consumidor.types";
 import { TabelaConsumidores } from "./TabelaConsumidores";
 
 /**
- * Somente leitura: o backend escopa a lista pelo lojista do JWT e reserva
- * criação/edição/exclusão do perfil ao próprio consumidor.
+ * Somente leitura: visitantes da missão sistema "Visitar loja" da loja autenticada.
+ * Consumidor.lojistaId é legado e não define esta lista.
  */
 export function PainelConsumidoresDaLoja() {
-    const [consumidores, setConsumidores] = useState<Consumidor[]>([]);
+    const [listagem, setListagem] = useState<ListagemVisitantesLoja>({
+        consumidores: [],
+        consumidoresUnicos: 0,
+        totalVisitas: 0,
+    });
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
 
@@ -19,9 +23,9 @@ export function PainelConsumidoresDaLoja() {
         let cancelado = false;
 
         listarConsumidores()
-            .then((lista) => {
+            .then((dados) => {
                 if (!cancelado) {
-                    setConsumidores(lista);
+                    setListagem(dados);
                 }
             })
             .catch((error: unknown) => {
@@ -42,14 +46,21 @@ export function PainelConsumidoresDaLoja() {
         };
     }, []);
 
+    const resumo =
+        listagem.consumidoresUnicos === 1
+            ? `1 consumidor · ${listagem.totalVisitas} ${listagem.totalVisitas === 1 ? "visita" : "visitas"}`
+            : `${listagem.consumidoresUnicos} consumidores · ${listagem.totalVisitas} visitas`;
+
     return (
         <section className="space-y-5">
             <div className="border-b border-slate-200 pb-5">
                 <h1 className="text-2xl font-bold">Consumidores da loja</h1>
                 <p className="mt-1 text-sm text-slate-600">
-                    Consumidores vinculados à sua loja. O cadastro é feito pelo próprio
-                    consumidor.
+                    Consumidores que visitaram sua loja pelo aplicativo
                 </p>
+                {!carregando && !erro ? (
+                    <p className="mt-2 text-sm font-medium text-slate-700">{resumo}</p>
+                ) : null}
             </div>
 
             {erro ? (
@@ -60,7 +71,7 @@ export function PainelConsumidoresDaLoja() {
 
             <div className="overflow-x-auto">
                 <TabelaConsumidores
-                    consumidores={consumidores}
+                    consumidores={listagem.consumidores}
                     carregando={carregando}
                 />
             </div>

@@ -7,7 +7,7 @@ export default function Page() {
     return (
         <ExigirAutenticacao>
             <LayoutAutenticado>
-                <ExigirLojaAprovada recurso="os consumidores da loja">
+                <ExigirLojaAprovada recurso="os visitantes da loja">
                     <PainelConsumidoresDaLoja />
                 </ExigirLojaAprovada>
             </LayoutAutenticado>

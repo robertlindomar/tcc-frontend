@@ -1,11 +1,12 @@
 import {
     Consumidor,
+    ListagemVisitantesLoja,
     RequisicaoAtualizarConsumidor,
     RequisicaoCriarConsumidor,
 } from "../types/consumidor.types";
 
 export interface RepositorioConsumidor {
-    listar(): Promise<Consumidor[]>;
+    listar(): Promise<ListagemVisitantesLoja>;
     buscarPorId(id: number): Promise<Consumidor | null>;
     criar(dados: RequisicaoCriarConsumidor): Promise<Consumidor>;
     atualizar(id: number, dados: RequisicaoAtualizarConsumidor): Promise<Consumidor>;
