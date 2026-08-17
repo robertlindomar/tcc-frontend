@@ -8,7 +8,8 @@ import {
     deletarMissao,
     listarMissoes,
 } from "../services/servicoMissao";
-import { Missao } from "../types/missao.types";
+import { FrequenciaMissao, Missao } from "../types/missao.types";
+import { ROTULOS_FREQUENCIA_MISSAO } from "../utils/rotulosMissao";
 import { ModalQrMissao } from "./ModalQrMissao";
 import { TabelaMissoes } from "./TabelaMissoes";
 
@@ -16,12 +17,16 @@ type FormState = {
     nome: string;
     descricao: string;
     pontoRecompensa: string;
+    frequencia: FrequenciaMissao;
+    dataFim: string;
 };
 
 const formInicial: FormState = {
     nome: "",
     descricao: "",
     pontoRecompensa: "",
+    frequencia: "UMA_VEZ",
+    dataFim: "",
 };
 
 function parsePontoRecompensa(valor: string): number | undefined {
@@ -88,6 +93,8 @@ export function CrudMissoes() {
             nome: missao.nome,
             descricao: missao.descricao ?? "",
             pontoRecompensa: String(missao.pontoRecompensa),
+            frequencia: missao.frequencia,
+            dataFim: missao.dataFimCivil ?? "",
         });
         setErro("");
         setModalAberto(true);
@@ -112,6 +119,10 @@ export function CrudMissoes() {
             setErro("Informe os pontos da missão (mínimo 1).");
             return;
         }
+        if (!form.dataFim) {
+            setErro("Informe até quando a missão é válida.");
+            return;
+        }
 
         setSalvando(true);
 
@@ -120,6 +131,8 @@ export function CrudMissoes() {
                 nome: form.nome.trim(),
                 descricao: form.descricao.trim() || null,
                 pontoRecompensa,
+                frequencia: form.frequencia,
+                dataFim: form.dataFim,
             };
 
             if (missaoEditando) {
@@ -255,6 +268,53 @@ export function CrudMissoes() {
                                         }))
                                     }
                                     className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                />
+                            </label>
+
+                            <label className="block text-sm font-medium text-slate-700">
+                                Frequência
+                                <select
+                                    value={form.frequencia}
+                                    onChange={(event) =>
+                                        setForm((atual) => ({
+                                            ...atual,
+                                            frequencia: event.target
+                                                .value as FrequenciaMissao,
+                                        }))
+                                    }
+                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                    required
+                                >
+                                    {(
+                                        Object.entries(ROTULOS_FREQUENCIA_MISSAO) as [
+                                            FrequenciaMissao,
+                                            string,
+                                        ][]
+                                    ).map(([valor, rotulo]) => (
+                                        <option key={valor} value={valor}>
+                                            {rotulo}
+                                        </option>
+                                    ))}
+                                </select>
+                                <span className="mt-1 block text-xs font-normal text-slate-500">
+                                    Depois da primeira conclusão, a frequência não
+                                    pode mais ser alterada.
+                                </span>
+                            </label>
+
+                            <label className="block text-sm font-medium text-slate-700">
+                                Válida até
+                                <input
+                                    type="date"
+                                    value={form.dataFim}
+                                    onChange={(event) =>
+                                        setForm((atual) => ({
+                                            ...atual,
+                                            dataFim: event.target.value,
+                                        }))
+                                    }
+                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                    required
                                 />
                             </label>
 

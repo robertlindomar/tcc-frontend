@@ -84,7 +84,17 @@ export function PainelMissoesConsumidor() {
             );
             setTokenQr("");
         } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao concluir missão."));
+            const bruto = obterMensagemErroApi(error, "Erro ao concluir missão.");
+            if (bruto === "Missao expirada") {
+                setErro("Esta missão não está mais disponível.");
+            } else if (
+                bruto === "Missao ja concluida neste periodo" ||
+                bruto === "Missao ja concluida"
+            ) {
+                setErro("Você já concluiu esta missão neste período.");
+            } else {
+                setErro(bruto);
+            }
         } finally {
             setConcluindo(false);
         }

@@ -1,4 +1,8 @@
 import { Missao } from "../types/missao.types";
+import {
+    formatarDataCivilBr,
+    rotuloFrequenciaMissao,
+} from "../utils/rotulosMissao";
 
 interface TabelaMissoesProps {
     missoes: Missao[];
@@ -7,14 +11,6 @@ interface TabelaMissoesProps {
     onVerQr: (missao: Missao) => void;
     carregando?: boolean;
     excluindoId?: number | null;
-}
-
-function formatarData(data: Date) {
-    return data.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
 }
 
 export function TabelaMissoes({
@@ -27,15 +23,17 @@ export function TabelaMissoes({
 }: TabelaMissoesProps) {
     return (
         <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
-            <table className="w-full min-w-[800px] text-sm">
+            <table className="w-full min-w-[900px] text-sm">
                 <thead className="bg-slate-100 text-slate-700">
                     <tr>
-                        <th className="px-4 py-3 text-left font-semibold">Nome</th>
+                        <th className="px-4 py-3 text-left font-semibold">Missão</th>
+                        <th className="px-4 py-3 text-left font-semibold">Pontos</th>
                         <th className="px-4 py-3 text-left font-semibold">
-                            Pontos
+                            Frequência
                         </th>
-                        <th className="px-4 py-3 text-left font-semibold">Descrição</th>
-                        <th className="px-4 py-3 text-left font-semibold">Criação</th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                            Válida até
+                        </th>
                         <th className="px-4 py-3 text-right font-semibold">Ações</th>
                     </tr>
                 </thead>
@@ -60,13 +58,22 @@ export function TabelaMissoes({
                     {!carregando &&
                         missoes.map((missao) => (
                             <tr key={missao.id} className="hover:bg-slate-50">
-                                <td className="px-4 py-3 font-medium">{missao.nome}</td>
-                                <td className="px-4 py-3">{missao.pontoRecompensa}</td>
                                 <td className="px-4 py-3">
-                                    {missao.descricao ?? "—"}
+                                    <div className="font-medium">{missao.nome}</div>
+                                    {missao.expirada && (
+                                        <span className="mt-1 inline-block bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                                            EXPIRADA
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="px-4 py-3">
-                                    {formatarData(missao.dataCriacao)}
+                                    +{missao.pontoRecompensa} pontos
+                                </td>
+                                <td className="px-4 py-3">
+                                    {rotuloFrequenciaMissao(missao.frequencia)}
+                                </td>
+                                <td className="px-4 py-3">
+                                    {formatarDataCivilBr(missao.dataFimCivil)}
                                 </td>
                                 <td className="px-4 py-3 text-right">
                                     <button

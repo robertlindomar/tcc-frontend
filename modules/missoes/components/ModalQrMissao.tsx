@@ -32,6 +32,12 @@ export function ModalQrMissao({ missao, onFechar }: ModalQrMissaoProps) {
                     </button>
                 </div>
 
+                {missao.expirada && (
+                    <div className="mb-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                        Missão expirada — este QR não concede mais pontos.
+                    </div>
+                )}
+
                 <div className="flex justify-center bg-white p-4">
                     <QRCodeSVG value={payload} size={256} />
                 </div>

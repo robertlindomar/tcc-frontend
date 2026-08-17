@@ -1,5 +1,6 @@
 import { clienteHttp } from "@/shared/services/clienteHttp";
 import {
+    FrequenciaMissao,
     Missao,
     RequisicaoAtualizarMissao,
     RequisicaoCriarMissao,
@@ -11,6 +12,10 @@ type MissaoApiResponse = {
     nome: string;
     descricao: string | null;
     pontoRecompensa: number;
+    frequencia: FrequenciaMissao;
+    dataFim: string | null;
+    dataFimCivil: string | null;
+    expirada: boolean;
     lojistaId: number;
     tokenQr: string;
     dataCriacao: string;
@@ -23,6 +28,10 @@ function mapMissaoApi(item: MissaoApiResponse): Missao {
         nome: item.nome,
         descricao: item.descricao,
         pontoRecompensa: item.pontoRecompensa,
+        frequencia: item.frequencia,
+        dataFim: item.dataFim ? new Date(item.dataFim) : null,
+        dataFimCivil: item.dataFimCivil,
+        expirada: item.expirada,
         lojistaId: item.lojistaId,
         tokenQr: item.tokenQr,
         dataCriacao: new Date(item.dataCriacao),
