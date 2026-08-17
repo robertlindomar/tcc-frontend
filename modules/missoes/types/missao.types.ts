@@ -14,6 +14,7 @@ export interface Missao {
     dataFim: Date | null;
     dataFimCivil: string | null;
     expirada: boolean;
+    sistema: boolean;
     lojistaId: number;
     tokenQr: string;
     dataCriacao: Date;

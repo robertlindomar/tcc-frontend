@@ -16,6 +16,7 @@ type MissaoApiResponse = {
     dataFim: string | null;
     dataFimCivil: string | null;
     expirada: boolean;
+    sistema: boolean;
     lojistaId: number;
     tokenQr: string;
     dataCriacao: string;
@@ -32,6 +33,7 @@ function mapMissaoApi(item: MissaoApiResponse): Missao {
         dataFim: item.dataFim ? new Date(item.dataFim) : null,
         dataFimCivil: item.dataFimCivil,
         expirada: item.expirada,
+        sistema: item.sistema,
         lojistaId: item.lojistaId,
         tokenQr: item.tokenQr,
         dataCriacao: new Date(item.dataCriacao),

@@ -60,8 +60,13 @@ export function TabelaMissoes({
                             <tr key={missao.id} className="hover:bg-slate-50">
                                 <td className="px-4 py-3">
                                     <div className="font-medium">{missao.nome}</div>
+                                    {missao.sistema && (
+                                        <span className="mt-1 inline-block bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                            Missão padrão
+                                        </span>
+                                    )}
                                     {missao.expirada && (
-                                        <span className="mt-1 inline-block bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                                        <span className="mt-1 ml-1 inline-block bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
                                             EXPIRADA
                                         </span>
                                     )}
@@ -73,7 +78,9 @@ export function TabelaMissoes({
                                     {rotuloFrequenciaMissao(missao.frequencia)}
                                 </td>
                                 <td className="px-4 py-3">
-                                    {formatarDataCivilBr(missao.dataFimCivil)}
+                                    {missao.sistema
+                                        ? "Permanente"
+                                        : formatarDataCivilBr(missao.dataFimCivil)}
                                 </td>
                                 <td className="px-4 py-3 text-right">
                                     <button
@@ -83,23 +90,27 @@ export function TabelaMissoes({
                                     >
                                         Ver QR
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onEditar(missao)}
-                                        className="ml-2 border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
-                                    >
-                                        Editar
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onExcluir(missao)}
-                                        disabled={excluindoId === missao.id}
-                                        className="ml-2 border border-red-200 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                        {excluindoId === missao.id
-                                            ? "Excluindo..."
-                                            : "Excluir"}
-                                    </button>
+                                    {!missao.sistema && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => onEditar(missao)}
+                                                className="ml-2 border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                            >
+                                                Editar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => onExcluir(missao)}
+                                                disabled={excluindoId === missao.id}
+                                                className="ml-2 border border-red-200 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                            >
+                                                {excluindoId === missao.id
+                                                    ? "Excluindo..."
+                                                    : "Excluir"}
+                                            </button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         ))}
