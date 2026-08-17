@@ -6,6 +6,8 @@ import {
     RequisicaoCriarRecompensa,
     ResgateRecompensa,
     RespostaResgatar,
+    SituacaoRecompensa,
+    StatusResgateRecompensa,
 } from "../types/recompensa.types";
 import { RepositorioRecompensa } from "./repositorioRecompensa";
 
@@ -15,16 +17,42 @@ type RecompensaApi = {
     descricao: string | null;
     custoPontos: number;
     ativa: boolean;
+    estoque: number | null;
+    dataFim: string | null;
+    dataFimCivil: string | null;
+    situacao: SituacaoRecompensa;
     lojistaId: number;
+    nomeLoja?: string | null;
     dataCriacao: string;
     dataAtualizacao: string;
+};
+
+type ResgateApi = {
+    id: number;
+    recompensaId: number;
+    consumidorId: number;
+    custoPontosSnapshot: number;
+    nomeRecompensaSnapshot: string;
+    status: StatusResgateRecompensa;
+    dataEntrega: string | null;
+    dataCriacao: string;
+    nomeConsumidor?: string | null;
 };
 
 function mapRecompensa(item: RecompensaApi): Recompensa {
     return {
         ...item,
+        dataFim: item.dataFim ? new Date(item.dataFim) : null,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
+    };
+}
+
+function mapResgate(item: ResgateApi): ResgateRecompensa {
+    return {
+        ...item,
+        dataEntrega: item.dataEntrega ? new Date(item.dataEntrega) : null,
+        dataCriacao: new Date(item.dataCriacao),
     };
 }
 
@@ -70,42 +98,29 @@ export const repositorioRecompensaApi: RepositorioRecompensa = {
 
     async resgatar(id: number) {
         const response = await clienteHttp.post<{
-            resgate: {
-                id: number;
-                recompensaId: number;
-                consumidorId: number;
-                custoPontosSnapshot: number;
-                nomeRecompensaSnapshot: string;
-                dataCriacao: string;
-            };
+            resgate: ResgateApi;
             consumidor: { pontos: number; nivel: number };
         }>(`/recompensa/${id}/resgatar`, {});
-        const r = response.data.resgate;
         return {
-            resgate: {
-                ...r,
-                dataCriacao: new Date(r.dataCriacao),
-            },
+            resgate: mapResgate(response.data.resgate),
             consumidor: response.data.consumidor,
         } satisfies RespostaResgatar;
     },
 
     async listarResgates() {
-        const response = await clienteHttp.get<
-            {
-                id: number;
-                recompensaId: number;
-                consumidorId: number;
-                custoPontosSnapshot: number;
-                nomeRecompensaSnapshot: string;
-                dataCriacao: string;
-            }[]
-        >("/resgate-recompensa");
-        return response.data.map(
-            (item): ResgateRecompensa => ({
-                ...item,
-                dataCriacao: new Date(item.dataCriacao),
-            }),
+        const response = await clienteHttp.get<ResgateApi[]>("/resgate-recompensa");
+        return response.data.map(mapResgate);
+    },
+
+    async listarResgatesLoja() {
+        const response = await clienteHttp.get<ResgateApi[]>("/resgate-recompensa/loja");
+        return response.data.map(mapResgate);
+    },
+
+    async confirmarEntrega(id: number) {
+        const response = await clienteHttp.patch<ResgateApi>(
+            `/resgate-recompensa/${id}/confirmar-entrega`,
         );
+        return mapResgate(response.data);
     },
 };

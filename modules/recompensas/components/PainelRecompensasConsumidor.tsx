@@ -16,6 +16,7 @@ export function PainelRecompensasConsumidor() {
     const [historico, setHistorico] = useState<ResgateRecompensa[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [resgatarId, setResgatarId] = useState<number | null>(null);
+    const [pendente, setPendente] = useState<Recompensa | null>(null);
     const [erro, setErro] = useState("");
     const [sucesso, setSucesso] = useState("");
 
@@ -47,7 +48,7 @@ export function PainelRecompensasConsumidor() {
         };
     }, []);
 
-    async function handleResgatar(item: Recompensa) {
+    async function confirmarResgate(item: Recompensa) {
         setErro("");
         setSucesso("");
         setResgatarId(item.id);
@@ -56,9 +57,22 @@ export function PainelRecompensasConsumidor() {
             setPontos(resposta.consumidor.pontos);
             setNivel(resposta.consumidor.nivel);
             setHistorico((atual) => [resposta.resgate, ...atual]);
-            setSucesso(
-                `Resgatado: ${item.nome}. Saldo: ${resposta.consumidor.pontos} pontos.`,
+            setRecompensas((atual) =>
+                atual.map((recompensa) =>
+                    recompensa.id === item.id && recompensa.estoque !== null
+                        ? {
+                              ...recompensa,
+                              estoque: Math.max(0, recompensa.estoque - 1),
+                              situacao:
+                                  recompensa.estoque - 1 === 0 ? "ESGOTADA" : recompensa.situacao,
+                          }
+                        : recompensa,
+                ),
             );
+            setSucesso(
+                `Resgate realizado! Apresente este resgate ao estabelecimento. Aguardando confirmação de entrega.`,
+            );
+            setPendente(null);
         } catch (error) {
             setErro(obterMensagemErroApi(error, "Não foi possível resgatar."));
         } finally {
@@ -99,6 +113,7 @@ export function PainelRecompensasConsumidor() {
                 <div className="grid gap-4 sm:grid-cols-2">
                     {recompensas.map((item) => {
                         const saldoOk = pontos !== null && pontos >= item.custoPontos;
+                        const disponivel = item.situacao === "DISPONIVEL";
                         return (
                             <article
                                 key={item.id}
@@ -107,23 +122,32 @@ export function PainelRecompensasConsumidor() {
                                 <h2 className="font-semibold text-slate-900">{item.nome}</h2>
                                 <p className="mt-1 text-sm text-slate-600">
                                     {item.custoPontos} pontos
+                                    {item.nomeLoja ? ` · ${item.nomeLoja}` : ""}
                                 </p>
                                 {item.descricao && (
                                     <p className="mt-1 text-sm text-slate-500">{item.descricao}</p>
                                 )}
+                                <p className="mt-1 text-xs text-slate-500">
+                                    {item.estoque === null
+                                        ? "Estoque ilimitado"
+                                        : `${item.estoque} restantes`}
+                                    {item.dataFimCivil ? ` · válida até ${item.dataFimCivil}` : ""}
+                                </p>
                                 <button
                                     type="button"
-                                    disabled={!item.ativa || !saldoOk || resgatarId === item.id}
-                                    onClick={() => handleResgatar(item)}
+                                    disabled={!disponivel || !saldoOk || resgatarId === item.id}
+                                    onClick={() => setPendente(item)}
                                     className="mt-3 bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
-                                    {!item.ativa
-                                        ? "Indisponível"
-                                        : !saldoOk
-                                          ? "Pontos insuficientes"
-                                          : resgatarId === item.id
-                                            ? "Resgatando..."
-                                            : "Resgatar"}
+                                    {item.situacao === "ESGOTADA"
+                                        ? "Esgotada"
+                                        : item.situacao === "EXPIRADA"
+                                          ? "Expirada"
+                                          : !saldoOk
+                                            ? "Pontos insuficientes"
+                                            : resgatarId === item.id
+                                              ? "Resgatando..."
+                                              : "Resgatar"}
                                 </button>
                             </article>
                         );
@@ -143,12 +167,51 @@ export function PainelRecompensasConsumidor() {
                                 {" · "}
                                 {item.custoPontosSnapshot} pontos
                                 {" · "}
+                                {item.status === "PENDENTE_ENTREGA"
+                                    ? "Aguardando entrega"
+                                    : "Entregue"}
+                                {" · "}
                                 {item.dataCriacao.toLocaleString("pt-BR")}
+                                {item.dataEntrega
+                                    ? ` · entregue em ${item.dataEntrega.toLocaleString("pt-BR")}`
+                                    : ""}
                             </li>
                         ))}
                     </ul>
                 )}
             </div>
+
+            {pendente ? (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
+                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
+                        <h2 className="text-lg font-semibold">Confirmar resgate</h2>
+                        <p className="mt-3 text-sm text-slate-700">
+                            Recomendamos resgatar esta recompensa quando você estiver na loja. Após
+                            o resgate, apresente a tela ao estabelecimento para confirmar a entrega.
+                        </p>
+                        <p className="mt-2 text-sm text-slate-500">
+                            {pendente.nome} · {pendente.custoPontos} pontos
+                        </p>
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPendente(null)}
+                                className="border border-slate-300 px-4 py-2 text-sm"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                disabled={resgatarId === pendente.id}
+                                onClick={() => confirmarResgate(pendente)}
+                                className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                            >
+                                {resgatarId === pendente.id ? "Resgatando..." : "Confirmar resgate"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </section>
     );
 }

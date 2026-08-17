@@ -9,17 +9,38 @@ import {
     desativarRecompensa,
     listarRecompensas,
 } from "../services/servicoRecompensa";
-import { Recompensa } from "../types/recompensa.types";
+import { Recompensa, SituacaoRecompensa } from "../types/recompensa.types";
+import { PainelResgatesLoja } from "./PainelResgatesLoja";
 
 type FormState = {
     nome: string;
     descricao: string;
     custoPontos: string;
+    estoque: string;
+    dataFim: string;
 };
 
-const formInicial: FormState = { nome: "", descricao: "", custoPontos: "" };
+const formInicial: FormState = {
+    nome: "",
+    descricao: "",
+    custoPontos: "",
+    estoque: "",
+    dataFim: "",
+};
+
+function rotuloSituacao(situacao: SituacaoRecompensa) {
+    if (situacao === "DESATIVADA") return "Desativada";
+    if (situacao === "EXPIRADA") return "Expirada";
+    if (situacao === "ESGOTADA") return "Esgotada";
+    return "Disponível";
+}
+
+function rotuloEstoque(estoque: number | null) {
+    return estoque === null ? "Ilimitado" : String(estoque);
+}
 
 export function CrudRecompensas() {
+    const [aba, setAba] = useState<"recompensas" | "resgates">("recompensas");
     const [lista, setLista] = useState<Recompensa[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
@@ -65,6 +86,8 @@ export function CrudRecompensas() {
             nome: item.nome,
             descricao: item.descricao ?? "",
             custoPontos: String(item.custoPontos),
+            estoque: item.estoque === null ? "" : String(item.estoque),
+            dataFim: item.dataFimCivil ?? "",
         });
         setErro("");
         setModalAberto(true);
@@ -77,6 +100,14 @@ export function CrudRecompensas() {
             setErro("Informe um custo em pontos inteiro maior que zero.");
             return;
         }
+        let estoque: number | null = null;
+        if (form.estoque.trim() !== "") {
+            estoque = Number(form.estoque);
+            if (!Number.isInteger(estoque) || estoque < 0) {
+                setErro("Estoque deve ser um inteiro maior ou igual a zero, ou vazio para ilimitado.");
+                return;
+            }
+        }
         setSalvando(true);
         setErro("");
         try {
@@ -84,6 +115,8 @@ export function CrudRecompensas() {
                 nome: form.nome.trim(),
                 descricao: form.descricao.trim() || null,
                 custoPontos: custo,
+                estoque,
+                dataFim: form.dataFim.trim() || null,
             };
             if (editando) {
                 const atualizado = await atualizarRecompensa(editando.id, dados);
@@ -135,14 +168,40 @@ export function CrudRecompensas() {
                     <p className="mt-1 text-sm text-slate-600">
                         Prêmios que o consumidor resgata com pontos.
                     </p>
+                    <div className="mt-3 flex gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setAba("recompensas")}
+                            className={`px-3 py-1.5 text-sm font-medium ${
+                                aba === "recompensas"
+                                    ? "bg-slate-900 text-white"
+                                    : "border border-slate-300 text-slate-700"
+                            }`}
+                        >
+                            Recompensas
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setAba("resgates")}
+                            className={`px-3 py-1.5 text-sm font-medium ${
+                                aba === "resgates"
+                                    ? "bg-slate-900 text-white"
+                                    : "border border-slate-300 text-slate-700"
+                            }`}
+                        >
+                            Resgates
+                        </button>
+                    </div>
                 </div>
-                <button
-                    type="button"
-                    onClick={abrirCriacao}
-                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                    Nova recompensa
-                </button>
+                {aba === "recompensas" ? (
+                    <button
+                        type="button"
+                        onClick={abrirCriacao}
+                        className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                        Nova recompensa
+                    </button>
+                ) : null}
             </div>
 
             {erro && (
@@ -151,12 +210,16 @@ export function CrudRecompensas() {
                 </div>
             )}
 
+            {aba === "resgates" ? (
+                <PainelResgatesLoja />
+            ) : (
             <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
-                <table className="w-full min-w-[700px] text-sm">
+                <table className="w-full min-w-[800px] text-sm">
                     <thead className="bg-slate-100 text-slate-700">
                         <tr>
                             <th className="px-4 py-3 text-left font-semibold">Nome</th>
                             <th className="px-4 py-3 text-left font-semibold">Pontos</th>
+                            <th className="px-4 py-3 text-left font-semibold">Estoque</th>
                             <th className="px-4 py-3 text-left font-semibold">Situação</th>
                             <th className="px-4 py-3 text-right font-semibold">Ações</th>
                         </tr>
@@ -164,14 +227,14 @@ export function CrudRecompensas() {
                     <tbody className="divide-y divide-slate-200">
                         {carregando && (
                             <tr>
-                                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
                                     Carregando...
                                 </td>
                             </tr>
                         )}
                         {!carregando && lista.length === 0 && (
                             <tr>
-                                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
                                     Nenhuma recompensa cadastrada.
                                 </td>
                             </tr>
@@ -188,9 +251,8 @@ export function CrudRecompensas() {
                                         ) : null}
                                     </td>
                                     <td className="px-4 py-3">{item.custoPontos}</td>
-                                    <td className="px-4 py-3">
-                                        {item.ativa ? "Ativa" : "Desativada"}
-                                    </td>
+                                    <td className="px-4 py-3">{rotuloEstoque(item.estoque)}</td>
+                                    <td className="px-4 py-3">{rotuloSituacao(item.situacao)}</td>
                                     <td className="px-4 py-3 text-right">
                                         <button
                                             type="button"
@@ -221,6 +283,7 @@ export function CrudRecompensas() {
                     </tbody>
                 </table>
             </div>
+            )}
 
             {modalAberto && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
@@ -251,6 +314,36 @@ export function CrudRecompensas() {
                                     }
                                     className="mt-1 w-full border border-slate-300 px-3 py-2"
                                 />
+                            </label>
+                            <label className="block text-sm font-medium text-slate-700">
+                                Estoque
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step={1}
+                                    value={form.estoque}
+                                    onChange={(e) =>
+                                        setForm((a) => ({ ...a, estoque: e.target.value }))
+                                    }
+                                    className="mt-1 w-full border border-slate-300 px-3 py-2"
+                                />
+                                <span className="mt-1 block text-xs font-normal text-slate-500">
+                                    Deixe vazio para quantidade ilimitada.
+                                </span>
+                            </label>
+                            <label className="block text-sm font-medium text-slate-700">
+                                Válida até
+                                <input
+                                    type="date"
+                                    value={form.dataFim}
+                                    onChange={(e) =>
+                                        setForm((a) => ({ ...a, dataFim: e.target.value }))
+                                    }
+                                    className="mt-1 w-full border border-slate-300 px-3 py-2"
+                                />
+                                <span className="mt-1 block text-xs font-normal text-slate-500">
+                                    Deixe vazio para não definir uma data de vencimento.
+                                </span>
                             </label>
                             <label className="block text-sm font-medium text-slate-700">
                                 Descrição (opcional)

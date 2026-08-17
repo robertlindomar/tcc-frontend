@@ -38,3 +38,11 @@ export async function resgatarRecompensa(id: number) {
 export async function listarMeusResgates() {
     return repositorioRecompensa.listarResgates();
 }
+
+export async function listarResgatesLoja() {
+    return repositorioRecompensa.listarResgatesLoja();
+}
+
+export async function confirmarEntregaResgate(id: number) {
+    return repositorioRecompensa.confirmarEntrega(id);
+}
