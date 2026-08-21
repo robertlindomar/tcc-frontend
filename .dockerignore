@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.githooks
+.gitignore
+.env
+.env*.local
+coverage
+out
+*.md
+*.tsbuildinfo
+.dockerignore
+Dockerfile
+eslint.config.mjs
+AGENTS.md
+CLAUDE.md
