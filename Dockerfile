@@ -18,12 +18,12 @@ COPY . .
 RUN npm run build
 
 ENV NODE_ENV=production
-# Coolify injeta PORT — não fixe 3001 no CMD
-ENV PORT=3001
+# Coolify Ports Exposes deve ser igual a PORT (padrão Coolify = 3000)
+ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-EXPOSE 3001
+EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-    CMD curl -fsS http://127.0.0.1:3001/ || exit 1
+    CMD curl -fsS http://127.0.0.1:3000/ || exit 1
 
-CMD ["sh", "-c", "npx next start -H 0.0.0.0 -p ${PORT:-3001}"]
+CMD ["sh", "-c", "npx next start -H 0.0.0.0 -p ${PORT:-3000}"]
