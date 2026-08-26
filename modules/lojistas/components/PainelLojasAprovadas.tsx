@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Eye, Search } from "lucide-react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { listarLojistas } from "../services/servicoLojista";
 import { Lojista } from "../types/lojista.types";
+import { ModalDetalheLojista } from "./ModalDetalheLojista";
 
 export function PainelLojasAprovadas() {
     const [lojistas, setLojistas] = useState<Lojista[]>([]);
     const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
+    const [detalhe, setDetalhe] = useState<Lojista | null>(null);
 
     useEffect(() => {
         let cancelado = false;
@@ -85,7 +87,7 @@ export function PainelLojasAprovadas() {
             ) : null}
 
             <div className="overflow-hidden rounded-[var(--radius)] border border-border bg-surface shadow-sm">
-                <table className="w-full min-w-[640px] text-sm">
+                <table className="w-full min-w-[720px] text-sm">
                     <thead className="bg-slate-50 text-slate-700">
                         <tr>
                             <th className="px-4 py-3 text-left font-semibold">ID</th>
@@ -94,13 +96,14 @@ export function PainelLojasAprovadas() {
                             </th>
                             <th className="px-4 py-3 text-left font-semibold">CNPJ</th>
                             <th className="px-4 py-3 text-left font-semibold">Status</th>
+                            <th className="px-4 py-3 text-right font-semibold">Ações</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                         {carregando ? (
                             <tr>
                                 <td
-                                    colSpan={4}
+                                    colSpan={5}
                                     className="px-4 py-10 text-center text-muted"
                                 >
                                     Carregando…
@@ -110,7 +113,7 @@ export function PainelLojasAprovadas() {
                         {!carregando && filtrados.length === 0 ? (
                             <tr>
                                 <td
-                                    colSpan={4}
+                                    colSpan={5}
                                     className="px-4 py-10 text-center text-muted"
                                 >
                                     Nenhuma loja aprovada ainda.
@@ -132,11 +135,31 @@ export function PainelLojasAprovadas() {
                                             Aprovado
                                         </span>
                                     </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex justify-end gap-1">
+                                            <button
+                                                type="button"
+                                                title="Ver detalhes"
+                                                aria-label={`Detalhes de ${lojista.nomeFantasia}`}
+                                                onClick={() => setDetalhe(lojista)}
+                                                className="rounded-lg p-2 text-primary hover:bg-primary-muted"
+                                            >
+                                                <Eye className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                     </tbody>
                 </table>
             </div>
+
+            {detalhe ? (
+                <ModalDetalheLojista
+                    lojista={detalhe}
+                    onFechar={() => setDetalhe(null)}
+                />
+            ) : null}
         </section>
     );
 }

@@ -9,6 +9,7 @@ import {
     rejeitarLojista,
 } from "../services/servicoLojista";
 import { Lojista } from "../types/lojista.types";
+import { ModalDetalheLojista } from "./ModalDetalheLojista";
 import { ModalJustificativaRejeicao } from "./ModalJustificativaRejeicao";
 
 export function PainelPreCadastros() {
@@ -213,37 +214,12 @@ export function PainelPreCadastros() {
             </div>
 
             {detalhe ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-                    <div className="w-full max-w-md space-y-4 rounded-[var(--radius)] bg-surface p-6 shadow-xl">
-                        <h2 className="text-lg font-semibold">
-                            Detalhes do pré-cadastro
-                        </h2>
-                        <dl className="space-y-2 text-sm">
-                            <div>
-                                <dt className="text-muted">Nome fantasia</dt>
-                                <dd className="font-medium">{detalhe.nomeFantasia}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-muted">Razão social</dt>
-                                <dd className="font-medium">{detalhe.razaoSocial}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-muted">CNPJ</dt>
-                                <dd className="font-medium">{detalhe.cnpj}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-muted">Status</dt>
-                                <dd className="font-medium">Aguardando</dd>
-                            </div>
-                        </dl>
-                        <div className="flex flex-wrap justify-end gap-2 pt-2">
-                            <button
-                                type="button"
-                                onClick={() => setDetalhe(null)}
-                                className="border border-border px-4 py-2 text-sm font-semibold"
-                            >
-                                Fechar
-                            </button>
+                <ModalDetalheLojista
+                    lojista={detalhe}
+                    titulo="Detalhes do pré-cadastro"
+                    onFechar={() => setDetalhe(null)}
+                    acoes={
+                        <>
                             <button
                                 type="button"
                                 disabled={acaoId === detalhe.id}
@@ -260,9 +236,9 @@ export function PainelPreCadastros() {
                             >
                                 Aprovar
                             </button>
-                        </div>
-                    </div>
-                </div>
+                        </>
+                    }
+                />
             ) : null}
 
             {rejeitando ? (

@@ -16,6 +16,7 @@ type LojistaApiResponse = {
     inscricaoEstadual: number | null;
     status: StatusLojista;
     usuarioId: number;
+    email: string;
     associacaoId: number;
     enderecoId: number | null;
     justificativaRejeicao: string | null;
@@ -32,6 +33,7 @@ function mapLojistaApi(item: LojistaApiResponse): Lojista {
         inscricaoEstadual: item.inscricaoEstadual,
         status: item.status,
         usuarioId: item.usuarioId,
+        email: item.email,
         associacaoId: item.associacaoId,
         enderecoId: item.enderecoId,
         justificativaRejeicao: item.justificativaRejeicao,
