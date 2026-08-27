@@ -1,5 +1,5 @@
 import { ExigirAutenticacao } from "@/modules/auth/components/ExigirAutenticacao";
-import { PainelMissoesConsumidor } from "@/modules/missao-consumidores/components/PainelMissoesConsumidor";
+import { AvisoCanalConsumidorMobile } from "@/shared/components/acesso/AvisoCanalConsumidorMobile";
 import { ExigirPapel } from "@/shared/components/acesso/ExigirPapel";
 import { LayoutAutenticado } from "@/shared/components/layout/LayoutAutenticado";
 
@@ -8,7 +8,7 @@ export default function Page() {
         <ExigirAutenticacao>
             <LayoutAutenticado>
                 <ExigirPapel papeis={["CONSUMIDOR"]}>
-                    <PainelMissoesConsumidor />
+                    <AvisoCanalConsumidorMobile />
                 </ExigirPapel>
             </LayoutAutenticado>
         </ExigirAutenticacao>

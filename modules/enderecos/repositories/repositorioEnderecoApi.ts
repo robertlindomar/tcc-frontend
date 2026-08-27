@@ -11,6 +11,8 @@ type EnderecoApiResponse = {
     id: number;
     cep: string;
     numero: string | null;
+    latitude: number | null;
+    longitude: number | null;
     usuarioId: number;
     rua: { id: number; nome: string };
     bairro: { id: number; nome: string };
@@ -25,6 +27,8 @@ function mapEnderecoApi(item: EnderecoApiResponse): Endereco {
         id: item.id,
         cep: item.cep,
         numero: item.numero,
+        latitude: item.latitude,
+        longitude: item.longitude,
         usuarioId: item.usuarioId,
         rua: item.rua,
         bairro: item.bairro,
@@ -55,6 +59,8 @@ export const repositorioEnderecoApi: RepositorioEndereco = {
         const response = await clienteHttp.post<EnderecoApiResponse>("/endereco", {
             cep: dados.cep,
             numero: dados.numero,
+            latitude: dados.latitude,
+            longitude: dados.longitude,
         });
         return mapEnderecoApi(response.data);
     },

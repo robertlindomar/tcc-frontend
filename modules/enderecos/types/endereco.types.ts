@@ -16,6 +16,8 @@ export interface Endereco {
     id: number;
     cep: string;
     numero: string | null;
+    latitude: number | null;
+    longitude: number | null;
     usuarioId: number;
     rua: LocalidadeEndereco;
     bairro: LocalidadeEndereco;
@@ -28,9 +30,13 @@ export interface Endereco {
 export interface RequisicaoCriarEndereco {
     cep: string;
     numero?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
 }
 
 export interface RequisicaoAtualizarEndereco {
     cep?: string;
     numero?: string;
+    latitude?: number | null;
+    longitude?: number | null;
 }

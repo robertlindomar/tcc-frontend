@@ -9,7 +9,6 @@ import {
     Store,
     Tags,
     Target,
-    Trophy,
     Users,
     type LucideIcon,
 } from "lucide-react";
@@ -29,7 +28,6 @@ const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
         { href: "/pre-cadastros", label: "Pré-Cadastros", icone: Store },
         { href: "/lojas-aprovadas", label: "Lojas aprovadas", icone: CheckCircle2 },
         { href: "/campanhas", label: "Campanhas", icone: Megaphone },
-        { href: "/sorteios", label: "Sorteios", icone: Gift },
         { href: "/associacoes", label: "Minha associação", icone: Building2 },
     ],
     LOJISTA: [
@@ -57,10 +55,8 @@ const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
             exigeLojaAprovada: true,
         },
     ],
-    CONSUMIDOR: [
-        { href: "/missao-consumidores", label: "Conclusões", icone: Trophy },
-        { href: "/recompensas-consumidor", label: "Recompensas", icone: Award },
-    ],
+    /** Canal consumidor = app mobile; sem itens de navegação lab no web. */
+    CONSUMIDOR: [],
 };
 
 export function itensNavegacaoPorPapel(papel: PapelUsuario | null | undefined): ItemNavegacao[] {

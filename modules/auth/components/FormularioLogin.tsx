@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { BotaoAuth } from "./BotaoAuth";
@@ -154,14 +155,15 @@ export function FormularioLogin() {
                     Entrar
                 </BotaoAuth>
 
-                <div className="text-center">
-                    <a
-                        href="#"
-                        className="text-sm font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900"
+                <p className="text-center text-sm text-slate-600">
+                    É lojista?{" "}
+                    <Link
+                        href="/cadastro"
+                        className="font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900"
                     >
-                        Esqueceu sua senha?
-                    </a>
-                </div>
+                        Cadastre sua loja
+                    </Link>
+                </p>
             </form>
         </section>
     );

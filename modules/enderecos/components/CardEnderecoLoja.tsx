@@ -20,6 +20,8 @@ type CardEnderecoLojaProps = {
 type FormEndereco = {
     cep: string;
     numero: string;
+    latitude: string;
+    longitude: string;
 };
 
 function apenasDigitos(valor: string): string {
@@ -50,7 +52,12 @@ export function CardEnderecoLoja({
     const [editando, setEditando] = useState(false);
     const [erro, setErro] = useState("");
     const [aviso, setAviso] = useState("");
-    const [form, setForm] = useState<FormEndereco>({ cep: "", numero: "" });
+    const [form, setForm] = useState<FormEndereco>({
+        cep: "",
+        numero: "",
+        latitude: "",
+        longitude: "",
+    });
 
     useEffect(() => {
         let cancelado = false;
@@ -90,6 +97,8 @@ export function CardEnderecoLoja({
         setForm({
             cep: endereco ? formatarCep(endereco.cep) : "",
             numero: endereco?.numero ?? "",
+            latitude: endereco?.latitude != null ? String(endereco.latitude) : "",
+            longitude: endereco?.longitude != null ? String(endereco.longitude) : "",
         });
         setErro("");
         setAviso("");
@@ -108,6 +117,26 @@ export function CardEnderecoLoja({
         }
 
         const numero = form.numero.trim();
+        const latitudeTexto = form.latitude.trim().replace(",", ".");
+        const longitudeTexto = form.longitude.trim().replace(",", ".");
+        if (Boolean(latitudeTexto) !== Boolean(longitudeTexto)) {
+            setErro("Informe latitude e longitude juntas ou deixe ambas vazias.");
+            return;
+        }
+
+        const latitude = latitudeTexto ? Number(latitudeTexto) : null;
+        const longitude = longitudeTexto ? Number(longitudeTexto) : null;
+        if (latitude !== null && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)) {
+            setErro("Informe uma latitude válida entre -90 e 90.");
+            return;
+        }
+        if (
+            longitude !== null &&
+            (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)
+        ) {
+            setErro("Informe uma longitude válida entre -180 e 180.");
+            return;
+        }
 
         setSalvando(true);
         try {
@@ -115,6 +144,8 @@ export function CardEnderecoLoja({
                 const atualizado = await atualizarEndereco(endereco.id, {
                     cep,
                     numero,
+                    latitude,
+                    longitude,
                 });
                 setEndereco(atualizado);
                 setAviso("Endereço atualizado.");
@@ -122,6 +153,8 @@ export function CardEnderecoLoja({
                 const criado = await criarEndereco({
                     cep,
                     numero: numero || undefined,
+                    latitude,
+                    longitude,
                 });
                 setEndereco(criado);
 
@@ -146,7 +179,8 @@ export function CardEnderecoLoja({
                 </h2>
                 <p className="mt-1 text-sm text-muted">
                     Informe o CEP: a rua, o bairro, a cidade e o estado são
-                    preenchidos automaticamente.
+                    preenchidos automaticamente. As coordenadas permitem calcular a
+                    proximidade no aplicativo.
                 </p>
             </div>
 
@@ -192,6 +226,34 @@ export function CardEnderecoLoja({
                         />
                     </label>
 
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <label className="block text-sm font-medium text-slate-700">
+                            Latitude (opcional)
+                            <input
+                                value={form.latitude}
+                                onChange={(e) =>
+                                    setForm((a) => ({ ...a, latitude: e.target.value }))
+                                }
+                                inputMode="decimal"
+                                placeholder="-23.550520"
+                                className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-slate-700">
+                            Longitude (opcional)
+                            <input
+                                value={form.longitude}
+                                onChange={(e) =>
+                                    setForm((a) => ({ ...a, longitude: e.target.value }))
+                                }
+                                inputMode="decimal"
+                                placeholder="-46.633308"
+                                className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                            />
+                        </label>
+                    </div>
+
                     <div className="flex justify-end gap-2">
                         <button
                             type="button"
@@ -221,6 +283,11 @@ export function CardEnderecoLoja({
                             </p>
                             <p className="mt-1 text-muted">
                                 CEP {formatarCep(endereco.cep)}
+                            </p>
+                            <p className="mt-1 text-muted">
+                                {endereco.latitude != null && endereco.longitude != null
+                                    ? `Coordenadas: ${endereco.latitude}, ${endereco.longitude}`
+                                    : "Coordenadas ainda não informadas."}
                             </p>
                         </div>
                     ) : (
