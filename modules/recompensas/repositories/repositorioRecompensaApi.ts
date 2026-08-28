@@ -79,6 +79,13 @@ export const repositorioRecompensaApi: RepositorioRecompensa = {
         return mapRecompensa(response.data);
     },
 
+    async reativar(id: number) {
+        const response = await clienteHttp.patch<RecompensaApi>(
+            `/recompensa/${id}/reativar`,
+        );
+        return mapRecompensa(response.data);
+    },
+
     async deletar(id: number) {
         await clienteHttp.delete(`/recompensa/${id}`);
     },

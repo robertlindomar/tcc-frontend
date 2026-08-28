@@ -8,6 +8,7 @@ import {
     deletarRecompensa,
     desativarRecompensa,
     listarRecompensas,
+    reativarRecompensa,
 } from "../services/servicoRecompensa";
 import { Recompensa, SituacaoRecompensa } from "../types/recompensa.types";
 import { PainelResgatesLoja } from "./PainelResgatesLoja";
@@ -147,6 +148,18 @@ export function CrudRecompensas() {
         }
     }
 
+    async function handleReativar(item: Recompensa) {
+        setErro("");
+        try {
+            const atualizado = await reativarRecompensa(item.id);
+            setLista((atual) =>
+                atual.map((r) => (r.id === atualizado.id ? atualizado : r)),
+            );
+        } catch (error) {
+            setErro(obterMensagemErroApi(error, "Erro ao reativar."));
+        }
+    }
+
     async function handleExcluir(item: Recompensa) {
         if (!window.confirm(`Excluir ${item.nome}? Resgates existentes impedem a exclusão.`)) {
             return;
@@ -261,13 +274,21 @@ export function CrudRecompensas() {
                                         >
                                             Editar
                                         </button>
-                                        {item.ativa && (
+                                        {item.ativa ? (
                                             <button
                                                 type="button"
                                                 onClick={() => handleDesativar(item)}
                                                 className="ml-2 border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
                                             >
                                                 Desativar
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleReativar(item)}
+                                                className="ml-2 border border-emerald-200 px-3 py-1.5 font-medium text-emerald-700 hover:bg-emerald-50"
+                                            >
+                                                Reativar
                                             </button>
                                         )}
                                         <button

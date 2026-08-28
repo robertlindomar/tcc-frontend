@@ -23,6 +23,10 @@ export async function desativarRecompensa(id: number) {
     return repositorioRecompensa.desativar(id);
 }
 
+export async function reativarRecompensa(id: number) {
+    return repositorioRecompensa.reativar(id);
+}
+
 export async function deletarRecompensa(id: number) {
     return repositorioRecompensa.deletar(id);
 }
