@@ -86,6 +86,13 @@ export const repositorioRecompensaApi: RepositorioRecompensa = {
         return mapRecompensa(response.data);
     },
 
+    async listarDaLoja(lojistaId: number) {
+        const response = await clienteHttp.get<RecompensaApi[]>(
+            `/recompensa/loja/${lojistaId}`,
+        );
+        return response.data.map(mapRecompensa);
+    },
+
     async deletar(id: number) {
         await clienteHttp.delete(`/recompensa/${id}`);
     },

@@ -13,6 +13,7 @@ export interface RepositorioRecompensa {
     atualizar(id: number, dados: RequisicaoAtualizarRecompensa): Promise<Recompensa>;
     desativar(id: number): Promise<Recompensa>;
     reativar(id: number): Promise<Recompensa>;
+    listarDaLoja(lojistaId: number): Promise<Recompensa[]>;
     deletar(id: number): Promise<void>;
     catalogo(): Promise<CatalogoRecompensa>;
     resgatar(id: number): Promise<RespostaResgatar>;
