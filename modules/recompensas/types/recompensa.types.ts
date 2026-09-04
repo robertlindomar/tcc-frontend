@@ -1,6 +1,6 @@
 export type SituacaoRecompensa = "DISPONIVEL" | "DESATIVADA" | "EXPIRADA" | "ESGOTADA";
 
-export type StatusResgateRecompensa = "PENDENTE_ENTREGA" | "ENTREGUE";
+export type StatusResgateRecompensa = "PENDENTE_ENTREGA" | "ENTREGUE" | "RECUSADO";
 
 export interface Recompensa {
     id: number;

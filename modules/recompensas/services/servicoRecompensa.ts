@@ -54,3 +54,7 @@ export async function listarResgatesLoja() {
 export async function confirmarEntregaResgate(id: number) {
     return repositorioRecompensa.confirmarEntrega(id);
 }
+
+export async function recusarResgate(id: number) {
+    return repositorioRecompensa.recusarResgate(id);
+}

@@ -168,8 +168,10 @@ export function PainelRecompensasConsumidor() {
                                 {item.custoPontosSnapshot} pontos
                                 {" · "}
                                 {item.status === "PENDENTE_ENTREGA"
-                                    ? "Aguardando entrega"
-                                    : "Entregue"}
+                                    ? "Retire na loja"
+                                    : item.status === "RECUSADO"
+                                      ? "Recusado · pontos devolvidos"
+                                      : "Entregue"}
                                 {" · "}
                                 {item.dataCriacao.toLocaleString("pt-BR")}
                                 {item.dataEntrega

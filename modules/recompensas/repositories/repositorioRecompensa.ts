@@ -20,4 +20,5 @@ export interface RepositorioRecompensa {
     listarResgates(): Promise<ResgateRecompensa[]>;
     listarResgatesLoja(): Promise<ResgateRecompensa[]>;
     confirmarEntrega(id: number): Promise<ResgateRecompensa>;
+    recusarResgate(id: number): Promise<ResgateRecompensa>;
 }

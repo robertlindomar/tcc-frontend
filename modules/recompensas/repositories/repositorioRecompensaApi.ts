@@ -137,4 +137,11 @@ export const repositorioRecompensaApi: RepositorioRecompensa = {
         );
         return mapResgate(response.data);
     },
+
+    async recusarResgate(id: number) {
+        const response = await clienteHttp.patch<ResgateApi>(
+            `/resgate-recompensa/${id}/recusar`,
+        );
+        return mapResgate(response.data);
+    },
 };

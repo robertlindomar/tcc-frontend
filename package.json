@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001 --webpack",
+    "dev:tailscale": "NEXT_PUBLIC_API_URL=http://$(tailscale ip -4):3000 next dev -H 0.0.0.0 -p 3001 --webpack",
     "build": "next build",
     "start": "next start -p 3001",
+    "start:tailscale": "NEXT_PUBLIC_API_URL=http://$(tailscale ip -4):3000 next start -H 0.0.0.0 -p 3001",
     "lint": "eslint"
   },
   "dependencies": {
