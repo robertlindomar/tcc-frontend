@@ -11,6 +11,11 @@ type CampanhaApiResponse = {
     nome: string;
     descricao: string | null;
     qrcode: string | null;
+    dataInicio: string;
+    dataFim: string;
+    dataInicioCivil: string;
+    dataFimCivil: string;
+    valorPorTicket: number;
     associacaoId: number;
     dataCriacao: string;
     dataAtualizacao: string;
@@ -22,6 +27,11 @@ function mapCampanhaApi(item: CampanhaApiResponse): Campanha {
         nome: item.nome,
         descricao: item.descricao,
         qrcode: item.qrcode,
+        dataInicio: new Date(item.dataInicio),
+        dataFim: new Date(item.dataFim),
+        dataInicioCivil: item.dataInicioCivil,
+        dataFimCivil: item.dataFimCivil,
+        valorPorTicket: item.valorPorTicket,
         associacaoId: item.associacaoId,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),

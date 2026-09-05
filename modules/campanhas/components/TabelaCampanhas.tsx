@@ -8,12 +8,19 @@ interface TabelaCampanhasProps {
     excluindoId?: number | null;
 }
 
-function formatarData(data: Date) {
-    return data.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
+function formatarMoeda(valor: number) {
+    return valor.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
     });
+}
+
+function formatarCivilBr(civil: string) {
+    const [ano, mes, dia] = civil.split("-");
+    if (!ano || !mes || !dia) {
+        return civil;
+    }
+    return `${dia}/${mes}/${ano}`;
 }
 
 export function TabelaCampanhas({
@@ -25,13 +32,13 @@ export function TabelaCampanhas({
 }: TabelaCampanhasProps) {
     return (
         <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
-            <table className="w-full min-w-[800px] text-sm">
+            <table className="w-full min-w-[960px] text-sm">
                 <thead className="bg-slate-100 text-slate-700">
                     <tr>
                         <th className="px-4 py-3 text-left font-semibold">Nome</th>
+                        <th className="px-4 py-3 text-left font-semibold">Vigência</th>
+                        <th className="px-4 py-3 text-left font-semibold">R$ / ticket</th>
                         <th className="px-4 py-3 text-left font-semibold">Descrição</th>
-                        <th className="px-4 py-3 text-left font-semibold">QR Code</th>
-                        <th className="px-4 py-3 text-left font-semibold">Criação</th>
                         <th className="px-4 py-3 text-right font-semibold">Ações</th>
                     </tr>
                 </thead>
@@ -58,11 +65,14 @@ export function TabelaCampanhas({
                             <tr key={campanha.id} className="hover:bg-slate-50">
                                 <td className="px-4 py-3 font-medium">{campanha.nome}</td>
                                 <td className="px-4 py-3">
-                                    {campanha.descricao ?? "—"}
+                                    {formatarCivilBr(campanha.dataInicioCivil)} —{" "}
+                                    {formatarCivilBr(campanha.dataFimCivil)}
                                 </td>
-                                <td className="px-4 py-3">{campanha.qrcode ?? "—"}</td>
                                 <td className="px-4 py-3">
-                                    {formatarData(campanha.dataCriacao)}
+                                    {formatarMoeda(campanha.valorPorTicket)}
+                                </td>
+                                <td className="px-4 py-3">
+                                    {campanha.descricao ?? "—"}
                                 </td>
                                 <td className="px-4 py-3 text-right">
                                     <button

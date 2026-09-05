@@ -15,12 +15,18 @@ type FormState = {
     nome: string;
     descricao: string;
     qrcode: string;
+    dataInicio: string;
+    dataFim: string;
+    valorPorTicket: string;
 };
 
 const formInicial: FormState = {
     nome: "",
     descricao: "",
     qrcode: "",
+    dataInicio: "",
+    dataFim: "",
+    valorPorTicket: "10",
 };
 
 export function CrudCampanhas() {
@@ -77,6 +83,9 @@ export function CrudCampanhas() {
             nome: campanha.nome,
             descricao: campanha.descricao ?? "",
             qrcode: campanha.qrcode ?? "",
+            dataInicio: campanha.dataInicioCivil,
+            dataFim: campanha.dataFimCivil,
+            valorPorTicket: String(campanha.valorPorTicket),
         });
         setErro("");
         setModalAberto(true);
@@ -101,6 +110,19 @@ export function CrudCampanhas() {
             setErro("Nome é obrigatório.");
             return;
         }
+        if (!form.dataInicio || !form.dataFim) {
+            setErro("Informe início e fim da campanha.");
+            return;
+        }
+        if (form.dataFim < form.dataInicio) {
+            setErro("A data de fim deve ser maior ou igual à data de início.");
+            return;
+        }
+        const valorPorTicket = Number(form.valorPorTicket.replace(",", "."));
+        if (!Number.isFinite(valorPorTicket) || valorPorTicket <= 0) {
+            setErro("Valor por ticket deve ser maior que zero.");
+            return;
+        }
 
         setSalvando(true);
 
@@ -109,6 +131,9 @@ export function CrudCampanhas() {
                 nome,
                 descricao: form.descricao.trim() || null,
                 qrcode: form.qrcode.trim() || null,
+                dataInicio: form.dataInicio,
+                dataFim: form.dataFim,
+                valorPorTicket,
             };
 
             if (campanhaEditando) {
@@ -158,7 +183,8 @@ export function CrudCampanhas() {
                 <div>
                     <h1 className="text-2xl font-bold">Campanhas</h1>
                     <p className="mt-1 text-sm text-slate-600">
-                        Gerencie cadastro, edição e exclusão de campanhas.
+                        Defina período e quanto cada ticket custa em reais. Todas as lojas
+                        aprovadas participam automaticamente.
                     </p>
                 </div>
 
@@ -189,7 +215,7 @@ export function CrudCampanhas() {
 
             {modalAberto && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-lg bg-white p-6 shadow-xl">
+                    <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto bg-white p-6 shadow-xl">
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-semibold text-slate-900">
@@ -198,7 +224,7 @@ export function CrudCampanhas() {
                                 <p className="mt-1 text-sm text-slate-600">
                                     {campanhaEditando
                                         ? "Altere os dados da campanha."
-                                        : "Informe os dados para cadastrar uma campanha."}
+                                        : "Informe vigência e valor por ticket."}
                                 </p>
                             </div>
                             <button
@@ -226,6 +252,60 @@ export function CrudCampanhas() {
                                     className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
                                     required
                                 />
+                            </label>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <label className="block text-sm font-medium text-slate-700">
+                                    Início
+                                    <input
+                                        type="date"
+                                        value={form.dataInicio}
+                                        onChange={(event) =>
+                                            setForm((atual) => ({
+                                                ...atual,
+                                                dataInicio: event.target.value,
+                                            }))
+                                        }
+                                        className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                        required
+                                    />
+                                </label>
+                                <label className="block text-sm font-medium text-slate-700">
+                                    Fim
+                                    <input
+                                        type="date"
+                                        value={form.dataFim}
+                                        onChange={(event) =>
+                                            setForm((atual) => ({
+                                                ...atual,
+                                                dataFim: event.target.value,
+                                            }))
+                                        }
+                                        className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                        required
+                                    />
+                                </label>
+                            </div>
+
+                            <label className="block text-sm font-medium text-slate-700">
+                                Valor por ticket (R$)
+                                <input
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    value={form.valorPorTicket}
+                                    onChange={(event) =>
+                                        setForm((atual) => ({
+                                            ...atual,
+                                            valorPorTicket: event.target.value,
+                                        }))
+                                    }
+                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                    required
+                                />
+                                <span className="mt-1 block text-xs font-normal text-slate-500">
+                                    Ex.: 10 = a cada R$ 10 em notas válidas, 1 ticket.
+                                </span>
                             </label>
 
                             <label className="block text-sm font-medium text-slate-700">

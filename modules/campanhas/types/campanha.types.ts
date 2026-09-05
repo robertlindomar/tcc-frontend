@@ -8,6 +8,11 @@ export interface Campanha {
     nome: string;
     descricao: string | null;
     qrcode: string | null;
+    dataInicio: Date;
+    dataFim: Date;
+    dataInicioCivil: string;
+    dataFimCivil: string;
+    valorPorTicket: number;
     associacaoId: number;
     dataCriacao: Date;
     dataAtualizacao: Date;
@@ -17,10 +22,16 @@ export interface RequisicaoCriarCampanha {
     nome: string;
     descricao?: string | null;
     qrcode?: string | null;
+    dataInicio: string;
+    dataFim: string;
+    valorPorTicket: number;
 }
 
 export interface RequisicaoAtualizarCampanha {
     nome: string;
     descricao?: string | null;
     qrcode?: string | null;
+    dataInicio: string;
+    dataFim: string;
+    valorPorTicket: number;
 }
