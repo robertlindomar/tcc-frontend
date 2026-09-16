@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarMissao,
     criarMissao,
@@ -177,11 +178,12 @@ export function CrudMissoes() {
     }
 
     return (
-        <section className="space-y-5">
-            <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <section className="painel-pagina space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Missões</h1>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="painel-eyebrow">LOJISTA</p>
+                    <h1 className="painel-titulo">Missões</h1>
+                    <p className="painel-subtitulo">
                         Gerencie cadastro, edição e exclusão de missões.
                     </p>
                 </div>
@@ -189,14 +191,14 @@ export function CrudMissoes() {
                 <button
                     type="button"
                     onClick={abrirCriacao}
-                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    className="btn-primario"
                 >
                     Nova missão
                 </button>
             </div>
 
             {erro && (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
                     {erro}
                 </div>
             )}
@@ -213,146 +215,144 @@ export function CrudMissoes() {
             </div>
 
             {modalAberto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-lg bg-white p-6 shadow-xl">
-                        <div className="mb-5 flex items-start justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold text-slate-900">
-                                    {tituloModal}
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-600">
-                                    {missaoEditando
-                                        ? "Altere os dados da missão."
-                                        : "Informe os dados para cadastrar uma missão."}
-                                </p>
-                            </div>
+                <ModalOverlay onFechar={fecharModal} bloqueado={salvando}>
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-xl font-semibold text-navy">
+                                {tituloModal}
+                            </h2>
+                            <p className="mt-1 text-sm text-muted">
+                                {missaoEditando
+                                    ? "Altere os dados da missão."
+                                    : "Informe os dados para cadastrar uma missão."}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={fecharModal}
+                            className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
+                            aria-label="Fechar modal"
+                        >
+                            x
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <label className="block text-sm font-medium text-navy">
+                            Nome
+                            <input
+                                type="text"
+                                value={form.nome}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        nome: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Pontos da missão *
+                            <input
+                                type="number"
+                                min={1}
+                                step={1}
+                                required
+                                value={form.pontoRecompensa}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        pontoRecompensa: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Frequência
+                            <select
+                                value={form.frequencia}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        frequencia: event.target
+                                            .value as FrequenciaMissao,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                                required
+                            >
+                                {(
+                                    Object.entries(ROTULOS_FREQUENCIA_MISSAO) as [
+                                        FrequenciaMissao,
+                                        string,
+                                    ][]
+                                ).map(([valor, rotulo]) => (
+                                    <option key={valor} value={valor}>
+                                        {rotulo}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="mt-1 block text-xs font-normal text-muted">
+                                Depois da primeira conclusão, a frequência não
+                                pode mais ser alterada.
+                            </span>
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Válida até
+                            <input
+                                type="date"
+                                value={form.dataFim}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        dataFim: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Descrição (opcional)
+                            <textarea
+                                value={form.descricao}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        descricao: event.target.value,
+                                    }))
+                                }
+                                rows={3}
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                        </label>
+
+                        <div className="flex justify-end gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={fecharModal}
-                                className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
-                                aria-label="Fechar modal"
+                                disabled={salvando}
+                                className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                x
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={salvando}
+                                className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {salvando ? "Salvando..." : "Salvar"}
                             </button>
                         </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Nome
-                                <input
-                                    type="text"
-                                    value={form.nome}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            nome: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Pontos da missão *
-                                <input
-                                    type="number"
-                                    min={1}
-                                    step={1}
-                                    required
-                                    value={form.pontoRecompensa}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            pontoRecompensa: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Frequência
-                                <select
-                                    value={form.frequencia}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            frequencia: event.target
-                                                .value as FrequenciaMissao,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                >
-                                    {(
-                                        Object.entries(ROTULOS_FREQUENCIA_MISSAO) as [
-                                            FrequenciaMissao,
-                                            string,
-                                        ][]
-                                    ).map(([valor, rotulo]) => (
-                                        <option key={valor} value={valor}>
-                                            {rotulo}
-                                        </option>
-                                    ))}
-                                </select>
-                                <span className="mt-1 block text-xs font-normal text-slate-500">
-                                    Depois da primeira conclusão, a frequência não
-                                    pode mais ser alterada.
-                                </span>
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Válida até
-                                <input
-                                    type="date"
-                                    value={form.dataFim}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            dataFim: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Descrição (opcional)
-                                <textarea
-                                    value={form.descricao}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            descricao: event.target.value,
-                                        }))
-                                    }
-                                    rows={3}
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
-                            </label>
-
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={fecharModal}
-                                    disabled={salvando}
-                                    className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={salvando}
-                                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {salvando ? "Salvando..." : "Salvar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                    </form>
+                </ModalOverlay>
             )}
 
             {missaoQr && (
@@ -360,36 +360,42 @@ export function CrudMissoes() {
             )}
 
             {missaoExcluindo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                        <h2 className="text-xl font-semibold text-slate-900">
-                            Excluir missão
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-600">
-                            Confirma a exclusão de {missaoExcluindo.nome}? Essa ação
-                            não poderá ser desfeita.
-                        </p>
+                <ModalOverlay
+                    onFechar={() => {
+                        if (excluindoId === null) {
+                            setMissaoExcluindo(null);
+                        }
+                    }}
+                    bloqueado={excluindoId !== null}
+                    largura="sm"
+                >
+                    <h2 className="text-xl font-semibold text-navy">
+                        Excluir missão
+                    </h2>
+                    <p className="mt-2 text-sm text-muted">
+                        Confirma a exclusão de {missaoExcluindo.nome}? Essa ação
+                        não poderá ser desfeita.
+                    </p>
 
-                        <div className="mt-6 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setMissaoExcluindo(null)}
-                                disabled={excluindoId !== null}
-                                className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={confirmarExclusao}
-                                disabled={excluindoId !== null}
-                                className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                {excluindoId ? "Excluindo..." : "Excluir"}
-                            </button>
-                        </div>
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setMissaoExcluindo(null)}
+                            disabled={excluindoId !== null}
+                            className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmarExclusao}
+                            disabled={excluindoId !== null}
+                            className="btn-perigo text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {excluindoId ? "Excluindo..." : "Excluir"}
+                        </button>
                     </div>
-                </div>
+                </ModalOverlay>
             )}
         </section>
     );

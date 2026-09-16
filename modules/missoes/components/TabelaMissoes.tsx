@@ -22,9 +22,9 @@ export function TabelaMissoes({
     excluindoId = null,
 }: TabelaMissoesProps) {
     return (
-        <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+        <div className="painel-card overflow-hidden">
             <table className="w-full min-w-[900px] text-sm">
-                <thead className="bg-slate-100 text-slate-700">
+                <thead className="bg-[#f7faf8] text-muted">
                     <tr>
                         <th className="px-4 py-3 text-left font-semibold">Missão</th>
                         <th className="px-4 py-3 text-left font-semibold">Pontos</th>
@@ -38,10 +38,10 @@ export function TabelaMissoes({
                     </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-200 text-slate-800">
+                <tbody className="divide-y divide-border text-navy">
                     {carregando && (
                         <tr>
-                            <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={5} className="px-4 py-10 text-center text-muted">
                                 Carregando missões...
                             </td>
                         </tr>
@@ -49,7 +49,7 @@ export function TabelaMissoes({
 
                     {!carregando && missoes.length === 0 && (
                         <tr>
-                            <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={5} className="px-4 py-10 text-center text-muted">
                                 Nenhuma missão cadastrada.
                             </td>
                         </tr>
@@ -57,11 +57,11 @@ export function TabelaMissoes({
 
                     {!carregando &&
                         missoes.map((missao) => (
-                            <tr key={missao.id} className="hover:bg-slate-50">
+                            <tr key={missao.id} className="hover:bg-[#f7faf8]">
                                 <td className="px-4 py-3">
                                     <div className="font-medium">{missao.nome}</div>
                                     {missao.sistema && (
-                                        <span className="mt-1 inline-block bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                        <span className="mt-1 inline-block rounded-full bg-[#eef6f1] px-2 py-0.5 text-xs font-semibold text-primary">
                                             Missão padrão
                                         </span>
                                     )}
@@ -86,7 +86,7 @@ export function TabelaMissoes({
                                     <button
                                         type="button"
                                         onClick={() => onVerQr(missao)}
-                                        className="border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                        className="btn-secundario text-sm"
                                     >
                                         Ver QR
                                     </button>
@@ -95,7 +95,7 @@ export function TabelaMissoes({
                                             <button
                                                 type="button"
                                                 onClick={() => onEditar(missao)}
-                                                className="ml-2 border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                                className="ml-2 btn-secundario text-sm"
                                             >
                                                 Editar
                                             </button>
@@ -103,7 +103,7 @@ export function TabelaMissoes({
                                                 type="button"
                                                 onClick={() => onExcluir(missao)}
                                                 disabled={excluindoId === missao.id}
-                                                className="ml-2 border border-red-200 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                                className="btn-perigo ml-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                                             >
                                                 {excluindoId === missao.id
                                                     ? "Excluindo..."

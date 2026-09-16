@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { atualizarAssociacao, listarAssociacoes } from "../services/servicoAssociacao";
 import { Associacao } from "../types/associacao.types";
 import { TabelaAssociacoes } from "./TabelaAssociacoes";
@@ -133,142 +134,142 @@ export function CrudAssociacoes() {
         }
     }
 
+    const classeCampo =
+        "mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-navy outline-none focus:border-primary";
+
     return (
-        <section className="space-y-5">
-            <header className="border-b border-slate-200 pb-5">
-                <h1 className="text-2xl font-bold">Minha associação</h1>
-                <p className="mt-1 text-sm text-slate-600">
+        <div className="painel-pagina space-y-6">
+            <div>
+                <p className="painel-eyebrow">Associação</p>
+                <h1 className="painel-titulo">Minha associação</h1>
+                <p className="painel-subtitulo">
                     Dados cadastrais da associação que você administra.
                 </p>
-            </header>
+            </div>
 
             {erro ? (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="painel-card border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {erro}
                 </div>
             ) : null}
 
             {aviso ? (
-                <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                <div className="painel-card border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                     {aviso}
                 </div>
             ) : null}
 
-            <div className="overflow-x-auto">
-                <TabelaAssociacoes
-                    associacoes={associacoes}
-                    onEditar={abrirEdicao}
-                    carregando={carregando}
-                />
-            </div>
+            <TabelaAssociacoes
+                associacoes={associacoes}
+                onEditar={abrirEdicao}
+                carregando={carregando}
+            />
 
             {associacaoEditando ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-lg bg-white p-6 shadow-xl">
-                        <div className="mb-5 flex items-start justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold text-slate-900">
-                                    Editar associação
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-600">
-                                    Altere os dados da associação.
-                                </p>
-                            </div>
+                <ModalOverlay onFechar={fecharModal} bloqueado={salvando}>
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-xl font-semibold text-navy">
+                                Editar associação
+                            </h2>
+                            <p className="mt-1 text-sm text-muted">
+                                Altere os dados da associação.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={fecharModal}
+                            className="px-2 py-1 text-2xl leading-none text-muted hover:text-navy"
+                            aria-label="Fechar"
+                        >
+                            ×
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <label className="block text-sm font-medium text-navy">
+                            Nome fantasia
+                            <input
+                                type="text"
+                                value={form.nomeFantasia}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        nomeFantasia: event.target.value,
+                                    }))
+                                }
+                                className={classeCampo}
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Razão social
+                            <input
+                                type="text"
+                                value={form.razaoSocial}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        razaoSocial: event.target.value,
+                                    }))
+                                }
+                                className={classeCampo}
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            CNPJ
+                            <input
+                                type="text"
+                                value={form.cnpj}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        cnpj: event.target.value,
+                                    }))
+                                }
+                                className={classeCampo}
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Inscrição estadual (opcional)
+                            <input
+                                type="number"
+                                value={form.inscricaoEstadual}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        inscricaoEstadual: event.target.value,
+                                    }))
+                                }
+                                className={classeCampo}
+                            />
+                        </label>
+
+                        <div className="flex justify-end gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={fecharModal}
-                                className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
-                                aria-label="Fechar"
+                                disabled={salvando}
+                                className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                x
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={salvando}
+                                className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {salvando ? "Salvando..." : "Salvar"}
                             </button>
                         </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Nome fantasia
-                                <input
-                                    type="text"
-                                    value={form.nomeFantasia}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            nomeFantasia: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Razão social
-                                <input
-                                    type="text"
-                                    value={form.razaoSocial}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            razaoSocial: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                CNPJ
-                                <input
-                                    type="text"
-                                    value={form.cnpj}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            cnpj: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Inscrição estadual (opcional)
-                                <input
-                                    type="number"
-                                    value={form.inscricaoEstadual}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            inscricaoEstadual: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
-                            </label>
-
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={fecharModal}
-                                    disabled={salvando}
-                                    className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={salvando}
-                                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {salvando ? "Salvando..." : "Salvar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                    </form>
+                </ModalOverlay>
             ) : null}
-        </section>
+        </div>
     );
 }

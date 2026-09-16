@@ -28,26 +28,26 @@ export function CampoFormulario({
         <div className="space-y-1">
             <label
                 htmlFor={inputId}
-                className={labelVisivel ? "text-sm font-medium text-slate-700" : "sr-only"}
+                className={labelVisivel ? "text-sm font-medium text-navy" : "sr-only"}
             >
                 {label}
             </label>
 
             <div className="relative">
                 {leftIcon && (
-                    <span className="pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 text-slate-500">
+                    <span className="pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 text-muted">
                         {leftIcon}
                     </span>
                 )}
 
                 <input
                     id={inputId}
-                    className={`w-full rounded-md border border-slate-300 bg-white py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${inputPadding} ${className ?? ""}`}
+                    className={`w-full rounded-xl border border-[#d7ded9] bg-white py-3 text-sm text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#02C394] focus:ring-2 focus:ring-[#d8f3ea] ${inputPadding} ${className ?? ""}`}
                     {...props}
                 />
 
                 {rightElement && (
-                    <span className="absolute right-3 top-1/2 flex -translate-y-1/2 text-slate-500">
+                    <span className="absolute right-3 top-1/2 flex -translate-y-1/2 text-muted">
                         {rightElement}
                     </span>
                 )}

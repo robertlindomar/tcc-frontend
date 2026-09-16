@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { buscarUsuarioLogadoAtual } from "@/modules/auth/services/servicoAuth";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     aprovarLojista,
     atualizarLojista,
@@ -291,146 +292,150 @@ export function CrudLojistas() {
             </div>
 
             {modalAberto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-lg bg-white p-6 shadow-xl">
-                        <div className="mb-5 flex items-start justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold text-slate-900">
-                                    {tituloModal}
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-600">
-                                    {lojistaEditando
-                                        ? "Altere os dados da loja (status não muda aqui)."
-                                        : "Novo lojista entra como PENDENTE."}
-                                </p>
-                            </div>
+                <ModalOverlay onFechar={fecharModal} bloqueado={salvando}>
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-900">
+                                {tituloModal}
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-600">
+                                {lojistaEditando
+                                    ? "Altere os dados da loja (status não muda aqui)."
+                                    : "Novo lojista entra como PENDENTE."}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={fecharModal}
+                            className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
+                            aria-label="Fechar modal"
+                        >
+                            x
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <label className="block text-sm font-medium text-slate-700">
+                            Nome fantasia
+                            <input
+                                type="text"
+                                value={form.nomeFantasia}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        nomeFantasia: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-slate-700">
+                            Razão social
+                            <input
+                                type="text"
+                                value={form.razaoSocial}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        razaoSocial: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-slate-700">
+                            CNPJ
+                            <input
+                                type="text"
+                                value={form.cnpj}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        cnpj: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-slate-700">
+                            Inscrição estadual (opcional)
+                            <input
+                                type="number"
+                                value={form.inscricaoEstadual}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        inscricaoEstadual: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                            />
+                        </label>
+
+                        <div className="flex justify-end gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={fecharModal}
-                                className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
-                                aria-label="Fechar modal"
-                            >
-                                x
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Nome fantasia
-                                <input
-                                    type="text"
-                                    value={form.nomeFantasia}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            nomeFantasia: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Razão social
-                                <input
-                                    type="text"
-                                    value={form.razaoSocial}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            razaoSocial: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                CNPJ
-                                <input
-                                    type="text"
-                                    value={form.cnpj}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            cnpj: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Inscrição estadual (opcional)
-                                <input
-                                    type="number"
-                                    value={form.inscricaoEstadual}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            inscricaoEstadual: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
-                            </label>
-
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={fecharModal}
-                                    disabled={salvando}
-                                    className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={salvando}
-                                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {salvando ? "Salvando..." : "Salvar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {lojistaExcluindo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                        <h2 className="text-xl font-semibold text-slate-900">
-                            Excluir lojista
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-600">
-                            Confirma a exclusão de {lojistaExcluindo.nomeFantasia}? Essa
-                            ação não poderá ser desfeita.
-                        </p>
-
-                        <div className="mt-6 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setLojistaExcluindo(null)}
-                                disabled={excluindoId !== null}
+                                disabled={salvando}
                                 className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 Cancelar
                             </button>
                             <button
-                                type="button"
-                                onClick={confirmarExclusao}
-                                disabled={excluindoId !== null}
-                                className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                type="submit"
+                                disabled={salvando}
+                                className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {excluindoId ? "Excluindo..." : "Excluir"}
+                                {salvando ? "Salvando..." : "Salvar"}
                             </button>
                         </div>
+                    </form>
+                </ModalOverlay>
+            )}
+
+            {lojistaExcluindo && (
+                <ModalOverlay
+                    onFechar={() => {
+                        if (excluindoId === null) {
+                            setLojistaExcluindo(null);
+                        }
+                    }}
+                    bloqueado={excluindoId !== null}
+                    largura="sm"
+                >
+                    <h2 className="text-xl font-semibold text-slate-900">
+                        Excluir lojista
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-600">
+                        Confirma a exclusão de {lojistaExcluindo.nomeFantasia}? Essa
+                        ação não poderá ser desfeita.
+                    </p>
+
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setLojistaExcluindo(null)}
+                            disabled={excluindoId !== null}
+                            className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmarExclusao}
+                            disabled={excluindoId !== null}
+                            className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {excluindoId ? "Excluindo..." : "Excluir"}
+                        </button>
                     </div>
-                </div>
+                </ModalOverlay>
             )}
 
             {lojistaRejeitando ? (

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarEvento,
     criarEvento,
@@ -162,11 +163,12 @@ export function CrudEventos() {
     }
 
     return (
-        <section className="space-y-5">
-            <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <section className="painel-pagina space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Eventos</h1>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="painel-eyebrow">LOJISTA</p>
+                    <h1 className="painel-titulo">Eventos</h1>
+                    <p className="painel-subtitulo">
                         Gerencie cadastro, edição e exclusão de eventos.
                     </p>
                 </div>
@@ -174,14 +176,14 @@ export function CrudEventos() {
                 <button
                     type="button"
                     onClick={abrirCriacao}
-                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    className="btn-primario"
                 >
                     Novo evento
                 </button>
             </div>
 
             {erro && (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
                     {erro}
                 </div>
             )}
@@ -197,130 +199,134 @@ export function CrudEventos() {
             </div>
 
             {modalAberto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-lg bg-white p-6 shadow-xl">
-                        <div className="mb-5 flex items-start justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold text-slate-900">
-                                    {tituloModal}
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-600">
-                                    {eventoEditando
-                                        ? "Altere os dados do evento."
-                                        : "Informe os dados para cadastrar um evento."}
-                                </p>
-                            </div>
+                <ModalOverlay onFechar={fecharModal} bloqueado={salvando}>
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-xl font-semibold text-navy">
+                                {tituloModal}
+                            </h2>
+                            <p className="mt-1 text-sm text-muted">
+                                {eventoEditando
+                                    ? "Altere os dados do evento."
+                                    : "Informe os dados para cadastrar um evento."}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={fecharModal}
+                            className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
+                            aria-label="Fechar modal"
+                        >
+                            x
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <label className="block text-sm font-medium text-navy">
+                            Nome
+                            <input
+                                type="text"
+                                value={form.nome}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        nome: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Descrição (opcional)
+                            <textarea
+                                value={form.descricao}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        descricao: event.target.value,
+                                    }))
+                                }
+                                rows={3}
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                        </label>
+
+                        <SeletorImagem
+                            id="foto-evento"
+                            rotulo="Imagem (opcional)"
+                            previewUrl={
+                                previewLocal ??
+                                urlPublicaArquivo(eventoEditando?.urlImagem)
+                            }
+                            onSelecionar={(arquivo) => {
+                                setArquivoImagem(arquivo);
+                                setPreviewLocal(
+                                    arquivo ? URL.createObjectURL(arquivo) : null,
+                                );
+                            }}
+                            desabilitado={salvando}
+                        />
+
+                        <div className="flex justify-end gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={fecharModal}
-                                className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
-                                aria-label="Fechar modal"
-                            >
-                                x
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Nome
-                                <input
-                                    type="text"
-                                    value={form.nome}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            nome: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Descrição (opcional)
-                                <textarea
-                                    value={form.descricao}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            descricao: event.target.value,
-                                        }))
-                                    }
-                                    rows={3}
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
-                            </label>
-
-                            <SeletorImagem
-                                id="foto-evento"
-                                rotulo="Imagem (opcional)"
-                                previewUrl={
-                                    previewLocal ??
-                                    urlPublicaArquivo(eventoEditando?.urlImagem)
-                                }
-                                onSelecionar={(arquivo) => {
-                                    setArquivoImagem(arquivo);
-                                    setPreviewLocal(
-                                        arquivo ? URL.createObjectURL(arquivo) : null,
-                                    );
-                                }}
-                                desabilitado={salvando}
-                            />
-
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={fecharModal}
-                                    disabled={salvando}
-                                    className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={salvando}
-                                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {salvando ? "Salvando..." : "Salvar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {eventoExcluindo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                        <h2 className="text-xl font-semibold text-slate-900">
-                            Excluir evento
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-600">
-                            Confirma a exclusão de {eventoExcluindo.nome}? Essa ação
-                            não poderá ser desfeita.
-                        </p>
-
-                        <div className="mt-6 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setEventoExcluindo(null)}
-                                disabled={excluindoId !== null}
-                                className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                disabled={salvando}
+                                className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 Cancelar
                             </button>
                             <button
-                                type="button"
-                                onClick={confirmarExclusao}
-                                disabled={excluindoId !== null}
-                                className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                type="submit"
+                                disabled={salvando}
+                                className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {excluindoId ? "Excluindo..." : "Excluir"}
+                                {salvando ? "Salvando..." : "Salvar"}
                             </button>
                         </div>
+                    </form>
+                </ModalOverlay>
+            )}
+
+            {eventoExcluindo && (
+                <ModalOverlay
+                    onFechar={() => {
+                        if (excluindoId === null) {
+                            setEventoExcluindo(null);
+                        }
+                    }}
+                    bloqueado={excluindoId !== null}
+                    largura="sm"
+                >
+                    <h2 className="text-xl font-semibold text-navy">
+                        Excluir evento
+                    </h2>
+                    <p className="mt-2 text-sm text-muted">
+                        Confirma a exclusão de {eventoExcluindo.nome}? Essa ação
+                        não poderá ser desfeita.
+                    </p>
+
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setEventoExcluindo(null)}
+                            disabled={excluindoId !== null}
+                            className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmarExclusao}
+                            disabled={excluindoId !== null}
+                            className="btn-perigo text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {excluindoId ? "Excluindo..." : "Excluir"}
+                        </button>
                     </div>
-                </div>
+                </ModalOverlay>
             )}
         </section>
     );

@@ -1,12 +1,19 @@
 import Link from "next/link";
+import { Clock3, ShieldAlert, Users, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 export type TomAviso = "neutro" | "aguardando" | "negado";
 
-const ESTILO_POR_TOM: Record<TomAviso, string> = {
-    neutro: "border-slate-200 bg-slate-50 text-slate-700",
-    aguardando: "border-amber-200 bg-amber-50 text-amber-900",
-    negado: "border-red-200 bg-red-50 text-red-800",
+const ESTILO_ICONE: Record<TomAviso, string> = {
+    neutro: "bg-[#efeaff] text-violet-600",
+    aguardando: "bg-amber-50 text-amber-700",
+    negado: "bg-red-50 text-red-600",
+};
+
+const ICONE_POR_TOM: Record<TomAviso, LucideIcon> = {
+    neutro: Users,
+    aguardando: Clock3,
+    negado: ShieldAlert,
 };
 
 type AvisoAcessoProps = {
@@ -28,22 +35,30 @@ export function AvisoAcesso({
     acao,
     children,
 }: AvisoAcessoProps) {
-    return (
-        <section className="mx-auto max-w-xl space-y-4 py-6">
-            <h1 className="text-2xl font-semibold text-slate-900">{titulo}</h1>
+    const Icone = ICONE_POR_TOM[tom];
 
-            <div
-                className={`space-y-3 rounded-[var(--radius)] border px-4 py-3 text-sm ${ESTILO_POR_TOM[tom]}`}
+    return (
+        <div className="painel-pagina flex min-h-[55vh] items-center justify-center py-8">
+            <section
+                className="painel-card w-full max-w-xl space-y-4 px-8 py-12 text-center"
                 role="status"
             >
-                <p>{mensagem}</p>
+                <div
+                    className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${ESTILO_ICONE[tom]}`}
+                >
+                    <Icone className="h-7 w-7" aria-hidden />
+                </div>
+                <h1 className="text-xl font-bold text-navy sm:text-2xl">{titulo}</h1>
+                <p className="mx-auto max-w-md text-sm leading-relaxed text-muted">
+                    {mensagem}
+                </p>
                 {children}
                 {acao ? (
-                    <Link href={acao.href} className="inline-block font-semibold underline">
+                    <Link href={acao.href} className="btn-primario inline-flex text-sm">
                         {acao.label}
                     </Link>
                 ) : null}
-            </div>
-        </section>
+            </section>
+        </div>
     );
 }

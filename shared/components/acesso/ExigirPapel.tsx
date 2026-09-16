@@ -18,7 +18,7 @@ export function ExigirPapel({ papeis, children }: ExigirPapelProps) {
     const { papel, carregando } = useSessaoUsuario();
 
     if (carregando) {
-        return <p className="text-sm text-slate-500">Carregando…</p>;
+        return <p className="text-sm text-muted">Carregando…</p>;
     }
 
     if (!papel || !papeis.includes(papel)) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarCampanha,
@@ -177,221 +178,224 @@ export function CrudCampanhas() {
         }
     }
 
+    const classeCampo =
+        "mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-navy outline-none focus:border-primary";
+
     return (
-        <section className="space-y-5">
-            <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="painel-pagina space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Campanhas</h1>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="painel-eyebrow">Associação</p>
+                    <h1 className="painel-titulo">Campanhas</h1>
+                    <p className="painel-subtitulo">
                         Defina período e quanto cada ticket custa em reais. Todas as lojas
                         aprovadas participam automaticamente.
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={abrirCriacao}
-                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                >
+                <button type="button" onClick={abrirCriacao} className="btn-primario text-sm">
                     Nova campanha
                 </button>
             </div>
 
-            {erro && (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {erro ? (
+                <div className="painel-card border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {erro}
                 </div>
-            )}
+            ) : null}
 
-            <div className="overflow-x-auto">
-                <TabelaCampanhas
-                    campanhas={campanhas}
-                    onEditar={abrirEdicao}
-                    onExcluir={setCampanhaExcluindo}
-                    carregando={carregando}
-                    excluindoId={excluindoId}
-                />
-            </div>
+            <TabelaCampanhas
+                campanhas={campanhas}
+                onEditar={abrirEdicao}
+                onExcluir={setCampanhaExcluindo}
+                carregando={carregando}
+                excluindoId={excluindoId}
+            />
 
-            {modalAberto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto bg-white p-6 shadow-xl">
-                        <div className="mb-5 flex items-start justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold text-slate-900">
-                                    {tituloModal}
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-600">
-                                    {campanhaEditando
-                                        ? "Altere os dados da campanha."
-                                        : "Informe vigência e valor por ticket."}
-                                </p>
-                            </div>
+            {modalAberto ? (
+                <ModalOverlay onFechar={fecharModal} bloqueado={salvando}>
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-xl font-semibold text-navy">
+                                {tituloModal}
+                            </h2>
+                            <p className="mt-1 text-sm text-muted">
+                                {campanhaEditando
+                                    ? "Altere os dados da campanha."
+                                    : "Informe vigência e valor por ticket."}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={fecharModal}
+                            disabled={salvando}
+                            className="px-2 py-1 text-2xl leading-none text-muted hover:text-navy disabled:opacity-50"
+                            aria-label="Fechar modal"
+                        >
+                            ×
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <label className="block text-sm font-medium text-navy">
+                            Nome
+                            <input
+                                type="text"
+                                value={form.nome}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        nome: event.target.value,
+                                    }))
+                                }
+                                className={classeCampo}
+                                required
+                            />
+                        </label>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block text-sm font-medium text-navy">
+                                Início
+                                <input
+                                    type="date"
+                                    value={form.dataInicio}
+                                    onChange={(event) =>
+                                        setForm((atual) => ({
+                                            ...atual,
+                                            dataInicio: event.target.value,
+                                        }))
+                                    }
+                                    className={classeCampo}
+                                    required
+                                />
+                            </label>
+                            <label className="block text-sm font-medium text-navy">
+                                Fim
+                                <input
+                                    type="date"
+                                    value={form.dataFim}
+                                    onChange={(event) =>
+                                        setForm((atual) => ({
+                                            ...atual,
+                                            dataFim: event.target.value,
+                                        }))
+                                    }
+                                    className={classeCampo}
+                                    required
+                                />
+                            </label>
+                        </div>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Valor por ticket (R$)
+                            <input
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                value={form.valorPorTicket}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        valorPorTicket: event.target.value,
+                                    }))
+                                }
+                                className={classeCampo}
+                                required
+                            />
+                            <span className="mt-1 block text-xs font-normal text-muted">
+                                Ex.: 10 = a cada R$ 10 em notas válidas, 1 ticket.
+                            </span>
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Descrição (opcional)
+                            <textarea
+                                value={form.descricao}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        descricao: event.target.value,
+                                    }))
+                                }
+                                rows={3}
+                                className={classeCampo}
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            QR Code (opcional)
+                            <input
+                                type="text"
+                                value={form.qrcode}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        qrcode: event.target.value,
+                                    }))
+                                }
+                                className={classeCampo}
+                            />
+                        </label>
+
+                        <div className="flex justify-end gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={fecharModal}
-                                className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
-                                aria-label="Fechar modal"
-                            >
-                                x
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Nome
-                                <input
-                                    type="text"
-                                    value={form.nome}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            nome: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <label className="block text-sm font-medium text-slate-700">
-                                    Início
-                                    <input
-                                        type="date"
-                                        value={form.dataInicio}
-                                        onChange={(event) =>
-                                            setForm((atual) => ({
-                                                ...atual,
-                                                dataInicio: event.target.value,
-                                            }))
-                                        }
-                                        className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                        required
-                                    />
-                                </label>
-                                <label className="block text-sm font-medium text-slate-700">
-                                    Fim
-                                    <input
-                                        type="date"
-                                        value={form.dataFim}
-                                        onChange={(event) =>
-                                            setForm((atual) => ({
-                                                ...atual,
-                                                dataFim: event.target.value,
-                                            }))
-                                        }
-                                        className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                        required
-                                    />
-                                </label>
-                            </div>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Valor por ticket (R$)
-                                <input
-                                    type="number"
-                                    min="0.01"
-                                    step="0.01"
-                                    value={form.valorPorTicket}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            valorPorTicket: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                                <span className="mt-1 block text-xs font-normal text-slate-500">
-                                    Ex.: 10 = a cada R$ 10 em notas válidas, 1 ticket.
-                                </span>
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Descrição (opcional)
-                                <textarea
-                                    value={form.descricao}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            descricao: event.target.value,
-                                        }))
-                                    }
-                                    rows={3}
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                QR Code (opcional)
-                                <input
-                                    type="text"
-                                    value={form.qrcode}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            qrcode: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                />
-                            </label>
-
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={fecharModal}
-                                    disabled={salvando}
-                                    className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={salvando}
-                                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {salvando ? "Salvando..." : "Salvar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {campanhaExcluindo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                        <h2 className="text-xl font-semibold text-slate-900">
-                            Excluir campanha
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-600">
-                            Confirma a exclusão de {campanhaExcluindo.nome}? Essa ação
-                            não poderá ser desfeita.
-                        </p>
-
-                        <div className="mt-6 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setCampanhaExcluindo(null)}
-                                disabled={excluindoId !== null}
-                                className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                disabled={salvando}
+                                className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 Cancelar
                             </button>
                             <button
-                                type="button"
-                                onClick={confirmarExclusao}
-                                disabled={excluindoId !== null}
-                                className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                type="submit"
+                                disabled={salvando}
+                                className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {excluindoId ? "Excluindo..." : "Excluir"}
+                                {salvando ? "Salvando..." : "Salvar"}
                             </button>
                         </div>
+                    </form>
+                </ModalOverlay>
+            ) : null}
+
+            {campanhaExcluindo ? (
+                <ModalOverlay
+                    onFechar={() => {
+                        if (excluindoId === null) {
+                            setCampanhaExcluindo(null);
+                        }
+                    }}
+                    bloqueado={excluindoId !== null}
+                    largura="sm"
+                >
+                    <h2 className="text-xl font-semibold text-navy">
+                        Excluir campanha
+                    </h2>
+                    <p className="mt-2 text-sm text-muted">
+                        Confirma a exclusão de {campanhaExcluindo.nome}? Essa ação
+                        não poderá ser desfeita.
+                    </p>
+
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setCampanhaExcluindo(null)}
+                            disabled={excluindoId !== null}
+                            className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmarExclusao}
+                            disabled={excluindoId !== null}
+                            className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {excluindoId ? "Excluindo..." : "Excluir"}
+                        </button>
                     </div>
-                </div>
-            )}
-        </section>
+                </ModalOverlay>
+            ) : null}
+        </div>
     );
 }

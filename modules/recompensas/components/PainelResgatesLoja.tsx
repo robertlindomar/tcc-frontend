@@ -80,37 +80,37 @@ export function PainelResgatesLoja() {
     const recusados = resgates.filter((item) => item.status === "RECUSADO");
 
     return (
-        <section className="space-y-4">
+        <section className="space-y-5">
             {erro ? (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
                     {erro}
                 </div>
             ) : null}
 
             {carregando ? (
-                <p className="text-sm text-slate-500">Carregando resgates...</p>
+                <p className="text-sm text-muted">Carregando resgates...</p>
             ) : (
                 <>
                     <div>
-                        <h2 className="mb-2 text-lg font-semibold">Pendentes de entrega</h2>
+                        <h2 className="mb-2 text-lg font-semibold text-navy">Pendentes de entrega</h2>
                         {pendentes.length === 0 ? (
-                            <p className="text-sm text-slate-500">Nenhum resgate aguardando entrega.</p>
+                            <div className="painel-card px-4 py-8 text-center text-sm text-muted">Nenhum resgate aguardando entrega.</div>
                         ) : (
-                            <ul className="divide-y divide-slate-200 border border-slate-200 bg-white">
+                            <ul className="painel-card divide-y divide-border overflow-hidden">
                                 {pendentes.map((item) => (
                                     <li
                                         key={item.id}
                                         className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                                     >
                                         <div className="text-sm">
-                                            <p className="font-medium text-slate-900">
+                                            <p className="font-medium text-navy">
                                                 {item.nomeConsumidor ?? "Consumidor"}
                                             </p>
-                                            <p className="text-slate-600">
+                                            <p className="text-muted">
                                                 {item.nomeRecompensaSnapshot} · {item.custoPontosSnapshot}{" "}
                                                 pontos
                                             </p>
-                                            <p className="text-xs text-slate-500">
+                                            <p className="text-xs text-muted">
                                                 Resgatado em {formatarData(item.dataCriacao)}
                                             </p>
                                         </div>
@@ -119,7 +119,7 @@ export function PainelResgatesLoja() {
                                                 type="button"
                                                 disabled={acaoId === item.id}
                                                 onClick={() => void handleConfirmar(item)}
-                                                className="bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                                                className="btn-primario text-sm disabled:opacity-60"
                                             >
                                                 {acaoId === item.id
                                                     ? "Processando..."
@@ -129,7 +129,7 @@ export function PainelResgatesLoja() {
                                                 type="button"
                                                 disabled={acaoId === item.id}
                                                 onClick={() => void handleRecusar(item)}
-                                                className="border border-red-300 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+                                                className="btn-perigo text-sm disabled:opacity-60"
                                             >
                                                 Recusar
                                             </button>
@@ -142,11 +142,11 @@ export function PainelResgatesLoja() {
 
                     {entregues.length > 0 ? (
                         <div>
-                            <h2 className="mb-2 text-lg font-semibold">Entregues</h2>
-                            <ul className="divide-y divide-slate-200 border border-slate-200 bg-white text-sm">
+                            <h2 className="mb-2 text-lg font-semibold text-navy">Entregues</h2>
+                            <ul className="painel-card divide-y divide-border overflow-hidden text-sm">
                                 {entregues.map((item) => (
-                                    <li key={item.id} className="px-4 py-3 text-slate-600">
-                                        <span className="font-medium text-slate-900">
+                                    <li key={item.id} className="px-4 py-3 text-muted">
+                                        <span className="font-medium text-navy">
                                             {item.nomeConsumidor ?? "Consumidor"}
                                         </span>
                                         {" · "}
@@ -163,11 +163,11 @@ export function PainelResgatesLoja() {
 
                     {recusados.length > 0 ? (
                         <div>
-                            <h2 className="mb-2 text-lg font-semibold">Recusados</h2>
-                            <ul className="divide-y divide-slate-200 border border-slate-200 bg-white text-sm">
+                            <h2 className="mb-2 text-lg font-semibold text-navy">Recusados</h2>
+                            <ul className="painel-card divide-y divide-border overflow-hidden text-sm">
                                 {recusados.map((item) => (
-                                    <li key={item.id} className="px-4 py-3 text-slate-600">
-                                        <span className="font-medium text-slate-900">
+                                    <li key={item.id} className="px-4 py-3 text-muted">
+                                        <span className="font-medium text-navy">
                                             {item.nomeConsumidor ?? "Consumidor"}
                                         </span>
                                         {" · "}

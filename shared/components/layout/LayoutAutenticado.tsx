@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { sair } from "@/modules/auth/services/servicoAuth";
 import { buscarMeuPerfilLojista } from "@/modules/lojistas/services/servicoLojista";
@@ -11,7 +12,6 @@ import type { PapelUsuario } from "@/modules/usuarios/types/usuario.types";
 import { useSessaoUsuario } from "@/shared/hooks/useSessaoUsuario";
 import {
     itensNavegacaoPorPapel,
-    tituloPainelPorPapel,
     type ItemNavegacao,
 } from "./itensNavegacao";
 
@@ -28,16 +28,16 @@ function ItemSidebar({
 }) {
     const Icone = item.icone;
     const classeBase =
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
+        "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors";
 
     if (bloqueado) {
         return (
             <span
-                className={`${classeBase} cursor-not-allowed text-slate-400`}
+                className={`${classeBase} cursor-not-allowed text-white/30`}
                 title="Disponível após a aprovação da sua loja"
                 aria-disabled
             >
-                <Icone className="h-5 w-5 shrink-0" aria-hidden />
+                <Icone className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} aria-hidden />
                 {item.label}
             </span>
         );
@@ -49,11 +49,21 @@ function ItemSidebar({
             onClick={onNavigate}
             className={`${classeBase} ${
                 ativo
-                    ? "bg-primary-muted text-primary"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    ? "bg-[#02C394]/18 text-white"
+                    : "text-white/75 hover:bg-white/[0.06] hover:text-white"
             }`}
         >
-            <Icone className="h-5 w-5 shrink-0" aria-hidden />
+            {ativo ? (
+                <span
+                    aria-hidden
+                    className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-[#02C394]"
+                />
+            ) : null}
+            <Icone
+                className={`h-[18px] w-[18px] shrink-0 ${ativo ? "text-[#02C394]" : "text-white/70"}`}
+                strokeWidth={1.75}
+                aria-hidden
+            />
             {item.label}
         </Link>
     );
@@ -79,17 +89,34 @@ function ConteudoSidebar({
     }
 
     return (
-        <div className="flex h-full flex-col">
-            <div className="border-b border-border px-4 py-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                    Conecta Comércio
-                </p>
-                <p className="mt-1 text-sm font-medium text-slate-800">
-                    {tituloPainelPorPapel(papel)}
-                </p>
+        <div className="relative flex h-full flex-col overflow-hidden bg-[#0B1416] text-white">
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -bottom-10 -right-16 h-64 w-64 rounded-full bg-[#02C394]/20 blur-3xl"
+            />
+
+            <div className="relative z-10 flex justify-center px-4 pb-2 pt-7">
+                <div className="text-left">
+                    <Image
+                        src="/marca/conecta-comercio-logo-horizontal-clara.svg"
+                        alt="Conecta Comércio"
+                        width={240}
+                        height={77}
+                        className="h-14 w-auto"
+                        priority
+                    />
+                    <p className="mt-2.5 text-[10px] font-semibold uppercase leading-relaxed tracking-[0.14em] text-white/50">
+                        Comércio local
+                        <br />
+                        Mais forte juntos
+                    </p>
+                </div>
             </div>
 
-            <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Principal">
+            <nav
+                className="relative z-10 mt-6 flex-1 space-y-1 overflow-y-auto px-3"
+                aria-label="Principal"
+            >
                 {itens.map((item) => (
                     <ItemSidebar
                         key={item.href}
@@ -103,13 +130,23 @@ function ConteudoSidebar({
                 ))}
             </nav>
 
-            <div className="border-t border-border p-3">
+            <div className="relative z-10 space-y-4 px-3 pb-5 pt-4">
+                <div className="rounded-2xl border border-white/10 bg-[#121c1e]/90 p-4 shadow-[0_0_40px_rgba(2,195,148,0.12)]">
+                    <Sparkles className="mb-2.5 h-4 w-4 text-[#02C394]" aria-hidden />
+                    <p className="text-[13px] font-semibold leading-snug text-white">
+                        Fortalecendo o comércio local
+                    </p>
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-white/50">
+                        Mais lojas, mais pessoas, mais histórias.
+                    </p>
+                </div>
+
                 <button
                     type="button"
                     onClick={handleSair}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-white/80 transition-colors hover:bg-white/[0.06] hover:text-white"
                 >
-                    <LogOut className="h-5 w-5" aria-hidden />
+                    <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
                     Sair
                 </button>
             </div>
@@ -122,7 +159,6 @@ export function LayoutAutenticado({ children }: { children: React.ReactNode }) {
     const { papel, nome: nomeUsuario } = useSessaoUsuario();
     const [statusLoja, setStatusLoja] = useState<StatusLojista | null>(null);
 
-    // Menu do lojista sinaliza o que o backend libera só com loja APROVADA.
     useEffect(() => {
         if (papel !== "LOJISTA") {
             return;
@@ -157,7 +193,7 @@ export function LayoutAutenticado({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex min-h-screen bg-background text-foreground">
-            <aside className="hidden w-64 shrink-0 border-r border-border bg-sidebar lg:block">
+            <aside className="hidden w-[272px] shrink-0 lg:block">
                 <ConteudoSidebar papel={papel} statusLoja={statusLoja} />
             </aside>
 
@@ -165,15 +201,15 @@ export function LayoutAutenticado({ children }: { children: React.ReactNode }) {
                 <div className="fixed inset-0 z-40 lg:hidden">
                     <button
                         type="button"
-                        className="absolute inset-0 bg-slate-900/40"
+                        className="absolute inset-0 bg-black/50"
                         aria-label="Fechar menu"
                         onClick={() => setMenuAberto(false)}
                     />
-                    <aside className="relative z-50 h-full w-72 bg-sidebar shadow-xl">
-                        <div className="flex justify-end p-2">
+                    <aside className="relative z-50 h-full w-[280px] shadow-xl">
+                        <div className="absolute right-2 top-2 z-10">
                             <button
                                 type="button"
-                                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+                                className="rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white"
                                 onClick={() => setMenuAberto(false)}
                                 aria-label="Fechar"
                             >
@@ -190,23 +226,24 @@ export function LayoutAutenticado({ children }: { children: React.ReactNode }) {
             ) : null}
 
             <div className="flex min-w-0 flex-1 flex-col">
-                <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-surface px-4 sm:px-6">
+                <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 backdrop-blur sm:px-6">
                     <div className="flex min-w-0 items-center gap-3">
                         <button
                             type="button"
-                            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+                            className="rounded-lg p-2 text-muted hover:bg-primary-muted lg:hidden"
                             onClick={() => setMenuAberto(true)}
                             aria-label="Abrir menu"
                         >
                             <Menu className="h-5 w-5" />
                         </button>
-                        <p className="truncate text-sm font-medium text-slate-800 sm:text-base">
-                            {tituloHeader}
-                        </p>
+                        <p className="painel-eyebrow truncate">{tituloHeader}</p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2 text-sm text-slate-600">
-                        <span className="hidden sm:inline">{nomeUsuario}</span>
-                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-muted text-xs font-semibold text-primary">
+                    <div className="flex shrink-0 items-center gap-2 text-sm text-muted">
+                        <div className="hidden text-right sm:block">
+                            <p className="font-medium text-navy">{nomeUsuario}</p>
+                            <p className="text-xs">{tituloHeader}</p>
+                        </div>
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
                             {nomeUsuario.slice(0, 1).toUpperCase()}
                         </span>
                     </div>

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarRecompensa,
     criarRecompensa,
@@ -174,21 +175,22 @@ export function CrudRecompensas() {
     }
 
     return (
-        <section className="space-y-5">
-            <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <section className="painel-pagina space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Recompensas</h1>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="painel-eyebrow">LOJISTA</p>
+                    <h1 className="painel-titulo">Recompensas</h1>
+                    <p className="painel-subtitulo">
                         Prêmios que o consumidor resgata com pontos.
                     </p>
                     <div className="mt-3 flex gap-2">
                         <button
                             type="button"
                             onClick={() => setAba("recompensas")}
-                            className={`px-3 py-1.5 text-sm font-medium ${
+                            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
                                 aba === "recompensas"
-                                    ? "bg-slate-900 text-white"
-                                    : "border border-slate-300 text-slate-700"
+                                    ? "bg-sidebar text-sidebar-foreground"
+                                    : "btn-secundario"
                             }`}
                         >
                             Recompensas
@@ -196,10 +198,10 @@ export function CrudRecompensas() {
                         <button
                             type="button"
                             onClick={() => setAba("resgates")}
-                            className={`px-3 py-1.5 text-sm font-medium ${
+                            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
                                 aba === "resgates"
-                                    ? "bg-slate-900 text-white"
-                                    : "border border-slate-300 text-slate-700"
+                                    ? "bg-sidebar text-sidebar-foreground"
+                                    : "btn-secundario"
                             }`}
                         >
                             Resgates
@@ -210,7 +212,7 @@ export function CrudRecompensas() {
                     <button
                         type="button"
                         onClick={abrirCriacao}
-                        className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        className="btn-primario"
                     >
                         Nova recompensa
                     </button>
@@ -218,7 +220,7 @@ export function CrudRecompensas() {
             </div>
 
             {erro && (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
                     {erro}
                 </div>
             )}
@@ -226,9 +228,9 @@ export function CrudRecompensas() {
             {aba === "resgates" ? (
                 <PainelResgatesLoja />
             ) : (
-            <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+            <div className="painel-card overflow-hidden">
                 <table className="w-full min-w-[800px] text-sm">
-                    <thead className="bg-slate-100 text-slate-700">
+                    <thead className="bg-[#f7faf8] text-muted">
                         <tr>
                             <th className="px-4 py-3 text-left font-semibold">Nome</th>
                             <th className="px-4 py-3 text-left font-semibold">Pontos</th>
@@ -237,28 +239,28 @@ export function CrudRecompensas() {
                             <th className="px-4 py-3 text-right font-semibold">Ações</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200">
+                    <tbody className="divide-y divide-border">
                         {carregando && (
                             <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                                <td colSpan={5} className="px-4 py-10 text-center text-muted">
                                     Carregando...
                                 </td>
                             </tr>
                         )}
                         {!carregando && lista.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                                <td colSpan={5} className="px-4 py-10 text-center text-muted">
                                     Nenhuma recompensa cadastrada.
                                 </td>
                             </tr>
                         )}
                         {!carregando &&
                             lista.map((item) => (
-                                <tr key={item.id} className="hover:bg-slate-50">
+                                <tr key={item.id} className="hover:bg-[#f7faf8]">
                                     <td className="px-4 py-3 font-medium">
                                         {item.nome}
                                         {item.descricao ? (
-                                            <p className="text-xs font-normal text-slate-500">
+                                            <p className="text-xs font-normal text-muted">
                                                 {item.descricao}
                                             </p>
                                         ) : null}
@@ -270,7 +272,7 @@ export function CrudRecompensas() {
                                         <button
                                             type="button"
                                             onClick={() => abrirEdicao(item)}
-                                            className="border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                            className="btn-secundario text-sm"
                                         >
                                             Editar
                                         </button>
@@ -278,7 +280,7 @@ export function CrudRecompensas() {
                                             <button
                                                 type="button"
                                                 onClick={() => handleDesativar(item)}
-                                                className="ml-2 border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                                className="ml-2 btn-secundario text-sm"
                                             >
                                                 Desativar
                                             </button>
@@ -286,7 +288,7 @@ export function CrudRecompensas() {
                                             <button
                                                 type="button"
                                                 onClick={() => handleReativar(item)}
-                                                className="ml-2 border border-emerald-200 px-3 py-1.5 font-medium text-emerald-700 hover:bg-emerald-50"
+                                                className="btn-secundario ml-2 text-sm text-emerald-800"
                                             >
                                                 Reativar
                                             </button>
@@ -294,7 +296,7 @@ export function CrudRecompensas() {
                                         <button
                                             type="button"
                                             onClick={() => handleExcluir(item)}
-                                            className="ml-2 border border-red-200 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50"
+                                            className="btn-perigo ml-2 text-sm"
                                         >
                                             Excluir
                                         </button>
@@ -307,95 +309,93 @@ export function CrudRecompensas() {
             )}
 
             {modalAberto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-lg bg-white p-6 shadow-xl">
-                        <h2 className="text-xl font-semibold">{tituloModal}</h2>
-                        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Nome
-                                <input
-                                    required
-                                    value={form.nome}
-                                    onChange={(e) =>
-                                        setForm((a) => ({ ...a, nome: e.target.value }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2"
-                                />
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Custo em pontos *
-                                <input
-                                    type="number"
-                                    min={1}
-                                    step={1}
-                                    required
-                                    value={form.custoPontos}
-                                    onChange={(e) =>
-                                        setForm((a) => ({ ...a, custoPontos: e.target.value }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2"
-                                />
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Estoque
-                                <input
-                                    type="number"
-                                    min={0}
-                                    step={1}
-                                    value={form.estoque}
-                                    onChange={(e) =>
-                                        setForm((a) => ({ ...a, estoque: e.target.value }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2"
-                                />
-                                <span className="mt-1 block text-xs font-normal text-slate-500">
-                                    Deixe vazio para quantidade ilimitada.
-                                </span>
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Válida até
-                                <input
-                                    type="date"
-                                    value={form.dataFim}
-                                    onChange={(e) =>
-                                        setForm((a) => ({ ...a, dataFim: e.target.value }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2"
-                                />
-                                <span className="mt-1 block text-xs font-normal text-slate-500">
-                                    Deixe vazio para não definir uma data de vencimento.
-                                </span>
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Descrição (opcional)
-                                <textarea
-                                    rows={3}
-                                    value={form.descricao}
-                                    onChange={(e) =>
-                                        setForm((a) => ({ ...a, descricao: e.target.value }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2"
-                                />
-                            </label>
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setModalAberto(false)}
-                                    className="border border-slate-300 px-4 py-2 text-sm"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={salvando}
-                                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                                >
-                                    {salvando ? "Salvando..." : "Salvar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <ModalOverlay onFechar={() => { if (!salvando) setModalAberto(false); }} bloqueado={salvando}>
+                    <h2 className="text-xl font-semibold text-navy">{tituloModal}</h2>
+                    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+                        <label className="block text-sm font-medium text-navy">
+                            Nome
+                            <input
+                                required
+                                value={form.nome}
+                                onChange={(e) =>
+                                    setForm((a) => ({ ...a, nome: e.target.value }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                        </label>
+                        <label className="block text-sm font-medium text-navy">
+                            Custo em pontos *
+                            <input
+                                type="number"
+                                min={1}
+                                step={1}
+                                required
+                                value={form.custoPontos}
+                                onChange={(e) =>
+                                    setForm((a) => ({ ...a, custoPontos: e.target.value }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                        </label>
+                        <label className="block text-sm font-medium text-navy">
+                            Estoque
+                            <input
+                                type="number"
+                                min={0}
+                                step={1}
+                                value={form.estoque}
+                                onChange={(e) =>
+                                    setForm((a) => ({ ...a, estoque: e.target.value }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                            <span className="mt-1 block text-xs font-normal text-muted">
+                                Deixe vazio para quantidade ilimitada.
+                            </span>
+                        </label>
+                        <label className="block text-sm font-medium text-navy">
+                            Válida até
+                            <input
+                                type="date"
+                                value={form.dataFim}
+                                onChange={(e) =>
+                                    setForm((a) => ({ ...a, dataFim: e.target.value }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                            <span className="mt-1 block text-xs font-normal text-muted">
+                                Deixe vazio para não definir uma data de vencimento.
+                            </span>
+                        </label>
+                        <label className="block text-sm font-medium text-navy">
+                            Descrição (opcional)
+                            <textarea
+                                rows={3}
+                                value={form.descricao}
+                                onChange={(e) =>
+                                    setForm((a) => ({ ...a, descricao: e.target.value }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
+                            />
+                        </label>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setModalAberto(false)}
+                                className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={salvando}
+                                className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {salvando ? "Salvando..." : "Salvar"}
+                            </button>
+                        </div>
+                    </form>
+                </ModalOverlay>
             )}
         </section>
     );

@@ -22,9 +22,9 @@ export function TabelaConsumidores({
     carregando = false,
 }: TabelaConsumidoresProps) {
     return (
-        <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+        <div className="painel-card overflow-hidden">
             <table className="w-full min-w-[640px] text-sm">
-                <thead className="bg-slate-100 text-slate-700">
+                <thead className="bg-[#f7faf8] text-muted">
                     <tr>
                         <th className="px-4 py-3 text-left font-semibold">Consumidor</th>
                         <th className="px-4 py-3 text-left font-semibold">Visitas</th>
@@ -32,10 +32,10 @@ export function TabelaConsumidores({
                     </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-200 text-slate-800">
+                <tbody className="divide-y divide-border text-navy">
                     {carregando && (
                         <tr>
-                            <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={3} className="px-4 py-10 text-center text-muted">
                                 Carregando visitantes...
                             </td>
                         </tr>
@@ -43,11 +43,11 @@ export function TabelaConsumidores({
 
                     {!carregando && consumidores.length === 0 && (
                         <tr>
-                            <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
-                                <p className="font-medium text-slate-700">
+                            <td colSpan={3} className="px-4 py-10 text-center text-muted">
+                                <p className="font-medium text-navy">
                                     Nenhuma visita registrada ainda.
                                 </p>
-                                <p className="mx-auto mt-2 max-w-md">
+                                <p className="mx-auto mt-2 max-w-md text-muted">
                                     Quando consumidores escanearem o QR &quot;Visitar loja&quot;,
                                     eles aparecerão aqui.
                                 </p>
@@ -57,7 +57,7 @@ export function TabelaConsumidores({
 
                     {!carregando &&
                         consumidores.map((consumidor) => (
-                            <tr key={consumidor.id} className="hover:bg-slate-50">
+                            <tr key={consumidor.id} className="hover:bg-[#f7faf8]">
                                 <td className="px-4 py-3 font-medium">{consumidor.nome}</td>
                                 <td className="px-4 py-3">
                                     {rotuloVisitas(consumidor.quantidadeVisitas)}

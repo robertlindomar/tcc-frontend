@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     listarMeusResgates,
     obterCatalogoRecompensas,
@@ -184,35 +185,41 @@ export function PainelRecompensasConsumidor() {
             </div>
 
             {pendente ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                        <h2 className="text-lg font-semibold">Confirmar resgate</h2>
-                        <p className="mt-3 text-sm text-slate-700">
-                            Recomendamos resgatar esta recompensa quando você estiver na loja. Após
-                            o resgate, apresente a tela ao estabelecimento para confirmar a entrega.
-                        </p>
-                        <p className="mt-2 text-sm text-slate-500">
-                            {pendente.nome} · {pendente.custoPontos} pontos
-                        </p>
-                        <div className="mt-4 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setPendente(null)}
-                                className="border border-slate-300 px-4 py-2 text-sm"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                disabled={resgatarId === pendente.id}
-                                onClick={() => confirmarResgate(pendente)}
-                                className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                            >
-                                {resgatarId === pendente.id ? "Resgatando..." : "Confirmar resgate"}
-                            </button>
-                        </div>
+                <ModalOverlay
+                    onFechar={() => {
+                        if (resgatarId === null) {
+                            setPendente(null);
+                        }
+                    }}
+                    bloqueado={resgatarId !== null}
+                    largura="sm"
+                >
+                    <h2 className="text-lg font-semibold">Confirmar resgate</h2>
+                    <p className="mt-3 text-sm text-slate-700">
+                        Recomendamos resgatar esta recompensa quando você estiver na loja. Após
+                        o resgate, apresente a tela ao estabelecimento para confirmar a entrega.
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">
+                        {pendente.nome} · {pendente.custoPontos} pontos
+                    </p>
+                    <div className="mt-4 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setPendente(null)}
+                            className="border border-slate-300 px-4 py-2 text-sm"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            disabled={resgatarId === pendente.id}
+                            onClick={() => confirmarResgate(pendente)}
+                            className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                        >
+                            {resgatarId === pendente.id ? "Resgatando..." : "Confirmar resgate"}
+                        </button>
                     </div>
-                </div>
+                </ModalOverlay>
             ) : null}
         </section>
     );

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 300" preserveAspectRatio="none">
+  <defs>
+    <radialGradient id="mint" cx="0" cy="0" r="1" gradientTransform="translate(700 -20) rotate(90) scale(245 520)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CBFBED" stop-opacity=".82"/>
+      <stop offset="1" stop-color="#CBFBED" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pink" cx="0" cy="0" r="1" gradientTransform="translate(1090 5) rotate(90) scale(250 420)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FEE8F1" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#FEE8F1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lilac" x1="820" y1="0" x2="970" y2="230" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D9D4F4" stop-opacity=".76"/>
+      <stop offset="1" stop-color="#D9D4F4" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1440" height="300" fill="#FEFEFE"/>
+  <ellipse cx="690" cy="-80" rx="520" ry="310" fill="url(#mint)"/>
+  <path d="M812-95c112 39 207 35 325-18l-56 294c-111-2-210 30-305 93 57-120 67-240 36-369Z" fill="url(#lilac)"/>
+  <ellipse cx="1110" cy="-50" rx="470" ry="330" fill="url(#pink)"/>
+  <path d="M1080 100c120-55 239-78 380-73v222c-149-9-285 14-402 80 49-78 57-154 22-229Z" fill="#E5FAF4" fill-opacity=".48"/>
+</svg>

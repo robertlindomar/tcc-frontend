@@ -25,9 +25,9 @@ export function TabelaEventos({
     excluindoId = null,
 }: TabelaEventosProps) {
     return (
-        <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+        <div className="painel-card overflow-hidden">
             <table className="w-full min-w-[800px] text-sm">
-                <thead className="bg-slate-100 text-slate-700">
+                <thead className="bg-[#f7faf8] text-muted">
                     <tr>
                         <th className="px-4 py-3 text-left font-semibold">Imagem</th>
                         <th className="px-4 py-3 text-left font-semibold">Nome</th>
@@ -37,10 +37,10 @@ export function TabelaEventos({
                     </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-200 text-slate-800">
+                <tbody className="divide-y divide-border text-navy">
                     {carregando && (
                         <tr>
-                            <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={5} className="px-4 py-10 text-center text-muted">
                                 Carregando eventos...
                             </td>
                         </tr>
@@ -48,7 +48,7 @@ export function TabelaEventos({
 
                     {!carregando && eventos.length === 0 && (
                         <tr>
-                            <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={5} className="px-4 py-10 text-center text-muted">
                                 Nenhum evento cadastrado.
                             </td>
                         </tr>
@@ -56,17 +56,17 @@ export function TabelaEventos({
 
                     {!carregando &&
                         eventos.map((evento) => (
-                            <tr key={evento.id} className="hover:bg-slate-50">
+                            <tr key={evento.id} className="hover:bg-[#f7faf8]">
                                 <td className="px-4 py-3">
                                     {urlPublicaArquivo(evento.urlImagem) ? (
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img
                                             src={urlPublicaArquivo(evento.urlImagem) ?? ""}
                                             alt=""
-                                            className="h-12 w-12 border border-slate-200 object-cover"
+                                            className="h-12 w-12 rounded-xl border border-border object-cover"
                                         />
                                     ) : (
-                                        <div className="flex h-12 w-12 items-center justify-center border border-dashed border-slate-300 text-[10px] text-slate-500">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-dashed border-border text-[10px] text-muted">
                                             —
                                         </div>
                                     )}
@@ -82,7 +82,7 @@ export function TabelaEventos({
                                     <button
                                         type="button"
                                         onClick={() => onEditar(evento)}
-                                        className="border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                        className="btn-secundario text-sm"
                                     >
                                         Editar
                                     </button>
@@ -90,7 +90,7 @@ export function TabelaEventos({
                                         type="button"
                                         onClick={() => onExcluir(evento)}
                                         disabled={excluindoId === evento.id}
-                                        className="ml-2 border border-red-200 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="btn-perigo ml-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                         {excluindoId === evento.id
                                             ? "Excluindo..."

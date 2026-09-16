@@ -63,7 +63,7 @@ export function FormularioCadastro() {
             rodape={
                 <p>
                     Já possui conta?{" "}
-                    <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+                    <Link href="/login" className="font-semibold text-primary hover:underline">
                         Fazer login
                     </Link>
                 </p>

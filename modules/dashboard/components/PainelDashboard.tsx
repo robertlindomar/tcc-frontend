@@ -41,16 +41,17 @@ export function PainelDashboard() {
     }, []);
 
     return (
-        <div className="space-y-6">
-            <header>
-                <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-                <p className="mt-1 text-sm text-muted">
+        <div className="painel-pagina space-y-6">
+            <div>
+                <p className="painel-eyebrow">Associação</p>
+                <h1 className="painel-titulo">Dashboard</h1>
+                <p className="painel-subtitulo">
                     Indicadores operacionais da sua associação.
                 </p>
-            </header>
+            </div>
 
             {erro ? (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="painel-card border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     <p>{erro}</p>
                     {erro.toLowerCase().includes("associacao nao encontrada") ? (
                         <p className="mt-2">
@@ -75,36 +76,36 @@ export function PainelDashboard() {
                             valor={resumo.metricas.lojasAguardandoAprovacao}
                             rotulo="Lojas aguardando aprovação"
                             icone={ICONES_METRICA.lojasPendentes}
-                            tom="primary"
+                            tom="verde"
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.campanhasCadastradas}
                             rotulo="Campanhas cadastradas"
                             icone={ICONES_METRICA.campanhas}
-                            tom="emerald"
+                            tom="coral"
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.sorteiosCadastrados}
                             rotulo="Sorteios cadastrados"
                             icone={ICONES_METRICA.sorteios}
-                            tom="emerald"
+                            tom="ambar"
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.totalLojasParticipantes}
                             rotulo="Total de lojas participantes"
                             icone={ICONES_METRICA.participantes}
-                            tom="amber"
+                            tom="roxo"
                         />
                     </section>
 
-                    <section className="rounded-[var(--radius)] border border-border bg-surface shadow-sm">
-                        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                            <h2 className="text-base font-semibold text-slate-900">
+                    <section className="painel-card overflow-hidden">
+                        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+                            <h2 className="text-base font-semibold text-navy">
                                 Atividades recentes
                             </h2>
                         </div>
                         {resumo.atividadesRecentes.length === 0 ? (
-                            <p className="px-4 py-8 text-center text-sm text-muted">
+                            <p className="px-5 py-10 text-center text-sm text-muted">
                                 Nenhuma atividade recente para esta associação.
                             </p>
                         ) : (

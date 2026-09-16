@@ -51,9 +51,9 @@ export function TabelaPromocoes({
     reativandoId = null,
 }: TabelaPromocoesProps) {
     return (
-        <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+        <div className="painel-card overflow-hidden">
             <table className="w-full min-w-[980px] text-sm">
-                <thead className="bg-slate-100 text-slate-700">
+                <thead className="bg-[#f7faf8] text-muted">
                     <tr>
                         <th className="px-4 py-3 text-left font-semibold">Produto</th>
                         <th className="px-4 py-3 text-left font-semibold">Preço</th>
@@ -64,10 +64,10 @@ export function TabelaPromocoes({
                     </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-200 text-slate-800">
+                <tbody className="divide-y divide-border text-navy">
                     {carregando && (
                         <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={6} className="px-4 py-10 text-center text-muted">
                                 Carregando promoções...
                             </td>
                         </tr>
@@ -75,7 +75,7 @@ export function TabelaPromocoes({
 
                     {!carregando && promocoes.length === 0 && (
                         <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                            <td colSpan={6} className="px-4 py-10 text-center text-muted">
                                 Nenhuma promoção cadastrada.
                             </td>
                         </tr>
@@ -83,7 +83,7 @@ export function TabelaPromocoes({
 
                     {!carregando &&
                         promocoes.map((promocao) => (
-                            <tr key={promocao.id} className="hover:bg-slate-50">
+                            <tr key={promocao.id} className="hover:bg-[#f7faf8]">
                                 <td className="px-4 py-3 font-medium">
                                     {nomeProdutoPorId[promocao.produtoId] ??
                                         `#${promocao.produtoId}`}
@@ -104,7 +104,7 @@ export function TabelaPromocoes({
                                     <button
                                         type="button"
                                         onClick={() => onEditar(promocao)}
-                                        className="border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                                        className="btn-secundario text-sm"
                                     >
                                         Editar
                                     </button>
@@ -113,7 +113,7 @@ export function TabelaPromocoes({
                                             type="button"
                                             onClick={() => onDesativar(promocao)}
                                             disabled={desativandoId === promocao.id}
-                                            className="ml-2 border border-amber-200 px-3 py-1.5 font-medium text-amber-800 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                            className="btn-secundario ml-2 text-sm text-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                             {desativandoId === promocao.id
                                                 ? "Desativando..."
@@ -124,7 +124,7 @@ export function TabelaPromocoes({
                                             type="button"
                                             onClick={() => onReativar(promocao)}
                                             disabled={reativandoId === promocao.id}
-                                            className="ml-2 border border-emerald-200 px-3 py-1.5 font-medium text-emerald-800 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                            className="btn-secundario ml-2 text-sm text-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                             {reativandoId === promocao.id
                                                 ? "Reativando..."
@@ -135,7 +135,7 @@ export function TabelaPromocoes({
                                         type="button"
                                         onClick={() => onExcluir(promocao)}
                                         disabled={excluindoId === promocao.id}
-                                        className="ml-2 border border-red-200 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="btn-perigo ml-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                         {excluindoId === promocao.id
                                             ? "Excluindo..."

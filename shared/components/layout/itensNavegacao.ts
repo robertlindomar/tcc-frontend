@@ -2,8 +2,9 @@ import {
     Award,
     Building2,
     CheckCircle2,
+    FileText,
     Gift,
-    LayoutDashboard,
+    Home,
     Megaphone,
     Package,
     Store,
@@ -24,10 +25,11 @@ export type ItemNavegacao = {
 
 const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
     ASSOCIACAO: [
-        { href: "/dashboard", label: "Dashboard", icone: LayoutDashboard },
-        { href: "/pre-cadastros", label: "Pré-Cadastros", icone: Store },
+        { href: "/dashboard", label: "Dashboard", icone: Home },
+        { href: "/pre-cadastros", label: "Pré-Cadastros", icone: FileText },
         { href: "/lojas-aprovadas", label: "Lojas aprovadas", icone: CheckCircle2 },
         { href: "/campanhas", label: "Campanhas", icone: Megaphone },
+        { href: "/sorteios", label: "Sorteios", icone: Gift },
         { href: "/associacoes", label: "Minha associação", icone: Building2 },
     ],
     LOJISTA: [

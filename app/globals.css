@@ -1,16 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f1f5f9;
-  --foreground: #0f172a;
+  /* Marca Conecta Comércio — redesign 2026 */
+  --background: #f4f7f5;
+  --foreground: #07162e;
   --surface: #ffffff;
-  --border: #e2e8f0;
-  --primary: #1d4ed8;
-  --primary-hover: #1e40af;
-  --primary-muted: #dbeafe;
-  --sidebar: #f8fafc;
-  --muted: #64748b;
-  --radius: 0.75rem;
+  --border: rgba(12, 47, 36, 0.12);
+  --primary: #019575;
+  --primary-hover: #017a60;
+  --primary-muted: #d8f3ea;
+  --primary-bright: #02c394;
+  --coral: #ff786c;
+  --coral-soft: #ff968a;
+  --sidebar: #0c2f24;
+  --sidebar-foreground: #eef6f1;
+  --sidebar-muted: #9bb5a8;
+  --muted: #4d6358;
+  --navy: #07162e;
+  --radius: 1rem;
+  --radius-sm: 0.75rem;
+  --shadow-soft: 0 18px 40px rgba(12, 47, 36, 0.1);
 }
 
 @theme inline {
@@ -21,10 +30,18 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-muted: var(--primary-muted);
+  --color-primary-bright: var(--primary-bright);
+  --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
   --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
   --color-muted: var(--muted);
+  --color-navy: var(--navy);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-lg: var(--radius);
+  --radius-md: var(--radius-sm);
 }
 
 body {
@@ -33,4 +50,96 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Utilitários de painel alinhados ao redesign */
+.painel-pagina {
+  position: relative;
+}
+
+.painel-pagina::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: -1.5rem -1.5rem auto auto;
+  width: min(420px, 55vw);
+  height: 220px;
+  background: url("/marca/web-ambient-header.svg") right top / cover no-repeat;
+  opacity: 0.55;
+  z-index: 0;
+}
+
+.painel-pagina > * {
+  position: relative;
+  z-index: 1;
+}
+
+.painel-titulo {
+  font-size: clamp(1.5rem, 2vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.painel-subtitulo {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.painel-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--coral);
+}
+
+.painel-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  background: var(--sidebar);
+  color: #f4faf6;
+  font-weight: 600;
+  padding: 0.65rem 1.15rem;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-primario:hover {
+  background: #0a261d;
+}
+
+.btn-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--navy);
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+}
+
+.btn-perigo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  background: #fff;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
 }

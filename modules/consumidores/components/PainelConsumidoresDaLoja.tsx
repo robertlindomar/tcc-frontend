@@ -52,19 +52,20 @@ export function PainelConsumidoresDaLoja() {
             : `${listagem.consumidoresUnicos} consumidores · ${listagem.totalVisitas} visitas`;
 
     return (
-        <section className="space-y-5">
-            <div className="border-b border-slate-200 pb-5">
-                <h1 className="text-2xl font-bold">Consumidores da loja</h1>
-                <p className="mt-1 text-sm text-slate-600">
+        <section className="painel-pagina space-y-6">
+            <header>
+                <p className="painel-eyebrow">LOJISTA</p>
+                <h1 className="painel-titulo">Consumidores da loja</h1>
+                <p className="painel-subtitulo">
                     Consumidores que visitaram sua loja pelo aplicativo
                 </p>
                 {!carregando && !erro ? (
-                    <p className="mt-2 text-sm font-medium text-slate-700">{resumo}</p>
+                    <p className="mt-2 text-sm font-medium text-navy">{resumo}</p>
                 ) : null}
-            </div>
+            </header>
 
             {erro ? (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
                     {erro}
                 </div>
             ) : null}

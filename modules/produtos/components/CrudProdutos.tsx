@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { X } from "lucide-react";
 import { listarCategorias } from "@/modules/categorias/services/servicoCategoria";
 import { Categoria } from "@/modules/categorias/types/categoria.types";
+import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarProduto,
@@ -230,29 +232,26 @@ export function CrudProdutos() {
     }
 
     return (
-        <section className="space-y-5">
-            <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <section className="painel-pagina space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Produtos</h1>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="painel-eyebrow">LOJISTA</p>
+                    <h1 className="painel-titulo">Produtos</h1>
+                    <p className="painel-subtitulo">
                         Gerencie cadastro, edição e exclusão de produtos.
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={abrirCriacao}
-                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                >
+                <button type="button" onClick={abrirCriacao} className="btn-primario">
                     Novo produto
                 </button>
             </div>
 
-            {erro && (
-                <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {erro && !modalAberto && !produtoExcluindo ? (
+                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
                     {erro}
                 </div>
-            )}
+            ) : null}
 
             <div className="overflow-x-auto">
                 <TabelaProdutos
@@ -265,171 +264,173 @@ export function CrudProdutos() {
                 />
             </div>
 
-            {modalAberto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-lg bg-white p-6 shadow-xl">
-                        <div className="mb-5 flex items-start justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold text-slate-900">
-                                    {tituloModal}
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-600">
-                                    {produtoEditando
-                                        ? produtoEditando.urlImagem
-                                            ? "Altere os dados. A foto pode ser trocada, mas o produto não fica sem imagem."
-                                            : "Este produto ainda não tem foto. Adicione uma imagem para concluir a edição."
-                                        : "Informe os dados e uma foto para cadastrar o produto."}
-                                </p>
-                            </div>
+            {modalAberto ? (
+                <ModalOverlay onFechar={fecharModal} bloqueado={salvando}>
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-xl font-semibold text-navy">{tituloModal}</h2>
+                            <p className="mt-1 text-sm text-muted">
+                                {produtoEditando
+                                    ? produtoEditando.urlImagem
+                                        ? "Altere os dados. A foto pode ser trocada, mas o produto não fica sem imagem."
+                                        : "Este produto ainda não tem foto. Adicione uma imagem para concluir a edição."
+                                    : "Informe os dados e uma foto para cadastrar o produto."}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={fecharModal}
+                            disabled={salvando}
+                            className="rounded-lg p-1.5 text-muted transition hover:bg-primary-muted hover:text-navy disabled:opacity-50"
+                            aria-label="Fechar modal"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    {erro ? (
+                        <div className="mb-4 rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
+                            {erro}
+                        </div>
+                    ) : null}
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <label className="block text-sm font-medium text-navy">
+                            Nome
+                            <input
+                                type="text"
+                                value={form.nome}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        nome: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2.5 text-navy outline-none focus:border-primary"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Valor
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={form.valor}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        valor: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2.5 text-navy outline-none focus:border-primary"
+                                required
+                            />
+                        </label>
+
+                        <label className="block text-sm font-medium text-navy">
+                            Categoria (opcional)
+                            <select
+                                value={form.categoriaId}
+                                onChange={(event) =>
+                                    setForm((atual) => ({
+                                        ...atual,
+                                        categoriaId: event.target.value,
+                                    }))
+                                }
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2.5 text-navy outline-none focus:border-primary"
+                            >
+                                <option value="">Sem categoria</option>
+                                {categorias.map((item) => (
+                                    <option key={item.id} value={item.id}>
+                                        {item.nome}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <SeletorImagem
+                            id="foto-produto"
+                            rotulo={produtoEditando?.urlImagem ? "Foto (trocar)" : "Foto"}
+                            previewUrl={
+                                previewLocal ?? urlPublicaArquivo(produtoEditando?.urlImagem)
+                            }
+                            onSelecionar={(arquivo) => {
+                                setArquivoImagem(arquivo);
+                                setPreviewLocal(
+                                    arquivo ? URL.createObjectURL(arquivo) : null,
+                                );
+                            }}
+                            desabilitado={salvando}
+                            obrigatorio={!produtoEditando || !produtoEditando.urlImagem}
+                        />
+
+                        <div className="flex justify-end gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={fecharModal}
-                                className="px-2 py-1 text-2xl leading-none text-slate-500 hover:text-slate-900"
-                                aria-label="Fechar modal"
-                            >
-                                x
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Nome
-                                <input
-                                    type="text"
-                                    value={form.nome}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            nome: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Valor
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={form.valor}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            valor: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-sm font-medium text-slate-700">
-                                Categoria (opcional)
-                                <select
-                                    value={form.categoriaId}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            categoriaId: event.target.value,
-                                        }))
-                                    }
-                                    className="mt-1 w-full border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
-                                >
-                                    <option value="">Sem categoria</option>
-                                    {categorias.map((item) => (
-                                        <option key={item.id} value={item.id}>
-                                            {item.nome}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <SeletorImagem
-                                id="foto-produto"
-                                rotulo={
-                                    produtoEditando?.urlImagem
-                                        ? "Foto (trocar)"
-                                        : "Foto"
-                                }
-                                previewUrl={
-                                    previewLocal ??
-                                    urlPublicaArquivo(produtoEditando?.urlImagem)
-                                }
-                                onSelecionar={(arquivo) => {
-                                    setArquivoImagem(arquivo);
-                                    setPreviewLocal(
-                                        arquivo ? URL.createObjectURL(arquivo) : null,
-                                    );
-                                }}
-                                desabilitado={salvando}
-                                obrigatorio={!produtoEditando || !produtoEditando.urlImagem}
-                            />
-
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={fecharModal}
-                                    disabled={salvando}
-                                    className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={
-                                        salvando ||
-                                        (!produtoEditando && !arquivoImagem) ||
-                                        Boolean(
-                                            produtoEditando &&
-                                                !produtoEditando.urlImagem &&
-                                                !arquivoImagem,
-                                        )
-                                    }
-                                    className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {salvando ? "Salvando..." : "Salvar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {produtoExcluindo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                        <h2 className="text-xl font-semibold text-slate-900">
-                            Excluir produto
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-600">
-                            Confirma a exclusão de {produtoExcluindo.nome}? Essa ação
-                            não poderá ser desfeita.
-                        </p>
-
-                        <div className="mt-6 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setProdutoExcluindo(null)}
-                                disabled={excluindoId !== null}
-                                className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                disabled={salvando}
+                                className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 Cancelar
                             </button>
                             <button
-                                type="button"
-                                onClick={confirmarExclusao}
-                                disabled={excluindoId !== null}
-                                className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                type="submit"
+                                disabled={
+                                    salvando ||
+                                    (!produtoEditando && !arquivoImagem) ||
+                                    Boolean(
+                                        produtoEditando &&
+                                            !produtoEditando.urlImagem &&
+                                            !arquivoImagem,
+                                    )
+                                }
+                                className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {excluindoId ? "Excluindo..." : "Excluir"}
+                                {salvando ? "Salvando..." : "Salvar"}
                             </button>
                         </div>
+                    </form>
+                </ModalOverlay>
+            ) : null}
+
+            {produtoExcluindo ? (
+                <ModalOverlay
+                    onFechar={() => {
+                        if (excluindoId === null) {
+                            setProdutoExcluindo(null);
+                        }
+                    }}
+                    bloqueado={excluindoId !== null}
+                    largura="sm"
+                >
+                    <h2 className="text-xl font-semibold text-navy">Excluir produto</h2>
+                    <p className="mt-2 text-sm text-muted">
+                        Confirma a exclusão de {produtoExcluindo.nome}? Essa ação não
+                        poderá ser desfeita.
+                    </p>
+
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setProdutoExcluindo(null)}
+                            disabled={excluindoId !== null}
+                            className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmarExclusao}
+                            disabled={excluindoId !== null}
+                            className="btn-perigo text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {excluindoId ? "Excluindo..." : "Excluir"}
+                        </button>
                     </div>
-                </div>
-            )}
+                </ModalOverlay>
+            ) : null}
         </section>
     );
 }

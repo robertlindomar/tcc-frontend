@@ -3,8 +3,8 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Building2 } from "lucide-react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
-import { BotaoAuth } from "./BotaoAuth";
 import { CampoFormulario } from "./CampoFormulario";
 import { homePorPapel } from "@/shared/components/layout/itensNavegacao";
 import { listarLojistas } from "@/modules/lojistas/services/servicoLojista";
@@ -75,36 +75,29 @@ export function FormularioLogin() {
     }
 
     return (
-        <section className="w-full max-w-[346px] rounded-lg border border-slate-300 bg-white px-5 pb-6 pt-5 shadow-sm">
-            <div className="mb-5 flex items-center gap-4">
-                <div className="grid h-14 w-20 shrink-0 place-items-center rounded-sm border border-blue-200 bg-white">
-                    <div className="relative h-11 w-14 overflow-hidden rounded-sm">
-                        <div className="absolute inset-1 rounded-full border-[6px] border-blue-700" />
-                        <div className="absolute -right-1 top-1 h-9 w-9 rounded-full border-[6px] border-emerald-500" />
-                        <div className="absolute -bottom-1 left-1 h-8 w-8 rounded-full border-[6px] border-cyan-500" />
-                    </div>
+        <section className="w-full rounded-[1.35rem] border border-[#e5ebe7] bg-white px-9 pb-10 pt-9 shadow-[0_24px_60px_rgba(12,47,36,0.09)] sm:px-11 sm:pb-11 sm:pt-10">
+            <div className="mb-7 flex items-center gap-3.5">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#d8f3ea] text-[#0c2f24]">
+                    <Building2 className="h-6 w-6" strokeWidth={1.75} aria-hidden />
                 </div>
-
-                <h1 className="text-[17px] font-bold leading-tight text-slate-950">
-                    ASSOCIAÇÃO COMERCIAL
-                    <br />
-                    SANTA FÉ DO SUL
-                </h1>
+                <p className="text-[13px] font-bold uppercase leading-tight tracking-[0.04em] text-[#0f172a] sm:text-[14px]">
+                    Associação Comercial Santa Fé do Sul
+                </p>
             </div>
 
-            <p className="mb-4 text-center text-base font-bold text-blue-700">
+            <p className="mb-8 text-center text-[1.35rem] font-bold text-[#019575] sm:text-[1.5rem]">
                 Área Administrativa
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 {erro && (
-                    <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                         {erro}
                     </div>
                 )}
 
                 <CampoFormulario
-                    label="Email"
+                    label="E-mail"
                     labelVisivel={false}
                     name="email"
                     type="email"
@@ -112,6 +105,7 @@ export function FormularioLogin() {
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     leftIcon={<MailIcon />}
+                    className="py-3.5 text-[15px]"
                     required
                 />
 
@@ -124,11 +118,12 @@ export function FormularioLogin() {
                     value={senha}
                     onChange={(event) => setSenha(event.target.value)}
                     leftIcon={<LockIcon />}
+                    className="py-3.5 text-[15px]"
                     rightElement={
                         <button
                             type="button"
                             aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-                            className="rounded text-slate-500 transition hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            className="rounded text-[#64748b] transition hover:text-[#019575] focus:outline-none focus:ring-2 focus:ring-[#d8f3ea]"
                             onClick={() => setMostrarSenha((valorAtual) => !valorAtual)}
                         >
                             <EyeIcon />
@@ -137,29 +132,29 @@ export function FormularioLogin() {
                     required
                 />
 
-                <label className="flex w-fit items-center gap-2 text-sm font-semibold text-slate-600">
+                <label className="flex w-fit items-center gap-2.5 text-[15px] font-medium text-[#64748b]">
                     <input
                         type="checkbox"
                         checked={lembrar}
                         onChange={(event) => setLembrar(event.target.checked)}
-                        className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-100"
+                        className="h-[1.05rem] w-[1.05rem] rounded border-[#cbd5e1] text-[#019575] focus:ring-[#d8f3ea]"
                     />
                     Lembrar-me
                 </label>
 
-                <BotaoAuth
+                <button
                     type="submit"
-                    carregando={carregando}
-                    className="rounded-md bg-blue-700 py-3 text-base uppercase shadow-sm hover:bg-blue-800"
+                    disabled={carregando}
+                    className="mt-2 w-full rounded-xl bg-[#02C394] px-4 py-4 text-[15px] font-bold uppercase tracking-wide text-white transition hover:bg-[#019575] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                    Entrar
-                </BotaoAuth>
+                    {carregando ? "Aguarde..." : "Entrar"}
+                </button>
 
-                <p className="text-center text-sm text-slate-600">
+                <p className="pt-2 text-center text-[15px] text-[#64748b]">
                     É lojista?{" "}
                     <Link
                         href="/cadastro"
-                        className="font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900"
+                        className="font-bold text-[#019575] underline underline-offset-2 hover:text-[#017a60]"
                     >
                         Cadastre sua loja
                     </Link>

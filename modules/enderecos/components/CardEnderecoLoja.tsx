@@ -172,26 +172,45 @@ export function CardEnderecoLoja({
     }
 
     return (
-        <div className="space-y-4 rounded-[var(--radius)] border border-border bg-surface p-6 shadow-sm">
-            <div>
-                <h2 className="text-lg font-semibold text-slate-900">
-                    Endereço da loja
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                    Informe o CEP: a rua, o bairro, a cidade e o estado são
-                    preenchidos automaticamente. As coordenadas permitem calcular a
-                    proximidade no aplicativo.
-                </p>
+        <div className="painel-card space-y-4 p-6">
+            <div className="flex items-start gap-4">
+                <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#e8f0ff] text-[#3b6fd8]"
+                    aria-hidden
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        className="h-6 w-6"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" />
+                        <circle cx="12" cy="10" r="2.5" />
+                    </svg>
+                </div>
+                <div className="min-w-0">
+                    <h2 className="text-lg font-semibold text-navy">
+                        Endereço da loja
+                    </h2>
+                    <p className="mt-1 text-sm text-muted">
+                        Informe o CEP: a rua, o bairro, a cidade e o estado são
+                        preenchidos automaticamente. As coordenadas permitem calcular a
+                        proximidade no aplicativo.
+                    </p>
+                </div>
             </div>
 
             {erro ? (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
                     {erro}
                 </div>
             ) : null}
 
             {aviso ? (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                <div className="rounded-[var(--radius-sm)] border border-primary/20 bg-primary-muted px-4 py-3 text-sm text-[#0c2f24]">
                     {aviso}
                 </div>
             ) : null}
@@ -200,7 +219,7 @@ export function CardEnderecoLoja({
 
             {!carregando && editando ? (
                 <form onSubmit={handleSalvar} className="space-y-4">
-                    <label className="block text-sm font-medium text-slate-700">
+                    <label className="block text-sm font-medium text-navy">
                         CEP
                         <input
                             value={form.cep}
@@ -210,24 +229,24 @@ export function CardEnderecoLoja({
                             inputMode="numeric"
                             maxLength={9}
                             placeholder="00000-000"
-                            className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                            className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
                             required
                         />
                     </label>
 
-                    <label className="block text-sm font-medium text-slate-700">
+                    <label className="block text-sm font-medium text-navy">
                         Número (opcional)
                         <input
                             value={form.numero}
                             onChange={(e) =>
                                 setForm((a) => ({ ...a, numero: e.target.value }))
                             }
-                            className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                            className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
                         />
                     </label>
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <label className="block text-sm font-medium text-slate-700">
+                        <label className="block text-sm font-medium text-navy">
                             Latitude (opcional)
                             <input
                                 value={form.latitude}
@@ -236,11 +255,11 @@ export function CardEnderecoLoja({
                                 }
                                 inputMode="decimal"
                                 placeholder="-23.550520"
-                                className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
                             />
                         </label>
 
-                        <label className="block text-sm font-medium text-slate-700">
+                        <label className="block text-sm font-medium text-navy">
                             Longitude (opcional)
                             <input
                                 value={form.longitude}
@@ -249,7 +268,7 @@ export function CardEnderecoLoja({
                                 }
                                 inputMode="decimal"
                                 placeholder="-46.633308"
-                                className="mt-1 w-full border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
                             />
                         </label>
                     </div>
@@ -259,14 +278,14 @@ export function CardEnderecoLoja({
                             type="button"
                             onClick={() => setEditando(false)}
                             disabled={salvando}
-                            className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                            className="btn-secundario text-sm disabled:opacity-60"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={salvando}
-                            className="bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                            className="btn-primario text-sm disabled:opacity-60"
                         >
                             {salvando ? "Salvando…" : "Salvar endereço"}
                         </button>
@@ -277,8 +296,8 @@ export function CardEnderecoLoja({
             {!carregando && !editando ? (
                 <div className="space-y-3">
                     {endereco ? (
-                        <div className="text-sm text-slate-700">
-                            <p className="font-medium text-slate-900">
+                        <div className="text-sm text-navy">
+                            <p className="font-medium text-navy">
                                 {descreverEndereco(endereco)}
                             </p>
                             <p className="mt-1 text-muted">
@@ -291,7 +310,7 @@ export function CardEnderecoLoja({
                             </p>
                         </div>
                     ) : (
-                        <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                        <p className="rounded-[var(--radius-sm)] border border-border bg-[#f7faf8] px-4 py-3 text-sm text-muted">
                             Endereço ainda não cadastrado.
                         </p>
                     )}
@@ -299,7 +318,7 @@ export function CardEnderecoLoja({
                     <button
                         type="button"
                         onClick={abrirFormulario}
-                        className="border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                        className="btn-secundario text-sm"
                     >
                         {endereco ? "Editar endereço" : "Cadastrar endereço"}
                     </button>
