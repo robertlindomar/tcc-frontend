@@ -2,6 +2,14 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import {
+    converterDiasParaNumero,
+    converterMoedaParaNumero,
+    formatarDias,
+    formatarMoeda,
+    mascararDias,
+    mascararMoeda,
+} from "@/shared/utils/valorNumerico";
 import { listarProdutos } from "@/modules/produtos/services/servicoProduto";
 import { Produto } from "@/modules/produtos/types/produto.types";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
@@ -27,17 +35,8 @@ const formInicial: FormState = {
     descricao: "",
     preco: "",
     produtoId: "",
-    duracaoDias: "7",
+    duracaoDias: formatarDias(7),
 };
-
-function parsePreco(valor: string): number | undefined {
-    const trim = valor.trim().replace(",", ".");
-    if (!trim) {
-        return undefined;
-    }
-    const numero = Number(trim);
-    return Number.isFinite(numero) ? numero : undefined;
-}
 
 export function CrudPromocoes() {
     const [promocoes, setPromocoes] = useState<Promocao[]>([]);
@@ -108,9 +107,9 @@ export function CrudPromocoes() {
         setPromocaoEditando(promocao);
         setForm({
             descricao: promocao.descricao ?? "",
-            preco: String(promocao.preco),
+            preco: formatarMoeda(promocao.preco),
             produtoId: String(promocao.produtoId),
-            duracaoDias: "7",
+            duracaoDias: formatarDias(7),
         });
         setErro("");
         setModalAberto(true);
@@ -130,7 +129,7 @@ export function CrudPromocoes() {
         event.preventDefault();
         setErro("");
 
-        const preco = parsePreco(form.preco);
+        const preco = converterMoedaParaNumero(form.preco);
         if (preco === undefined) {
             setErro("Preço inválido.");
             return;
@@ -142,8 +141,8 @@ export function CrudPromocoes() {
             return;
         }
 
-        const duracaoDias = Number(form.duracaoDias);
-        if (!Number.isInteger(duracaoDias) || duracaoDias < 1) {
+        const duracaoDias = converterDiasParaNumero(form.duracaoDias);
+        if (duracaoDias === undefined || duracaoDias < 1) {
             setErro("Informe a duração em dias (mínimo 1).");
             return;
         }
@@ -334,14 +333,14 @@ export function CrudPromocoes() {
                         <label className="block text-sm font-medium text-navy">
                             Preço
                             <input
-                                type="number"
-                                min="0"
-                                step="0.01"
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="R$0,00"
                                 value={form.preco}
                                 onChange={(event) =>
                                     setForm((atual) => ({
                                         ...atual,
-                                        preco: event.target.value,
+                                        preco: mascararMoeda(event.target.value),
                                     }))
                                 }
                                 className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
@@ -352,16 +351,17 @@ export function CrudPromocoes() {
                         <label className="block text-sm font-medium text-navy">
                             Duração da promoção (dias) *
                             <input
-                                type="number"
-                                min={1}
-                                step={1}
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="7 Dias"
                                 value={form.duracaoDias}
-                                onChange={(event) =>
+                                onChange={(event) => {
+                                    const entrada = event.target.value;
                                     setForm((atual) => ({
                                         ...atual,
-                                        duracaoDias: event.target.value,
-                                    }))
-                                }
+                                        duracaoDias: mascararDias(entrada, atual.duracaoDias),
+                                    }));
+                                }}
                                 className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
                                 required
                             />

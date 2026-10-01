@@ -7,6 +7,11 @@ import { Categoria } from "@/modules/categorias/types/categoria.types";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
+    converterMoedaParaNumero,
+    formatarMoeda,
+    mascararMoeda,
+} from "@/shared/utils/valorNumerico";
+import {
     atualizarProduto,
     criarProduto,
     deletarProduto,
@@ -29,15 +34,6 @@ const formInicial: FormState = {
     valor: "",
     categoriaId: "",
 };
-
-function parseValor(valor: string): number | undefined {
-    const trim = valor.trim().replace(",", ".");
-    if (!trim) {
-        return undefined;
-    }
-    const numero = Number(trim);
-    return Number.isFinite(numero) ? numero : undefined;
-}
 
 function parseCategoriaId(valor: string): number | null | undefined {
     const trim = valor.trim();
@@ -114,7 +110,7 @@ export function CrudProdutos() {
         setProdutoEditando(produto);
         setForm({
             nome: produto.nome,
-            valor: String(produto.valor),
+            valor: formatarMoeda(produto.valor),
             categoriaId:
                 produto.categoriaId != null ? String(produto.categoriaId) : "",
         });
@@ -140,7 +136,7 @@ export function CrudProdutos() {
         event.preventDefault();
         setErro("");
 
-        const valor = parseValor(form.valor);
+        const valor = converterMoedaParaNumero(form.valor);
         if (valor === undefined) {
             setErro("Valor inválido.");
             return;
@@ -314,14 +310,14 @@ export function CrudProdutos() {
                         <label className="block text-sm font-medium text-navy">
                             Valor
                             <input
-                                type="number"
-                                min="0"
-                                step="0.01"
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="R$0,00"
                                 value={form.valor}
                                 onChange={(event) =>
                                     setForm((atual) => ({
                                         ...atual,
-                                        valor: event.target.value,
+                                        valor: mascararMoeda(event.target.value),
                                     }))
                                 }
                                 className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2.5 text-navy outline-none focus:border-primary"

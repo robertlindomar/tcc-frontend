@@ -7,7 +7,7 @@ import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { BotaoAuth } from "./BotaoAuth";
 import { CartaoAuth } from "./CartaoAuth";
 import { CampoFormulario } from "./CampoFormulario";
-import { cadastrarUsuario } from "../services/servicoAuth";
+import { cadastrarUsuario, entrar } from "../services/servicoAuth";
 
 /** Cadastro web público: apenas lojista (API ainda aceita CONSUMIDOR para o app mobile). */
 const PAPEL_CADASTRO_WEB = "LOJISTA" as const;
@@ -47,10 +47,17 @@ export function FormularioCadastro() {
                 senha,
                 role: PAPEL_CADASTRO_WEB,
             });
-
-            router.push("/login");
         } catch (error) {
             setErro(obterMensagemErroApi(error, "Erro ao cadastrar usuário."));
+            setCarregando(false);
+            return;
+        }
+
+        try {
+            await entrar({ email, senha });
+            router.replace("/minha-loja");
+        } catch {
+            router.push("/login");
         } finally {
             setCarregando(false);
         }
