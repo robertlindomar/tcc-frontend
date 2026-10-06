@@ -12,6 +12,7 @@ import {
     listarSorteios,
 } from "../services/servicoSorteio";
 import { Sorteio } from "../types/sorteio.types";
+import { PainelResultadoSorteio } from "./PainelResultadoSorteio";
 import { TabelaSorteios } from "./TabelaSorteios";
 
 type FormState = {
@@ -34,7 +35,9 @@ export function CrudSorteios() {
     const [modalAberto, setModalAberto] = useState(false);
     const [sorteioEditando, setSorteioEditando] = useState<Sorteio | null>(null);
     const [sorteioExcluindo, setSorteioExcluindo] = useState<Sorteio | null>(null);
+    const [sorteioResultado, setSorteioResultado] = useState<Sorteio | null>(null);
     const [form, setForm] = useState<FormState>(formInicial);
+    const campanhaTravada = (sorteioEditando?.historico.length ?? 0) > 0;
 
     const tituloModal = useMemo(
         () => (sorteioEditando ? "Editar sorteio" : "Novo sorteio"),
@@ -140,6 +143,13 @@ export function CrudSorteios() {
         }
     }
 
+    function aplicarSorteioAtualizado(atualizado: Sorteio) {
+        setSorteios((lista) =>
+            lista.map((item) => (item.id === atualizado.id ? atualizado : item)),
+        );
+        setSorteioResultado(atualizado);
+    }
+
     async function confirmarExclusao() {
         if (!sorteioExcluindo) {
             return;
@@ -171,7 +181,8 @@ export function CrudSorteios() {
                     <p className="painel-eyebrow">Associação</p>
                     <h1 className="painel-titulo">Sorteios</h1>
                     <p className="painel-subtitulo">
-                        Gerencie cadastro, edição e exclusão de sorteios.
+                        Cadastre o sorteio da campanha e, após o término, gere o número
+                        vencedor entre os tickets.
                     </p>
                 </div>
 
@@ -191,6 +202,7 @@ export function CrudSorteios() {
                 nomeCampanhaPorId={nomeCampanhaPorId}
                 onEditar={abrirEdicao}
                 onExcluir={setSorteioExcluindo}
+                onAbrirResultado={setSorteioResultado}
                 carregando={carregando}
                 excluindoId={excluindoId}
             />
@@ -230,7 +242,8 @@ export function CrudSorteios() {
                                         campanhaId: event.target.value,
                                     }))
                                 }
-                                className={classeCampo}
+                                className={`${classeCampo} disabled:cursor-not-allowed disabled:opacity-60`}
+                                disabled={campanhaTravada}
                                 required
                             >
                                 <option value="">Selecione uma campanha</option>
@@ -240,6 +253,11 @@ export function CrudSorteios() {
                                     </option>
                                 ))}
                             </select>
+                            {campanhaTravada ? (
+                                <span className="mt-1 block text-xs font-normal text-muted">
+                                    Sorteio já realizado: a campanha não pode ser trocada.
+                                </span>
+                            ) : null}
                         </label>
 
                         <label className="block text-sm font-medium text-navy">
@@ -276,6 +294,18 @@ export function CrudSorteios() {
                         </div>
                     </form>
                 </ModalOverlay>
+            ) : null}
+
+            {sorteioResultado ? (
+                <PainelResultadoSorteio
+                    sorteio={sorteioResultado}
+                    nomeCampanha={
+                        nomeCampanhaPorId[sorteioResultado.campanhaId] ??
+                        `Campanha #${sorteioResultado.campanhaId}`
+                    }
+                    onFechar={() => setSorteioResultado(null)}
+                    onAtualizado={aplicarSorteioAtualizado}
+                />
             ) : null}
 
             {sorteioExcluindo ? (
