@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
@@ -44,11 +44,17 @@ export function PainelResultadoSorteio({
 }: PainelResultadoSorteioProps) {
     const [acao, setAcao] = useState<Acao | null>(null);
     const [erro, setErro] = useState("");
+    const [agora, setAgora] = useState(() => Date.now());
+    useEffect(() => {
+        const intervalo = setInterval(() => setAgora(Date.now()), 1_000);
+        return () => clearInterval(intervalo);
+    }, []);
 
     const atual = sorteio.resultadoAtual;
     const cancelados = sorteio.historico.filter((item) => item.situacao === "CANCELADO");
     const podeSortear = sorteio.campanhaEncerrada && sorteio.totalTickets > 0 && !atual;
     const processando = acao !== null;
+    const prazoEncerrado = atual ? atual.prazoEncerrado || agora > atual.dataLimiteRetirada.getTime() : false;
 
     async function executar(tipo: Acao) {
         if (
@@ -125,12 +131,18 @@ export function PainelResultadoSorteio({
                         Sorteado em {formatarDataHora(atual.dataSorteio)}
                     </p>
 
+                    <p className="text-sm text-muted">
+                        Leitura: {atual.dataConfirmacaoLeitura ? `confirmada em ${formatarDataHora(atual.dataConfirmacaoLeitura)}` : "aguardando confirmação no aplicativo"}
+                        <br />
+                        Retirada até {formatarDataHora(atual.dataLimiteRetirada)}
+                        {prazoEncerrado && atual.situacao === "AGUARDANDO_ENTREGA" ? " · prazo encerrado, refazer disponível" : ""}
+                    </p>
                     {atual.situacao === "AGUARDANDO_ENTREGA" ? (
                         <div className="flex flex-wrap justify-end gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={() => void executar("refazer")}
-                                disabled={processando}
+                                disabled={processando || !prazoEncerrado}
                                 className="btn-perigo text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {acao === "refazer" ? "Sorteando..." : "Vencedor não apareceu — refazer"}
@@ -138,7 +150,7 @@ export function PainelResultadoSorteio({
                             <button
                                 type="button"
                                 onClick={() => void executar("confirmar")}
-                                disabled={processando}
+                                disabled={processando || prazoEncerrado || !atual.dataConfirmacaoLeitura}
                                 className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {acao === "confirmar" ? "Confirmando..." : "Confirmar entrega do prêmio"}

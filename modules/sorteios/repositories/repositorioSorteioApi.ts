@@ -14,6 +14,9 @@ type ResultadoSorteioApiResponse = {
     totalTickets: number;
     situacao: SituacaoResultadoSorteio;
     dataSorteio: string;
+    dataConfirmacaoLeitura: string | null;
+    dataLimiteRetirada: string;
+    prazoEncerrado: boolean;
     dataAtualizacao: string;
     vencedor: ResultadoSorteio["vencedor"];
 };
@@ -37,6 +40,9 @@ function mapResultadoApi(item: ResultadoSorteioApiResponse): ResultadoSorteio {
         totalTickets: item.totalTickets,
         situacao: item.situacao,
         dataSorteio: new Date(item.dataSorteio),
+        dataConfirmacaoLeitura: item.dataConfirmacaoLeitura ? new Date(item.dataConfirmacaoLeitura) : null,
+        dataLimiteRetirada: new Date(item.dataLimiteRetirada),
+        prazoEncerrado: item.prazoEncerrado,
         dataAtualizacao: new Date(item.dataAtualizacao),
         vencedor: item.vencedor,
     };
