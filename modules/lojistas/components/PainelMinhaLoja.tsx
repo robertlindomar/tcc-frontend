@@ -2,6 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Box, Check, CheckCircle2, Copy, List, Pencil, Store, Target } from "lucide-react";
+import { urlPublicaArquivo } from "@/shared/utils/urlPublicaArquivo";
+import estilos from "./minha-loja.module.css";
 import { CardEnderecoLoja } from "@/modules/enderecos/components/CardEnderecoLoja";
 import {
     atualizarLojista,
@@ -11,6 +14,9 @@ import {
 } from "@/modules/lojistas/services/servicoLojista";
 import { Lojista, StatusLojista } from "@/modules/lojistas/types/lojista.types";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { PreviaMinhaLoja } from "./PreviaMinhaLoja";
+import { Eye, ExternalLink } from "lucide-react";
+import { CardLogoLoja } from "./CardLogoLoja";
 import { ModalConfirmarReenvio } from "./ModalConfirmarReenvio";
 
 type FormState = {
@@ -35,12 +41,6 @@ const ROTULO_STATUS: Record<StatusLojista, string> = {
     REJEITADO: "Não aprovada",
 };
 
-const ESTILO_STATUS: Record<StatusLojista, string> = {
-    PENDENTE: "border-amber-200 bg-amber-50 text-amber-900",
-    APROVADO: "border-primary/25 bg-primary-muted text-[#0c2f24]",
-    REJEITADO: "border-[#ffc9c3] bg-[#fff5f3] text-[#b91c1c]",
-};
-
 function parseInscricaoEstadual(valor: string): number | null | undefined {
     const trim = valor.trim();
     if (!trim) {
@@ -61,6 +61,7 @@ function formularioDoPerfil(perfil: Lojista): FormState {
 }
 
 export function PainelMinhaLoja() {
+    const [mostrarPrevia, setMostrarPrevia] = useState(false);
     const [perfil, setPerfil] = useState<Lojista | null>(null);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
@@ -211,13 +212,14 @@ export function PainelMinhaLoja() {
     }
 
     return (
-        <section className="painel-pagina space-y-6">
-            <header>
-                <p className="painel-eyebrow">LOJISTA</p>
-                <h1 className="painel-titulo">Minha loja</h1>
-                <p className="painel-subtitulo">
-                    Cadastro e status da sua loja junto à associação comercial.
-                </p>
+        <section className={estilos.pagina}>
+            <header className={estilos.cabecalhoPagina}>
+                <div>
+                    <p className={estilos.sobrancelha}>LOJISTA</p>
+                    <h1 className={estilos.titulo}>Minha loja</h1>
+                    <p className={estilos.subtitulo}>Gerencie as informações da sua loja que aparecem no aplicativo.</p>
+                </div>
+                {perfil?.status === "APROVADO" ? <button type="button" onClick={() => setMostrarPrevia(true)} className={estilos.botaoPrevia}><Eye size={24} aria-hidden /><span><strong>Ver minha loja <ExternalLink size={14} aria-hidden /></strong><small>Prévia para o cliente</small></span></button> : null}
             </header>
 
             {erro ? (
@@ -232,7 +234,7 @@ export function PainelMinhaLoja() {
                 </div>
             ) : null}
 
-            <div className="grid gap-5 lg:grid-cols-2">
+            <div className={estilos.gradePrincipal}>
                 {!perfil ? (
                     <form
                         onSubmit={handleSubmit}
@@ -330,6 +332,10 @@ export function PainelMinhaLoja() {
                     </div>
                 )}
             </div>
+
+            {perfil ? <CardLogoLoja loja={perfil} onAtualizar={setPerfil} /> : null}
+
+            {mostrarPrevia && perfil ? <PreviaMinhaLoja loja={perfil} onFechar={() => setMostrarPrevia(false)} /> : null}
 
             {confirmarReenvio ? (
                 <ModalConfirmarReenvio
@@ -433,97 +439,80 @@ function FormularioEdicao({
     );
 }
 
-function StatusPerfil({
-    loja,
-    onEditar,
-    onReenviar,
-}: {
+function StatusPerfil({ loja, onEditar, onReenviar }: {
     loja: Lojista;
     onEditar: () => void;
     onReenviar: () => void;
 }) {
+    const [copiado, setCopiado] = useState(false);
+    const [erroCopia, setErroCopia] = useState(false);
+    const logo = urlPublicaArquivo(loja.urlLogo);
     const status = loja.status;
-
+    async function copiarCnpj() {
+        try {
+            await navigator.clipboard.writeText(loja.cnpj);
+            setCopiado(true);
+            setErroCopia(false);
+        } catch {
+            setErroCopia(true);
+        }
+    }
     return (
-        <div className="painel-card space-y-4 p-6">
-            <div className="flex items-start gap-4">
-                <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-muted text-primary"
-                    aria-hidden
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        className="h-6 w-6"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" />
-                        <path d="M9 21V12h6v9" />
-                    </svg>
+        <section className={estilos.card} aria-labelledby="dados-loja-titulo">
+            <div className={estilos.cabecalhoCard}>
+                <span className={`${estilos.iconeCabecalho} ${estilos.verde}`}><Store size={28} aria-hidden /></span>
+                <div className={estilos.textoCabecalho}>
+                    <h2 id="dados-loja-titulo">Dados da loja</h2>
+                    <p>Informações básicas da sua loja e status junto à associação comercial.</p>
                 </div>
-                <div className="min-w-0">
-                    <p className="text-lg font-semibold text-navy">{loja.nomeFantasia}</p>
-                    <p className="text-sm text-muted">{loja.razaoSocial}</p>
-                    <p className="mt-1 text-sm text-muted">CNPJ: {loja.cnpj}</p>
-                </div>
+                <span className={`${estilos.status} ${estilos[`status${status}`]}`}>
+                    {status === "APROVADO" ? <CheckCircle2 size={18} aria-hidden /> : null}
+                    {status === "APROVADO" ? "Aprovada" : ROTULO_STATUS[status]}
+                </span>
             </div>
-
-            <p
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${ESTILO_STATUS[status]}`}
-            >
-                Situação: {ROTULO_STATUS[status]}
-            </p>
-
-            {status === "PENDENTE" ? (
-                <p className="rounded-[var(--radius-sm)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    Pré-cadastro enviado. Aguarde a associação aprovar ou recusar. Você
-                    ainda pode corrigir os dados enquanto aguarda.
-                </p>
-            ) : null}
-
+            <div className={estilos.resumoLoja}>
+                <span className={estilos.avatarLoja}>
+                    {logo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={logo} alt={`Logo de ${loja.nomeFantasia}`} />
+                    ) : <Store size={32} aria-hidden />}
+                </span>
+                <div className={estilos.identidadeLoja}>
+                    <h3>{loja.nomeFantasia}</h3>
+                    <p>{loja.razaoSocial}</p>
+                    <div className={estilos.cnpj}>
+                        <span>CNPJ: {loja.cnpj}</span>
+                        <button type="button" onClick={() => void copiarCnpj()} aria-label="Copiar CNPJ" title="Copiar CNPJ">
+                            {copiado ? <Check size={17} /> : <Copy size={17} />}
+                        </button>
+                    </div>
+                    {copiado ? <span role="status" className={estilos.textoSucesso}>CNPJ copiado.</span> : null}
+                    {erroCopia ? <span role="alert" className={estilos.textoErro}>Não foi possível copiar. Selecione o CNPJ acima.</span> : null}
+                </div>
+                <button type="button" onClick={onEditar} className={estilos.botaoSecundario}><Pencil size={17} aria-hidden />Editar dados da loja</button>
+            </div>
             {status === "APROVADO" ? (
-                <div className="space-y-3 rounded-[var(--radius-sm)] border border-primary/20 bg-primary-muted px-4 py-3 text-sm text-[#0c2f24]">
-                    <p>Sua loja foi aprovada. Você já pode cadastrar produtos e missões.</p>
-                    <Link
-                        href="/produtos"
-                        className="inline-block font-semibold text-primary underline"
-                    >
-                        Ir para Produtos
-                    </Link>
+                <div className={estilos.avisoAprovacao}>
+                    <span className={estilos.iconeAprovacao}><CheckCircle2 size={27} aria-hidden /></span>
+                    <div><strong>Sua loja foi aprovada!</strong><p>Você já pode cadastrar produtos e missões.</p></div>
+                    <Link href="/produtos" className={estilos.botaoPrimario}>Ir para Produtos <ArrowRight size={17} aria-hidden /></Link>
                 </div>
-            ) : null}
-
-            {status === "REJEITADO" ? (
-                <div className="space-y-3 rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
-                    <p className="font-semibold">{MSG_REJEITADO}</p>
-                    {loja.justificativaRejeicao ? (
-                        <div>
-                            <p className="text-xs font-medium uppercase tracking-wide text-coral">
-                                Motivo
-                            </p>
-                            <p className="mt-1 whitespace-pre-wrap">{loja.justificativaRejeicao}</p>
-                        </div>
-                    ) : null}
-                    <button
-                        type="button"
-                        onClick={onReenviar}
-                        className="btn-primario text-sm"
-                    >
-                        Enviar novamente para análise
-                    </button>
+            ) : status === "PENDENTE" ? (
+                <div className={estilos.avisoPendente}>Pré-cadastro enviado. Aguarde a associação aprovar ou recusar. Você ainda pode corrigir os dados enquanto aguarda.</div>
+            ) : (
+                <div className={estilos.avisoRejeitado}>
+                    <strong>{MSG_REJEITADO}</strong>
+                    {loja.justificativaRejeicao ? <p>{loja.justificativaRejeicao}</p> : null}
+                    <button type="button" onClick={onReenviar} className={estilos.botaoPrimario}>Enviar novamente para análise</button>
                 </div>
+            )}
+            {status === "APROVADO" ? (
+                <nav className={estilos.atalhos} aria-label="Gerenciar a loja">
+                    <Link href="/produtos"><span className={`${estilos.iconeAtalho} ${estilos.azul}`}><Box size={27} aria-hidden /></span><span><strong>Produtos</strong><small>Cadastre e gerencie seus produtos</small></span><ArrowRight size={17} aria-hidden /></Link>
+                    <Link href="/categorias"><span className={`${estilos.iconeAtalho} ${estilos.roxo}`}><List size={27} aria-hidden /></span><span><strong>Categorias</strong><small>Organize seus produtos em categorias</small></span><ArrowRight size={17} aria-hidden /></Link>
+                    <Link href="/missoes"><span className={`${estilos.iconeAtalho} ${estilos.laranja}`}><Target size={27} aria-hidden /></span><span><strong>Missões</strong><small>Crie missões e incentive a participação</small></span><ArrowRight size={17} aria-hidden /></Link>
+                </nav>
             ) : null}
-
-            <button
-                type="button"
-                onClick={onEditar}
-                className="btn-secundario text-sm"
-            >
-                Editar dados da loja
-            </button>
-        </div>
+        </section>
     );
 }

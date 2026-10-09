@@ -46,3 +46,7 @@ export async function reenviarLojistaParaAnalise(id: number) {
 export async function deletarLojista(id: number) {
     return repositorioLojista.deletar(id);
 }
+
+export async function enviarLogoLojista(id: number, arquivo: File) {
+    return repositorioLojista.enviarLogo(id, arquivo);
+}

@@ -7,6 +7,7 @@ export type StatusLojista = "PENDENTE" | "APROVADO" | "REJEITADO";
 export interface Lojista {
     id: number;
     nomeFantasia: string;
+    urlLogo?: string | null;
     razaoSocial: string;
     cnpj: string;
     inscricaoEstadual: number | null;

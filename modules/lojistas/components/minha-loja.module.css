@@ -1,0 +1,100 @@
+.pagina { position: relative; display: flex; flex-direction: column; gap: 26px; color: #0b122b; isolation: isolate; }
+.pagina::before { content: ""; position: absolute; inset: -24px; z-index: -1; pointer-events: none; background: radial-gradient(ellipse at 85% 0%, #f0eafb80, transparent 45%), linear-gradient(135deg, #f6f9ff 0%, #f1f8f6 60%, #f5f7fa 100%); }
+.cabecalhoPagina { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 3px; }
+.sobrancelha { color: #ff575e; font-size: 12px; font-weight: 750; letter-spacing: .07em; }
+.titulo { font-size: clamp(28px, 2.8vw, 38px); line-height: 1.2; font-weight: 800; letter-spacing: -.045em; margin-top: 3px; }
+.subtitulo { color: #52617e; font-size: 14px; margin-top: 5px; }
+.gradePrincipal { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 24px; align-items: stretch; }
+.card { min-width: 0; padding: 22px; border: 1px solid #f0f3f9; background: #ffffffed; border-radius: 18px; box-shadow: 0 14px 35px #21385207; display: flex; flex-direction: column; gap: 18px; }
+.cabecalhoCard { display: flex; gap: 15px; align-items: center; }
+.iconeCabecalho { display: inline-flex; width: 52px; height: 52px; border-radius: 13px; flex-shrink: 0; align-items: center; justify-content: center; }
+.textoCabecalho { min-width: 0; flex: 1; }
+.textoCabecalho h2 { font-size: 18px; font-weight: 780; letter-spacing: -.025em; }
+.textoCabecalho p { color: #52617e; font-size: 13px; line-height: 1.65; margin-top: 3px; }
+.verde { background: linear-gradient(135deg, #c4f8e3, #dafff1); color: #009655; }
+.azul { background: linear-gradient(135deg, #e4edff, #e1eaff); color: #003ce9; }
+.roxo { background: #f0e4ff; color: #7826ff; }
+.laranja { background: #fff0e1; color: #ff6700; }
+.rosa { background: #fbe3f7; color: #bd0783; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 750; padding: 10px 14px; border-radius: 18px; white-space: nowrap; }
+.statusAPROVADO { background: #dffbf0; color: #008632; }
+.statusPENDENTE { background: #fff6df; color: #986319; }
+.statusREJEITADO { background: #fff0ee; color: #b53435; }
+.resumoLoja { display: flex; align-items: center; gap: 18px; padding: 18px; border-radius: 13px; background: linear-gradient(110deg, #f0f9f5, #f3f8fa); }
+.avatarLoja { width: 70px; height: 70px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 3px solid white; border-radius: 16px; background: #d8faec; color: #009a5d; overflow: hidden; }
+.avatarLoja img { width: 100%; height: 100%; object-fit: contain; background: white; }
+.identidadeLoja { flex: 1; min-width: 0; }
+.identidadeLoja h3 { font-size: 20px; font-weight: 800; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.identidadeLoja p { color: #52617e; font-size: 13px; }
+.cnpj { display: flex; align-items: center; gap: 9px; color: #41516e; font-size: 13px; font-weight: 600; flex-wrap: wrap; }
+.cnpj button { padding: 5px; border-radius: 5px; color: #697693; cursor: pointer; }
+.botaoSecundario, .botaoPrimario { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 17px; border-radius: 10px; font-size: 12px; font-weight: 750; cursor: pointer; transition: background .15s, box-shadow .15s; flex-shrink: 0; }
+.botaoSecundario { border: 1px solid #dce3ef; color: #0b122b; background: white; }
+.botaoPrimario { color: white; background: linear-gradient(110deg, #007c58, #009775); border: 1px solid transparent; }
+.botaoSecundario:hover { background: #f4f7fc; }
+.botaoPrimario:hover { background: #006f50; }
+.botaoSecundario:disabled, .botaoPrimario:disabled { opacity: .55; cursor: wait; }
+.pagina button:focus-visible, .pagina a:focus-visible, .card button:focus-visible, .card input:focus-visible { outline: 3px solid #a8beff; outline-offset: 3px; }
+.avisoAprovacao { display: flex; align-items: center; gap: 13px; padding: 14px; background: linear-gradient(110deg, #e1f9f0, #e7faf2); border-radius: 11px; }
+.avisoAprovacao strong { font-size: 15px; font-weight: 750; color: #007d2a; }
+.avisoAprovacao p { font-size: 13px; color: #526773; margin-top: 2px; }
+.avisoAprovacao .botaoPrimario { margin-left: auto; }
+.iconeAprovacao { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; flex-shrink: 0; background: #c6f3e0; color: #008638; border-radius: 10px; }
+.avisoPendente, .avisoRejeitado { border-radius: 11px; padding: 16px; font-size: 13px; line-height: 1.6; }
+.avisoPendente { background: #fff8e9; color: #865716; }
+.avisoRejeitado { background: #fff1ef; color: #b3343c; }
+.avisoRejeitado p { margin: 8px 0 12px; white-space: pre-wrap; }
+.atalhos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.atalhos a { display: flex; align-items: flex-start; gap: 10px; padding: 14px 12px; background: linear-gradient(120deg, #f7f9ff, #f8faff); border: 1px solid #edf0fa; border-radius: 12px; transition: border-color .15s; }
+.atalhos a:hover { border-color: #a7b9ee; }
+.atalhos a > span:nth-child(2) { flex: 1; min-width: 0; }
+.atalhos a > svg { color: #73829e; flex-shrink: 0; align-self: center; width: 14px; }
+.atalhos strong { display: block; font-size: 12px; margin-top: 7px; }
+.atalhos small { display: block; font-size: 11px; line-height: 1.6; color: #52617e; margin-top: 3px; }
+.iconeAtalho { display: inline-flex; align-items: center; justify-content: center; width: 43px; height: 46px; flex-shrink: 0; border-radius: 11px; }
+.campo { display: flex; flex-direction: column; gap: 5px; min-width: 0; font-size: 12px; font-weight: 650; }
+.campo input { min-width: 0; width: 100%; padding: 11px 13px; height: 42px; border: 1px solid #dce3ef; border-radius: 9px; outline: none; color: #25334f; background: white; font-weight: 400; font-size: 13px; }
+.campo input::placeholder { color: #919db6; }
+.campo input:focus { border-color: #758fd7; }
+.campo input[readonly] { background: #fbfcff; color: #68758e; }
+.formEndereco { display: flex; flex-direction: column; gap: 16px; margin-top: 6px; }
+.linhaCep { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 16px; }
+.buscaCep { position: relative; }
+.buscaCep input { padding-right: 42px; }
+.buscaCep button { position: absolute; right: 9px; top: 8px; padding: 3px; color: #7988a5; cursor: pointer; }
+.linhaRua { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 18px; }
+.linhaCidade { display: grid; grid-template-columns: 1fr 1.2fr .8fr; gap: 18px; }
+.coordenadas { color: #67758e; font-size: 11px; }
+.coordenadas summary { cursor: pointer; }
+.coordenadas > div { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+.textoErro { font-size: 12px; color: #b3343c; }
+.textoSucesso { font-size: 12px; color: #00835c; }
+.logoCard { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(260px, 1.5fr) 240px; gap: 24px; }
+.logoTitulo { grid-column: 1 / 3; }
+.zonaUpload { min-height: 152px; padding: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 5px; border: 1.5px dashed #d5dced; border-radius: 11px; background: #fafbff; cursor: pointer; }
+.zonaUpload > svg { color: #788399; margin-bottom: 7px; }
+.zonaUpload strong { font-size: 13px; }
+.zonaUpload span { max-width: 230px; color: #586985; font-size: 12px; line-height: 1.5; }
+.zonaUpload:hover, .arrastando { background: #f0f7ff; border-color: #5b83e6; }
+.dicasLogo { align-self: stretch; border-radius: 11px; background: linear-gradient(110deg, #f0f8ff, #eaf4ff); padding: 18px; font-size: 12px; color: #536581; }
+.dicasLogo strong { display: flex; align-items: center; gap: 8px; color: #0036d9; margin-bottom: 9px; }
+.dicasLogo li { display: flex; align-items: center; gap: 9px; margin-top: 6px; }
+.dicasLogo li svg { color: #009d50; flex-shrink: 0; }
+.previewLogo { grid-column: 3; grid-row: 1 / 3; border: 1.5px dashed #d5dced; border-radius: 11px; padding: 15px; display: flex; flex-direction: column; gap: 9px; }
+.previewLogo strong { font-size: 12px; }
+.previewQuadro { flex: 1; min-height: 155px; display: flex; align-items: center; justify-content: center; border: 1px dashed #dce3ef; border-radius: 10px; padding: 10px; }
+.previewQuadro img { width: 140px; height: 130px; object-fit: contain; }
+.previewVazio { width: 145px; min-height: 132px; display: flex; align-items: center; justify-content: center; gap: 7px; flex-direction: column; background: #f5f3fa; border-radius: 10px; color: #8790a7; font-size: 13px; }
+.mensagemLogo { grid-column: 1 / -1; }
+@media (max-width: 1350px) { .resumoLoja { flex-wrap: wrap; } .resumoLoja > button { margin-left: 88px; } .atalhos a { flex-wrap: wrap; } .atalhos a > span:nth-child(2) { flex-basis: 60%; } .linhaCep { grid-template-columns: 1fr; gap: 10px; } .linhaCep > button { justify-self: start; } .logoCard { grid-template-columns: 1fr 1.2fr 200px; gap: 18px; } }
+@media (max-width: 1050px) { .gradePrincipal { grid-template-columns: 1fr; } .resumoLoja { flex-wrap: nowrap; } .resumoLoja > button { margin-left: 0; } .atalhos a { flex-wrap: nowrap; } .linhaCep { grid-template-columns: 1fr auto; } .logoCard { grid-template-columns: 1fr 1.4fr; } .logoTitulo { grid-column: 1 / -1; } .previewLogo { grid-column: 1 / -1; grid-row: auto; } .previewQuadro { min-height: 130px; } }
+@media (max-width: 600px) { .pagina { gap: 18px; } .card { padding: 17px; gap: 16px; } .cabecalhoCard { flex-wrap: wrap; gap: 10px; } .iconeCabecalho { width: 44px; height: 44px; } .textoCabecalho h2 { font-size: 17px; } .status { margin-left: 54px; } .resumoLoja { flex-wrap: wrap; gap: 12px; padding: 13px; } .avatarLoja { width: 56px; height: 56px; } .identidadeLoja h3 { font-size: 17px; } .resumoLoja > button { width: 100%; } .avisoAprovacao { flex-wrap: wrap; } .avisoAprovacao > div { flex: 1; } .avisoAprovacao .botaoPrimario { width: 100%; margin-top: 3px; } .atalhos { grid-template-columns: 1fr; } .atalhos a { align-items: center; } .atalhos strong { margin-top: 0; } .atalhos a > span:nth-child(2) { flex-basis: auto; } .linhaCep { grid-template-columns: 1fr; } .linhaRua { grid-template-columns: 1fr 80px; gap: 10px; } .linhaCidade { grid-template-columns: 1fr 1fr; gap: 12px; } .logoCard { grid-template-columns: 1fr; } .logoTitulo, .previewLogo { grid-column: 1; } }
+
+.botaoPrevia { display: flex; align-items: center; gap: 14px; border: 1px solid #dce3ef; border-radius: 13px; padding: 13px 17px; color: #003ce9; background: #ffffff7a; cursor: pointer; }
+.botaoPrevia strong { color: #0b122b; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+.botaoPrevia small { display: block; text-align: left; color: #52617e; font-size: 11px; margin-top: 2px; }
+@media (max-width: 600px) { .cabecalhoPagina { align-items: flex-start; flex-direction: column; } .botaoPrevia { align-self: flex-start; } }
+@media (max-width: 600px) {
+  .cabecalhoCard { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: start; }
+  .status { grid-column: 2; margin-left: 0; justify-self: start; }
+}

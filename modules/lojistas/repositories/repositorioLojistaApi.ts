@@ -11,6 +11,7 @@ import { RepositorioLojista } from "./repositorioLojista";
 type LojistaApiResponse = {
     id: number;
     nomeFantasia: string;
+    urlLogo: string | null;
     razaoSocial: string;
     cnpj: string;
     inscricaoEstadual: number | null;
@@ -28,6 +29,7 @@ function mapLojistaApi(item: LojistaApiResponse): Lojista {
     return {
         id: item.id,
         nomeFantasia: item.nomeFantasia,
+        urlLogo: item.urlLogo ?? null,
         razaoSocial: item.razaoSocial,
         cnpj: item.cnpj,
         inscricaoEstadual: item.inscricaoEstadual,
@@ -90,6 +92,13 @@ export const repositorioLojistaApi: RepositorioLojista = {
         const response = await clienteHttp.patch<LojistaApiResponse>(
             `/lojista/${id}/reenviar`,
         );
+        return mapLojistaApi(response.data);
+    },
+
+    async enviarLogo(id: number, arquivo: File): Promise<Lojista> {
+        const dados = new FormData();
+        dados.append("arquivo", arquivo);
+        const response = await clienteHttp.put<LojistaApiResponse>(`/lojista/${id}/logo`, dados);
         return mapLojistaApi(response.data);
     },
 

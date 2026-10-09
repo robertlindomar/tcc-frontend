@@ -1,329 +1,138 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { LocateFixed, MapPin, Search } from "lucide-react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
-import {
-    atualizarEndereco,
-    buscarEnderecoDoUsuario,
-    criarEndereco,
-} from "../services/servicoEndereco";
+import { atualizarEndereco, buscarEnderecoDoUsuario, criarEndereco } from "../services/servicoEndereco";
 import { Endereco } from "../types/endereco.types";
+import { obterLocalizacaoLoja } from "../services/localizacaoLoja";
+import estilos from "@/modules/lojistas/components/minha-loja.module.css";
 
-type CardEnderecoLojaProps = {
-    /** Dono do endereço: vem do perfil autenticado, nunca de escolha na tela. */
-    usuarioId: number;
-    enderecoVinculadoId: number | null;
-    /** Sincroniza `lojista.enderecoId` quando um endereço novo é criado. */
-    onEnderecoCriado: (enderecoId: number) => Promise<void>;
-};
+type Props = { usuarioId: number; enderecoVinculadoId: number | null; onEnderecoCriado: (id: number) => Promise<void> };
+type Formulario = { cep: string; numero: string; latitude: string; longitude: string };
+type Geografia = { rua: string; bairro: string; cidade: string; uf: string };
+const geografiaVazia: Geografia = { rua: "", bairro: "", cidade: "", uf: "" };
+const digitos = (valor: string) => valor.replace(/\D/g, "");
+const formatarCep = (valor: string) => digitos(valor).slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
 
-type FormEndereco = {
-    cep: string;
-    numero: string;
-    latitude: string;
-    longitude: string;
-};
-
-function apenasDigitos(valor: string): string {
-    return valor.replace(/\D/g, "");
-}
-
-function formatarCep(cep: string): string {
-    const digitos = apenasDigitos(cep);
-    if (digitos.length !== 8) {
-        return cep;
-    }
-    return `${digitos.slice(0, 5)}-${digitos.slice(5)}`;
-}
-
-function descreverEndereco(endereco: Endereco): string {
-    const numero = endereco.numero?.trim() ? endereco.numero.trim() : "s/n";
-    return `${endereco.rua.nome}, ${numero} — ${endereco.bairro.nome}, ${endereco.cidade.nome}/${endereco.estado.uf}`;
-}
-
-export function CardEnderecoLoja({
-    usuarioId,
-    enderecoVinculadoId,
-    onEnderecoCriado,
-}: CardEnderecoLojaProps) {
+export function CardEnderecoLoja({ usuarioId, enderecoVinculadoId, onEnderecoCriado }: Props) {
     const [endereco, setEndereco] = useState<Endereco | null>(null);
+    const [form, setForm] = useState<Formulario>({ cep: "", numero: "", latitude: "", longitude: "" });
+    const [geografia, setGeografia] = useState<Geografia>(geografiaVazia);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
-    const [editando, setEditando] = useState(false);
+    const [consultando, setConsultando] = useState(false);
+    const [localizando, setLocalizando] = useState(false);
+    const [mostrarCoordenadas, setMostrarCoordenadas] = useState(false);
     const [erro, setErro] = useState("");
     const [aviso, setAviso] = useState("");
-    const [form, setForm] = useState<FormEndereco>({
-        cep: "",
-        numero: "",
-        latitude: "",
-        longitude: "",
-    });
-
+    const consulta = useRef<AbortController | null>(null);
+    const cepAtual = useRef("");
+    function preencher(atual: Endereco) {
+        setForm({ cep: formatarCep(atual.cep), numero: atual.numero ?? "", latitude: atual.latitude != null ? String(atual.latitude) : "", longitude: atual.longitude != null ? String(atual.longitude) : "" });
+        cepAtual.current = digitos(atual.cep);
+        setGeografia({ rua: atual.rua.nome, bairro: atual.bairro.nome, cidade: atual.cidade.nome, uf: atual.estado.uf });
+    }
     useEffect(() => {
         let cancelado = false;
-
         async function carregar() {
-            setCarregando(true);
-            setErro("");
             try {
                 const atual = await buscarEnderecoDoUsuario(usuarioId);
-                if (!cancelado) {
-                    setEndereco(atual);
-                }
-            } catch (error) {
-                if (!cancelado) {
-                    setErro(
-                        obterMensagemErroApi(
-                            error,
-                            "Erro ao carregar o endereço da loja.",
-                        ),
-                    );
-                }
-            } finally {
-                if (!cancelado) {
-                    setCarregando(false);
-                }
-            }
+                if (!cancelado) { setEndereco(atual); if (atual) preencher(atual); }
+            } catch (causa) { if (!cancelado) setErro(obterMensagemErroApi(causa, "Erro ao carregar o endereço da loja.")); }
+            finally { if (!cancelado) setCarregando(false); }
         }
-
         void carregar();
-
-        return () => {
-            cancelado = true;
-        };
+        return () => { cancelado = true; consulta.current?.abort(); };
     }, [usuarioId]);
 
-    function abrirFormulario() {
-        setForm({
-            cep: endereco ? formatarCep(endereco.cep) : "",
-            numero: endereco?.numero ?? "",
-            latitude: endereco?.latitude != null ? String(endereco.latitude) : "",
-            longitude: endereco?.longitude != null ? String(endereco.longitude) : "",
-        });
-        setErro("");
-        setAviso("");
-        setEditando(true);
+    async function consultarCep() {
+        const cep = digitos(form.cep);
+        if (cep.length !== 8) { setErro("Informe um CEP com 8 dígitos."); return; }
+        consulta.current?.abort();
+        const controle = new AbortController();
+        consulta.current = controle;
+        setConsultando(true); setErro(""); setAviso("");
+        try {
+            // Prévia somente de leitura. Ao salvar, a API resolve o CEP novamente como fonte de verdade.
+            const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: controle.signal });
+            if (!resposta.ok) throw new Error("Não foi possível consultar o CEP.");
+            const dados = await resposta.json();
+            if (dados.erro) throw new Error("CEP não encontrado.");
+            if (cepAtual.current === cep) setGeografia({ rua: dados.logradouro || "", bairro: dados.bairro || "", cidade: dados.localidade || "", uf: dados.uf || "" });
+        } catch (causa) {
+            if (!controle.signal.aborted && cepAtual.current === cep) setErro(obterMensagemErroApi(causa, "Não foi possível consultar o CEP. Você pode tentar novamente ou salvar pela API."));
+        } finally { if (consulta.current === controle) setConsultando(false); }
     }
 
-    async function handleSalvar(event: FormEvent) {
-        event.preventDefault();
-        setErro("");
-        setAviso("");
-
-        const cep = apenasDigitos(form.cep);
-        if (cep.length !== 8) {
-            setErro("Informe um CEP com 8 dígitos.");
-            return;
+    async function usarLocalizacao() {
+        setErro(""); setAviso("");
+        setLocalizando(true);
+        try {
+            const posicao = await obterLocalizacaoLoja({ contextoSeguro: window.isSecureContext, geolocalizacao: navigator.geolocation });
+            setForm(atual => ({ ...atual, latitude: String(posicao.latitude), longitude: String(posicao.longitude) }));
+            setAviso("Localização obtida: coordenadas preenchidas abaixo. O CEP e o número continuam sendo informados no formulário. Salve o endereço para aplicar à loja.");
+        } catch (causa) {
+            setErro(obterMensagemErroApi(causa, "Não foi possível obter a localização."));
+        } finally {
+            setMostrarCoordenadas(true);
+            setLocalizando(false);
         }
+    }
 
-        const numero = form.numero.trim();
-        const latitudeTexto = form.latitude.trim().replace(",", ".");
-        const longitudeTexto = form.longitude.trim().replace(",", ".");
-        if (Boolean(latitudeTexto) !== Boolean(longitudeTexto)) {
-            setErro("Informe latitude e longitude juntas ou deixe ambas vazias.");
-            return;
-        }
-
-        const latitude = latitudeTexto ? Number(latitudeTexto) : null;
-        const longitude = longitudeTexto ? Number(longitudeTexto) : null;
-        if (latitude !== null && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)) {
-            setErro("Informe uma latitude válida entre -90 e 90.");
-            return;
-        }
-        if (
-            longitude !== null &&
-            (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)
-        ) {
-            setErro("Informe uma longitude válida entre -180 e 180.");
-            return;
-        }
-
+    async function salvar(evento: FormEvent) {
+        evento.preventDefault(); setErro(""); setAviso("");
+        const cep = digitos(form.cep);
+        if (cep.length !== 8) { setErro("Informe um CEP com 8 dígitos."); return; }
+        const lat = form.latitude.trim().replace(",", "."); const lng = form.longitude.trim().replace(",", ".");
+        if (Boolean(lat) !== Boolean(lng)) { setErro("Informe latitude e longitude juntas ou deixe ambas vazias."); return; }
+        const latitude = lat ? Number(lat) : null; const longitude = lng ? Number(lng) : null;
+        if (latitude !== null && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)) { setErro("Informe uma latitude válida entre -90 e 90."); return; }
+        if (longitude !== null && (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)) { setErro("Informe uma longitude válida entre -180 e 180."); return; }
         setSalvando(true);
         try {
-            if (endereco) {
-                const atualizado = await atualizarEndereco(endereco.id, {
-                    cep,
-                    numero,
-                    latitude,
-                    longitude,
-                });
-                setEndereco(atualizado);
-                setAviso("Endereço atualizado.");
-            } else {
-                const criado = await criarEndereco({
-                    cep,
-                    numero: numero || undefined,
-                    latitude,
-                    longitude,
-                });
-                setEndereco(criado);
-
-                if (enderecoVinculadoId !== criado.id) {
-                    await onEnderecoCriado(criado.id);
-                }
-                setAviso("Endereço cadastrado.");
-            }
-            setEditando(false);
-        } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao salvar o endereço."));
-        } finally {
-            setSalvando(false);
-        }
+            const dados = { cep, numero: form.numero.trim(), latitude, longitude };
+            const atualizado = endereco ? await atualizarEndereco(endereco.id, dados) : await criarEndereco(dados);
+            setEndereco(atualizado); preencher(atualizado);
+            if (enderecoVinculadoId !== atualizado.id) await onEnderecoCriado(atualizado.id);
+            setAviso("Endereço salvo com sucesso.");
+        } catch (causa) { setErro(obterMensagemErroApi(causa, "Erro ao salvar o endereço.")); }
+        finally { setSalvando(false); }
     }
-
     return (
-        <div className="painel-card space-y-4 p-6">
-            <div className="flex items-start gap-4">
-                <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#e8f0ff] text-[#3b6fd8]"
-                    aria-hidden
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        className="h-6 w-6"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" />
-                        <circle cx="12" cy="10" r="2.5" />
-                    </svg>
-                </div>
-                <div className="min-w-0">
-                    <h2 className="text-lg font-semibold text-navy">
-                        Endereço da loja
-                    </h2>
-                    <p className="mt-1 text-sm text-muted">
-                        Informe o CEP: a rua, o bairro, a cidade e o estado são
-                        preenchidos automaticamente. As coordenadas permitem calcular a
-                        proximidade no aplicativo.
-                    </p>
-                </div>
+        <section className={estilos.card} aria-labelledby="endereco-loja-titulo">
+            <div className={estilos.cabecalhoCard}>
+                <span className={`${estilos.iconeCabecalho} ${estilos.azul}`}><MapPin size={28} aria-hidden /></span>
+                <div className={estilos.textoCabecalho}><h2 id="endereco-loja-titulo">Endereço da loja</h2><p>Informe o CEP: a rua, o bairro, a cidade e o estado são preenchidos automaticamente. As coordenadas permitem calcular a proximidade no aplicativo.</p></div>
             </div>
-
-            {erro ? (
-                <div className="rounded-[var(--radius-sm)] border border-[#ffc9c3] bg-[#fff5f3] px-4 py-3 text-sm text-[#b91c1c]">
-                    {erro}
-                </div>
-            ) : null}
-
-            {aviso ? (
-                <div className="rounded-[var(--radius-sm)] border border-primary/20 bg-primary-muted px-4 py-3 text-sm text-[#0c2f24]">
-                    {aviso}
-                </div>
-            ) : null}
-
-            {carregando ? <p className="text-sm text-muted">Carregando…</p> : null}
-
-            {!carregando && editando ? (
-                <form onSubmit={handleSalvar} className="space-y-4">
-                    <label className="block text-sm font-medium text-navy">
-                        CEP
-                        <input
-                            value={form.cep}
-                            onChange={(e) =>
-                                setForm((a) => ({ ...a, cep: e.target.value }))
-                            }
-                            inputMode="numeric"
-                            maxLength={9}
-                            placeholder="00000-000"
-                            className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
-                            required
-                        />
-                    </label>
-
-                    <label className="block text-sm font-medium text-navy">
-                        Número (opcional)
-                        <input
-                            value={form.numero}
-                            onChange={(e) =>
-                                setForm((a) => ({ ...a, numero: e.target.value }))
-                            }
-                            className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
-                        />
-                    </label>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <label className="block text-sm font-medium text-navy">
-                            Latitude (opcional)
-                            <input
-                                value={form.latitude}
-                                onChange={(e) =>
-                                    setForm((a) => ({ ...a, latitude: e.target.value }))
-                                }
-                                inputMode="decimal"
-                                placeholder="-23.550520"
-                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
-                            />
-                        </label>
-
-                        <label className="block text-sm font-medium text-navy">
-                            Longitude (opcional)
-                            <input
-                                value={form.longitude}
-                                onChange={(e) =>
-                                    setForm((a) => ({ ...a, longitude: e.target.value }))
-                                }
-                                inputMode="decimal"
-                                placeholder="-46.633308"
-                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
-                            />
-                        </label>
+            {carregando ? <p className={estilos.subtitulo}>Carregando endereço…</p> : (
+                <form onSubmit={salvar} className={estilos.formEndereco}>
+                    <div className={estilos.linhaCep}>
+                        <label className={estilos.campo}>CEP<div className={estilos.buscaCep}>
+                            <input aria-label="CEP" value={form.cep} placeholder="00000-000" inputMode="numeric" maxLength={9} required onBlur={() => { if (digitos(form.cep).length === 8 && !geografia.cidade) void consultarCep(); }} onChange={evento => { const cep = formatarCep(evento.target.value); cepAtual.current = digitos(cep); consulta.current?.abort(); setConsultando(false); setForm(atual => ({ ...atual, cep })); setGeografia(geografiaVazia); }} />
+                            <button type="button" aria-label="Consultar CEP" disabled={consultando} onClick={() => void consultarCep()}><Search size={19} aria-hidden /></button>
+                        </div></label>
+                        <button type="button" className={estilos.botaoSecundario} onClick={usarLocalizacao} disabled={localizando || salvando}><LocateFixed size={19} aria-hidden />{localizando ? "Obtendo localização…" : "Usar minha localização"}</button>
                     </div>
-
-                    <div className="flex justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setEditando(false)}
-                            disabled={salvando}
-                            className="btn-secundario text-sm disabled:opacity-60"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={salvando}
-                            className="btn-primario text-sm disabled:opacity-60"
-                        >
-                            {salvando ? "Salvando…" : "Salvar endereço"}
-                        </button>
+                    <div className={estilos.linhaRua}>
+                        <label className={estilos.campo}>Rua<input value={geografia.rua} readOnly placeholder="Preenchida pelo CEP" /></label>
+                        <label className={estilos.campo}>Número<input value={form.numero} placeholder="Nº" onChange={evento => setForm(atual => ({ ...atual, numero: evento.target.value }))} /></label>
                     </div>
+                    <div className={estilos.linhaCidade}>
+                        <label className={estilos.campo}>Bairro<input value={geografia.bairro} readOnly placeholder="Pelo CEP" /></label>
+                        <label className={estilos.campo}>Cidade<input value={geografia.cidade} readOnly placeholder="Pelo CEP" /></label>
+                        <label className={estilos.campo}>Estado<input value={geografia.uf} readOnly placeholder="UF" /></label>
+                    </div>
+                    <details className={estilos.coordenadas} open={mostrarCoordenadas} onToggle={evento => setMostrarCoordenadas(evento.currentTarget.open)}><summary>Coordenadas da loja (opcional)</summary><div>
+                        <label className={estilos.campo}>Latitude<input inputMode="decimal" value={form.latitude} placeholder="-20.211" onChange={evento => setForm(atual => ({ ...atual, latitude: evento.target.value }))} /></label>
+                        <label className={estilos.campo}>Longitude<input inputMode="decimal" value={form.longitude} placeholder="-50.927" onChange={evento => setForm(atual => ({ ...atual, longitude: evento.target.value }))} /></label>
+                    </div></details>
+                    {consultando ? <p role="status" className={estilos.subtitulo}>Consultando CEP…</p> : null}
+                    <div><button type="submit" disabled={salvando || consultando} className={estilos.botaoPrimario}><MapPin size={18} aria-hidden />{salvando ? "Salvando…" : "Salvar endereço"}</button></div>
                 </form>
-            ) : null}
-
-            {!carregando && !editando ? (
-                <div className="space-y-3">
-                    {endereco ? (
-                        <div className="text-sm text-navy">
-                            <p className="font-medium text-navy">
-                                {descreverEndereco(endereco)}
-                            </p>
-                            <p className="mt-1 text-muted">
-                                CEP {formatarCep(endereco.cep)}
-                            </p>
-                            <p className="mt-1 text-muted">
-                                {endereco.latitude != null && endereco.longitude != null
-                                    ? `Coordenadas: ${endereco.latitude}, ${endereco.longitude}`
-                                    : "Coordenadas ainda não informadas."}
-                            </p>
-                        </div>
-                    ) : (
-                        <p className="rounded-[var(--radius-sm)] border border-border bg-[#f7faf8] px-4 py-3 text-sm text-muted">
-                            Endereço ainda não cadastrado.
-                        </p>
-                    )}
-
-                    <button
-                        type="button"
-                        onClick={abrirFormulario}
-                        className="btn-secundario text-sm"
-                    >
-                        {endereco ? "Editar endereço" : "Cadastrar endereço"}
-                    </button>
-                </div>
-            ) : null}
-        </div>
+            )}
+            {erro ? <p role="alert" className={estilos.textoErro}>{erro}</p> : null}
+            {aviso ? <p role="status" className={estilos.textoSucesso}>{aviso}</p> : null}
+        </section>
     );
 }

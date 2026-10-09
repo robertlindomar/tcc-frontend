@@ -13,5 +13,6 @@ export interface RepositorioLojista {
     aprovar(id: number): Promise<Lojista>;
     rejeitar(id: number, justificativaRejeicao: string): Promise<Lojista>;
     reenviarParaAnalise(id: number): Promise<Lojista>;
+    enviarLogo(id: number, arquivo: File): Promise<Lojista>;
     deletar(id: number): Promise<void>;
 }
