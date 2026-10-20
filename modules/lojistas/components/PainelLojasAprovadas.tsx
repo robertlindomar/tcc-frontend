@@ -97,7 +97,6 @@ export function PainelLojasAprovadas() {
                     <table className="w-full min-w-[720px] text-sm">
                         <thead className="bg-[#f7faf8] text-navy">
                             <tr>
-                                <th className="px-5 py-3 text-left font-semibold">ID</th>
                                 <th className="px-5 py-3 text-left font-semibold">
                                     Nome da Loja
                                 </th>
@@ -114,7 +113,7 @@ export function PainelLojasAprovadas() {
                             {carregando ? (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={4}
                                         className="px-5 py-10 text-center text-muted"
                                     >
                                         Carregando…
@@ -124,7 +123,7 @@ export function PainelLojasAprovadas() {
                             {!carregando && filtrados.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={4}
                                         className="px-5 py-10 text-center text-muted"
                                     >
                                         Nenhuma loja aprovada ainda.
@@ -137,9 +136,6 @@ export function PainelLojasAprovadas() {
                                         key={lojista.id}
                                         className="hover:bg-[#f7faf8]/80"
                                     >
-                                        <td className="px-5 py-3.5 text-muted">
-                                            #{lojista.id}
-                                        </td>
                                         <td className="px-5 py-3.5 font-semibold text-navy">
                                             {lojista.nomeFantasia}
                                         </td>
