@@ -12,6 +12,17 @@ import { Lojista } from "../types/lojista.types";
 import { ModalDetalheLojista } from "./ModalDetalheLojista";
 import { ModalJustificativaRejeicao } from "./ModalJustificativaRejeicao";
 
+function formatarDataSolicitacao(valor: Date | string): string {
+    const data = new Date(valor);
+    if (Number.isNaN(data.getTime())) {
+        return "—";
+    }
+    return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
+    }).format(data);
+}
+
 export function PainelPreCadastros({
     lojistaInicialId,
 }: {
@@ -142,7 +153,9 @@ export function PainelPreCadastros({
                     <table className="w-full min-w-[720px] text-sm">
                         <thead className="bg-[#f7faf8] text-navy">
                             <tr>
-                                <th className="px-5 py-3 text-left font-semibold">ID</th>
+                                <th className="px-5 py-3 text-left font-semibold">
+                                    Data de solicitação
+                                </th>
                                 <th className="px-5 py-3 text-left font-semibold">
                                     Nome da Loja
                                 </th>
@@ -183,7 +196,7 @@ export function PainelPreCadastros({
                                         className="hover:bg-[#f7faf8]/80"
                                     >
                                         <td className="px-5 py-3.5 text-muted">
-                                            #{lojista.id}
+                                            {formatarDataSolicitacao(lojista.dataCriacao)}
                                         </td>
                                         <td className="px-5 py-3.5 font-semibold text-navy">
                                             {lojista.nomeFantasia}
