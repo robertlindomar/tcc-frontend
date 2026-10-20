@@ -9,6 +9,7 @@ import {
     rejeitarLojista,
 } from "../services/servicoLojista";
 import { Lojista } from "../types/lojista.types";
+import { ModalConfirmarAprovacao } from "./ModalConfirmarAprovacao";
 import { ModalDetalheLojista } from "./ModalDetalheLojista";
 import { ModalJustificativaRejeicao } from "./ModalJustificativaRejeicao";
 
@@ -35,6 +36,7 @@ export function PainelPreCadastros({
     const [erro, setErro] = useState("");
     const [detalhe, setDetalhe] = useState<Lojista | null>(null);
     const [rejeitando, setRejeitando] = useState<Lojista | null>(null);
+    const [aprovando, setAprovando] = useState<Lojista | null>(null);
 
     useEffect(() => {
         let cancelado = false;
@@ -92,7 +94,9 @@ export function PainelPreCadastros({
             await aprovarLojista(lojista.id);
             setLojistas((lista) => lista.filter((item) => item.id !== lojista.id));
             setDetalhe(null);
+            setAprovando(null);
         } catch (error) {
+            setAprovando(null);
             setErro(obterMensagemErroApi(error, "Erro ao aprovar pré-cadastro."));
         } finally {
             setAcaoId(null);
@@ -217,7 +221,7 @@ export function PainelPreCadastros({
                                                     aria-label={`Aprovar ${lojista.nomeFantasia}`}
                                                     disabled={acaoId === lojista.id}
                                                     onClick={() =>
-                                                        void handleAprovar(lojista)
+                                                        setAprovando(lojista)
                                                     }
                                                     className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-hover disabled:opacity-50"
                                                 >
@@ -271,13 +275,26 @@ export function PainelPreCadastros({
                             <button
                                 type="button"
                                 disabled={acaoId === detalhe.id}
-                                onClick={() => void handleAprovar(detalhe)}
+                                onClick={() => setAprovando(detalhe)}
                                 className="btn-primario text-sm disabled:opacity-50"
                             >
                                 Aprovar
                             </button>
                         </>
                     }
+                />
+            ) : null}
+
+            {aprovando ? (
+                <ModalConfirmarAprovacao
+                    nomeLoja={aprovando.nomeFantasia}
+                    salvando={acaoId === aprovando.id}
+                    onCancelar={() => {
+                        if (acaoId === null) {
+                            setAprovando(null);
+                        }
+                    }}
+                    onConfirmar={() => void handleAprovar(aprovando)}
                 />
             ) : null}
 
