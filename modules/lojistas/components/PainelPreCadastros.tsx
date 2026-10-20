@@ -12,7 +12,11 @@ import { Lojista } from "../types/lojista.types";
 import { ModalDetalheLojista } from "./ModalDetalheLojista";
 import { ModalJustificativaRejeicao } from "./ModalJustificativaRejeicao";
 
-export function PainelPreCadastros() {
+export function PainelPreCadastros({
+    lojistaInicialId,
+}: {
+    lojistaInicialId?: number;
+} = {}) {
     const [lojistas, setLojistas] = useState<Lojista[]>([]);
     const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
@@ -31,6 +35,10 @@ export function PainelPreCadastros() {
                 const lista = await listarLojistas({ status: "PENDENTE" });
                 if (!cancelado) {
                     setLojistas(lista);
+                    const inicial = lista.find((item) => item.id === lojistaInicialId);
+                    if (inicial) {
+                        setDetalhe(inicial);
+                    }
                 }
             } catch (error) {
                 if (!cancelado) {
@@ -53,7 +61,7 @@ export function PainelPreCadastros() {
         return () => {
             cancelado = true;
         };
-    }, []);
+    }, [lojistaInicialId]);
 
     const filtrados = useMemo(() => {
         const termo = busca.trim().toLowerCase();

@@ -1,4 +1,5 @@
-import { CheckCircle2, Gift, Megaphone, Store } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle2, Eye, Gift, Megaphone, Store } from "lucide-react";
 import { AtividadeDashboard, TipoAtividadeDashboard } from "../types/dashboard.types";
 
 const ICONE_POR_TIPO: Record<TipoAtividadeDashboard, typeof Store> = {
@@ -43,6 +44,15 @@ export function ItemAtividade({ atividade }: { atividade: AtividadeDashboard }) 
                     {formatarQuando(atividade.ocorridoEm)}
                 </p>
             </div>
+            {atividade.tipo === "LOJA_PENDENTE" ? (
+                <Link
+                    href={`/pre-cadastros?lojista=${atividade.entidadeId}`}
+                    className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                >
+                    <Eye className="h-3.5 w-3.5" aria-hidden />
+                    Ver pré-cadastro
+                </Link>
+            ) : null}
         </li>
     );
 }

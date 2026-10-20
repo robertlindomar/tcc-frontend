@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Gift, Megaphone, Store, Users, type LucideIcon } from "lucide-react";
 
 export type TomMetrica = "verde" | "coral" | "ambar" | "roxo";
@@ -26,18 +27,19 @@ export function CartaoMetrica({
     rotulo,
     icone: Icone,
     tom = "verde",
+    href,
 }: {
     valor: number;
     rotulo: string;
     icone: LucideIcon;
     tom?: TomMetrica;
+    href?: string;
 }) {
     const estilo = TONS[tom];
+    const classeBase = `flex items-center gap-4 rounded-2xl border p-4 shadow-[var(--shadow-soft)] ${estilo.card}`;
 
-    return (
-        <article
-            className={`flex items-center gap-4 rounded-2xl border p-4 shadow-[var(--shadow-soft)] ${estilo.card}`}
-        >
+    const conteudo = (
+        <>
             <div
                 className={`flex h-12 w-12 items-center justify-center rounded-xl ${estilo.icone}`}
             >
@@ -49,8 +51,21 @@ export function CartaoMetrica({
                 </p>
                 <p className="text-sm text-muted">{rotulo}</p>
             </div>
-        </article>
+        </>
     );
+
+    if (href) {
+        return (
+            <Link
+                href={href}
+                className={`${classeBase} transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-primary`}
+            >
+                {conteudo}
+            </Link>
+        );
+    }
+
+    return <article className={classeBase}>{conteudo}</article>;
 }
 
 export const ICONES_METRICA = {

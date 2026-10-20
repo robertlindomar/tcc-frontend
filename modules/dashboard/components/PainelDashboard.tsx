@@ -77,6 +77,7 @@ export function PainelDashboard() {
                             rotulo="Lojas aguardando aprovação"
                             icone={ICONES_METRICA.lojasPendentes}
                             tom="verde"
+                            href="/pre-cadastros"
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.campanhasCadastradas}
