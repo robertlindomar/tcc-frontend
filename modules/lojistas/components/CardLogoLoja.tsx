@@ -24,8 +24,8 @@ export function CardLogoLoja({ loja, onAtualizar }: { loja: Lojista; onAtualizar
             setErro("Selecione uma imagem JPG, PNG ou WebP.");
             return;
         }
-        if (arquivo.size > 2 * 1024 * 1024) {
-            setErro("A imagem deve ter no máximo 2 MB.");
+        if (arquivo.size > 25 * 1024 * 1024) {
+            setErro("A imagem deve ter no máximo 25 MB.");
             return;
         }
         setEnviando(true);
@@ -65,7 +65,7 @@ export function CardLogoLoja({ loja, onAtualizar }: { loja: Lojista; onAtualizar
             <div className={estilos.dicasLogo}>
                 <strong><Info size={18} aria-hidden />Dicas para uma boa logo</strong>
                 <ul>
-                    {["Use uma imagem quadrada", "Prefira fundo transparente ou claro", "Formato: JPG, PNG ou WebP", "Tamanho máximo: 2 MB"].map(dica => <li key={dica}><Check size={18} aria-hidden />{dica}</li>)}
+                    {["Use uma imagem quadrada", "Prefira fundo transparente ou claro", "Formato: JPG, PNG ou WebP", "Tamanho máximo: 25 MB"].map(dica => <li key={dica}><Check size={18} aria-hidden />{dica}</li>)}
                 </ul>
             </div>
             <div className={estilos.previewLogo}>
