@@ -170,7 +170,6 @@ export function PainelLojasAprovadas() {
             {detalhe ? (
                 <ModalDetalheLojista
                     lojista={detalhe}
-                    exibirRecompensas
                     onFechar={() => setDetalhe(null)}
                 />
             ) : null}

@@ -27,10 +27,6 @@ export async function reativarRecompensa(id: number) {
     return repositorioRecompensa.reativar(id);
 }
 
-export async function listarRecompensasDaLoja(lojistaId: number) {
-    return repositorioRecompensa.listarDaLoja(lojistaId);
-}
-
 export async function deletarRecompensa(id: number) {
     return repositorioRecompensa.deletar(id);
 }
