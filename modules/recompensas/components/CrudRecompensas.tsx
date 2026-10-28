@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { CampoData } from "@/shared/components/ui/CampoData";
+import { validarDataNaoPassada } from "@/shared/utils/dataCivil";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import {
@@ -122,6 +124,14 @@ export function CrudRecompensas() {
                 setErro("Estoque deve ser um inteiro maior ou igual a zero, ou vazio para ilimitado.");
                 return;
             }
+        }
+        const erroData = validarDataNaoPassada(form.dataFim.trim(), {
+            rotulo: "validade",
+            valorOriginal: editando?.dataFimCivil,
+        });
+        if (erroData) {
+            setErro(erroData);
+            return;
         }
         setSalvando(true);
         setErro("");
@@ -376,20 +386,13 @@ export function CrudRecompensas() {
                                 Deixe vazio para quantidade ilimitada.
                             </span>
                         </label>
-                        <label className="block text-sm font-medium text-navy">
-                            Válida até
-                            <input
-                                type="date"
-                                value={form.dataFim}
-                                onChange={(e) =>
-                                    setForm((a) => ({ ...a, dataFim: e.target.value }))
-                                }
-                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
-                            />
-                            <span className="mt-1 block text-xs font-normal text-muted">
-                                Deixe vazio para não definir uma data de vencimento.
-                            </span>
-                        </label>
+                        <CampoData
+                            rotulo="Válida até"
+                            valor={form.dataFim}
+                            onChange={(dataFim) => setForm((a) => ({ ...a, dataFim }))}
+                            valorOriginal={editando?.dataFimCivil}
+                            dica="Deixe vazio para não definir uma data de vencimento."
+                        />
                         <label className="block text-sm font-medium text-navy">
                             Descrição (opcional)
                             <textarea

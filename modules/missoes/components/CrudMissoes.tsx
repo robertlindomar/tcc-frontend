@@ -4,11 +4,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { CampoBusca } from "@/shared/components/ui/CampoBusca";
 import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
-import {
-    DATA_MAXIMA_INPUT,
-    ehDataIsoValida,
-    hojeIsoCivil,
-} from "@/shared/utils/dataCivil";
+import { validarDataNaoPassada } from "@/shared/utils/dataCivil";
+import { CampoData } from "@/shared/components/ui/CampoData";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarMissao,
@@ -63,11 +60,6 @@ export function CrudMissoes() {
         () => (missaoEditando ? "Editar missão" : "Nova missão"),
         [missaoEditando],
     );
-
-    const hoje = hojeIsoCivil();
-    const dataOriginal = missaoEditando?.dataFimCivil;
-    const dataMinima = dataOriginal && dataOriginal < hoje ? dataOriginal : hoje;
-
     const missoesFiltrados = useMemo(
         () =>
             missoes.filter((item) =>
@@ -146,13 +138,13 @@ export function CrudMissoes() {
             setErro("Informe até quando a missão é válida.");
             return;
         }
-        if (!ehDataIsoValida(form.dataFim)) {
-            setErro("Data de validade inválida. Use dd/mm/aaaa, com ano de 4 dígitos.");
-            return;
-        }
-        const dataAlterada = form.dataFim !== missaoEditando?.dataFimCivil;
-        if (dataAlterada && form.dataFim < hojeIsoCivil()) {
-            setErro("A data de validade não pode ser anterior a hoje.");
+        const erroData = validarDataNaoPassada(form.dataFim, {
+            rotulo: "validade",
+            obrigatorio: true,
+            valorOriginal: missaoEditando?.dataFimCivil,
+        });
+        if (erroData) {
+            setErro(erroData);
             return;
         }
 
@@ -346,23 +338,15 @@ export function CrudMissoes() {
                             </span>
                         </label>
 
-                        <label className="block text-sm font-medium text-navy">
-                            Válida até
-                            <input
-                                type="date"
-                                min={dataMinima}
-                                max={DATA_MAXIMA_INPUT}
-                                value={form.dataFim}
-                                onChange={(event) =>
-                                    setForm((atual) => ({
-                                        ...atual,
-                                        dataFim: event.target.value,
-                                    }))
-                                }
-                                className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
-                                required
-                            />
-                        </label>
+                        <CampoData
+                            rotulo="Válida até"
+                            valor={form.dataFim}
+                            onChange={(dataFim) =>
+                                setForm((atual) => ({ ...atual, dataFim }))
+                            }
+                            valorOriginal={missaoEditando?.dataFimCivil}
+                            obrigatorio
+                        />
 
                         <label className="block text-sm font-medium text-navy">
                             Descrição (opcional)

@@ -1,6 +1,33 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DATA_MAXIMA_INPUT, ehDataIsoValida, hojeIsoCivil } from "./dataCivil.ts";
+import {
+    DATA_MAXIMA_INPUT,
+    dataMinimaPermitida,
+    ehDataIsoValida,
+    hojeIsoCivil,
+    validarDataNaoPassada,
+} from "./dataCivil.ts";
+
+const agora = new Date("2026-10-27T15:00:00Z");
+
+test("data mínima é hoje, ou a data salva se já venceu", () => {
+    assert.equal(dataMinimaPermitida(null, agora), "2026-10-27");
+    assert.equal(dataMinimaPermitida("2026-12-01", agora), "2026-10-27");
+    assert.equal(dataMinimaPermitida("2026-09-30", agora), "2026-09-30");
+});
+
+test("validarDataNaoPassada cobre vazio, formato, passado e data salva", () => {
+    const base = { rotulo: "validade", agora };
+    assert.equal(validarDataNaoPassada("", base), null);
+    assert.match(validarDataNaoPassada("", { ...base, obrigatorio: true }), /Informe/);
+    assert.match(validarDataNaoPassada("123456-01-01", base), /4 dígitos/);
+    assert.match(validarDataNaoPassada("2026-10-26", base), /anterior a hoje/);
+    assert.equal(validarDataNaoPassada("2026-10-27", base), null);
+    assert.equal(
+        validarDataNaoPassada("2026-09-30", { ...base, valorOriginal: "2026-09-30" }),
+        null,
+    );
+});
 
 test("aceita apenas datas existentes com ano de 4 dígitos", () => {
     assert.equal(ehDataIsoValida("2026-01-01"), true);

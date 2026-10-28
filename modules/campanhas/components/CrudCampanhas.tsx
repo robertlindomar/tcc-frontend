@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { CampoData } from "@/shared/components/ui/CampoData";
+import { validarDataNaoPassada } from "@/shared/utils/dataCivil";
 import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
@@ -126,6 +128,21 @@ export function CrudCampanhas() {
         }
         if (!form.dataInicio || !form.dataFim) {
             setErro("Informe início e fim da campanha.");
+            return;
+        }
+        const erroData =
+            validarDataNaoPassada(form.dataInicio, {
+                rotulo: "início",
+                obrigatorio: true,
+                valorOriginal: campanhaEditando?.dataInicioCivil,
+            }) ??
+            validarDataNaoPassada(form.dataFim, {
+                rotulo: "fim",
+                obrigatorio: true,
+                valorOriginal: campanhaEditando?.dataFimCivil,
+            });
+        if (erroData) {
+            setErro(erroData);
             return;
         }
         if (form.dataFim < form.dataInicio) {
@@ -279,36 +296,27 @@ export function CrudCampanhas() {
                         </label>
 
                         <div className="grid gap-4 sm:grid-cols-2">
-                            <label className="block text-sm font-medium text-navy">
-                                Início
-                                <input
-                                    type="date"
-                                    value={form.dataInicio}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            dataInicio: event.target.value,
-                                        }))
-                                    }
-                                    className={classeCampo}
-                                    required
-                                />
-                            </label>
-                            <label className="block text-sm font-medium text-navy">
-                                Fim
-                                <input
-                                    type="date"
-                                    value={form.dataFim}
-                                    onChange={(event) =>
-                                        setForm((atual) => ({
-                                            ...atual,
-                                            dataFim: event.target.value,
-                                        }))
-                                    }
-                                    className={classeCampo}
-                                    required
-                                />
-                            </label>
+                            <CampoData
+                                rotulo="Início"
+                                valor={form.dataInicio}
+                                onChange={(dataInicio) =>
+                                    setForm((atual) => ({ ...atual, dataInicio }))
+                                }
+                                valorOriginal={campanhaEditando?.dataInicioCivil}
+                                className={classeCampo}
+                                obrigatorio
+                            />
+                            <CampoData
+                                rotulo="Fim"
+                                valor={form.dataFim}
+                                onChange={(dataFim) =>
+                                    setForm((atual) => ({ ...atual, dataFim }))
+                                }
+                                valorOriginal={campanhaEditando?.dataFimCivil}
+                                minimo={form.dataInicio}
+                                className={classeCampo}
+                                obrigatorio
+                            />
                         </div>
 
                         <label className="block text-sm font-medium text-navy">
