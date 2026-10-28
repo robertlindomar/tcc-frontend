@@ -84,18 +84,21 @@ export function PainelDashboard() {
                             rotulo="Campanhas cadastradas"
                             icone={ICONES_METRICA.campanhas}
                             tom="coral"
+                            href="/campanhas"
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.sorteiosCadastrados}
                             rotulo="Sorteios cadastrados"
                             icone={ICONES_METRICA.sorteios}
                             tom="ambar"
+                            href="/sorteios"
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.totalLojasParticipantes}
                             rotulo="Total de lojas participantes"
                             icone={ICONES_METRICA.participantes}
                             tom="roxo"
+                            href="/lojas-aprovadas"
                         />
                     </section>
 
