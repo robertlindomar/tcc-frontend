@@ -4,6 +4,11 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { CampoBusca } from "@/shared/components/ui/CampoBusca";
 import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
+import {
+    DATA_MAXIMA_INPUT,
+    ehDataIsoValida,
+    hojeIsoCivil,
+} from "@/shared/utils/dataCivil";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarMissao,
@@ -58,6 +63,10 @@ export function CrudMissoes() {
         () => (missaoEditando ? "Editar missão" : "Nova missão"),
         [missaoEditando],
     );
+
+    const hoje = hojeIsoCivil();
+    const dataOriginal = missaoEditando?.dataFimCivil;
+    const dataMinima = dataOriginal && dataOriginal < hoje ? dataOriginal : hoje;
 
     const missoesFiltrados = useMemo(
         () =>
@@ -135,6 +144,15 @@ export function CrudMissoes() {
         }
         if (!form.dataFim) {
             setErro("Informe até quando a missão é válida.");
+            return;
+        }
+        if (!ehDataIsoValida(form.dataFim)) {
+            setErro("Data de validade inválida. Use dd/mm/aaaa, com ano de 4 dígitos.");
+            return;
+        }
+        const dataAlterada = form.dataFim !== missaoEditando?.dataFimCivil;
+        if (dataAlterada && form.dataFim < hojeIsoCivil()) {
+            setErro("A data de validade não pode ser anterior a hoje.");
             return;
         }
 
@@ -332,6 +350,8 @@ export function CrudMissoes() {
                             Válida até
                             <input
                                 type="date"
+                                min={dataMinima}
+                                max={DATA_MAXIMA_INPUT}
                                 value={form.dataFim}
                                 onChange={(event) =>
                                     setForm((atual) => ({
