@@ -6,6 +6,7 @@ interface TabelaCategoriasProps {
     onExcluir: (categoria: Categoria) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
 }
 
 export function TabelaCategorias({
@@ -14,6 +15,7 @@ export function TabelaCategorias({
     onExcluir,
     carregando = false,
     excluindoId = null,
+    mensagemVazia = "Nenhuma categoria cadastrada.",
 }: TabelaCategoriasProps) {
     return (
         <div className="painel-card overflow-hidden">
@@ -35,7 +37,7 @@ export function TabelaCategorias({
                     {!carregando && categorias.length === 0 ? (
                         <tr>
                             <td colSpan={2} className="px-4 py-10 text-center text-muted">
-                                Nenhuma categoria cadastrada.
+                                {mensagemVazia}
                             </td>
                         </tr>
                     ) : null}

@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
@@ -14,6 +16,7 @@ import { TabelaCategorias } from "./TabelaCategorias";
 
 export function CrudCategorias() {
     const [categorias, setCategorias] = useState<Categoria[]>([]);
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -26,6 +29,16 @@ export function CrudCategorias() {
     const tituloModal = useMemo(
         () => (categoriaEditando ? "Editar categoria" : "Nova categoria"),
         [categoriaEditando],
+    );
+
+    const categoriasFiltrados = useMemo(
+        () =>
+            categorias.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [item.nome],
+                }),
+            ),
+        [busca, categorias],
     );
 
     useEffect(() => {
@@ -148,8 +161,20 @@ export function CrudCategorias() {
                 </div>
             ) : null}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar categoria…"
+                rotuloContagem={rotularContagem(categoriasFiltrados.length, "categoria", "categorias")}
+            />
+
             <TabelaCategorias
-                categorias={categorias}
+                categorias={categoriasFiltrados}
+                mensagemVazia={
+                    categorias.length > 0
+                        ? "Nenhuma categoria encontrada para essa busca."
+                        : undefined
+                }
                 onEditar={abrirEdicao}
                 onExcluir={setCategoriaExcluindo}
                 carregando={carregando}

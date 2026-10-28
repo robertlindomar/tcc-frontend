@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
@@ -32,6 +34,7 @@ const formInicial: FormState = {
 
 export function CrudCampanhas() {
     const [campanhas, setCampanhas] = useState<Campanha[]>([]);
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -44,6 +47,16 @@ export function CrudCampanhas() {
     const tituloModal = useMemo(
         () => (campanhaEditando ? "Editar campanha" : "Nova campanha"),
         [campanhaEditando],
+    );
+
+    const campanhasFiltrados = useMemo(
+        () =>
+            campanhas.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [item.nome, item.descricao],
+                }),
+            ),
+        [busca, campanhas],
     );
 
     useEffect(() => {
@@ -204,8 +217,20 @@ export function CrudCampanhas() {
                 </div>
             ) : null}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por nome ou descrição…"
+                rotuloContagem={rotularContagem(campanhasFiltrados.length, "campanha", "campanhas")}
+            />
+
             <TabelaCampanhas
-                campanhas={campanhas}
+                campanhas={campanhasFiltrados}
+                mensagemVazia={
+                    campanhas.length > 0
+                        ? "Nenhuma campanha encontrada para essa busca."
+                        : undefined
+                }
                 onEditar={abrirEdicao}
                 onExcluir={setCampanhaExcluindo}
                 carregando={carregando}

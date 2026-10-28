@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarEvento,
@@ -27,6 +29,7 @@ const formInicial: FormState = {
 
 export function CrudEventos() {
     const [eventos, setEventos] = useState<Evento[]>([]);
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -41,6 +44,16 @@ export function CrudEventos() {
     const tituloModal = useMemo(
         () => (eventoEditando ? "Editar evento" : "Novo evento"),
         [eventoEditando],
+    );
+
+    const eventosFiltrados = useMemo(
+        () =>
+            eventos.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [item.nome, item.descricao],
+                }),
+            ),
+        [busca, eventos],
     );
 
     useEffect(() => {
@@ -188,9 +201,21 @@ export function CrudEventos() {
                 </div>
             )}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por nome ou descrição…"
+                rotuloContagem={rotularContagem(eventosFiltrados.length, "evento", "eventos")}
+            />
+
             <div className="overflow-x-auto">
                 <TabelaEventos
-                    eventos={eventos}
+                    eventos={eventosFiltrados}
+                    mensagemVazia={
+                        eventos.length > 0
+                            ? "Nenhum evento encontrado para essa busca."
+                            : undefined
+                    }
                     onEditar={abrirEdicao}
                     onExcluir={setEventoExcluindo}
                     carregando={carregando}

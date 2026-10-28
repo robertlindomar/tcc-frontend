@@ -13,6 +13,7 @@ import {
     reenviarLojistaParaAnalise,
 } from "@/modules/lojistas/services/servicoLojista";
 import { Lojista, StatusLojista } from "@/modules/lojistas/types/lojista.types";
+import { formatarCnpj, mascararCnpj } from "@/shared/utils/buscaTexto";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { PreviaMinhaLoja } from "./PreviaMinhaLoja";
 import { Eye, ExternalLink } from "lucide-react";
@@ -54,7 +55,7 @@ function formularioDoPerfil(perfil: Lojista): FormState {
     return {
         nomeFantasia: perfil.nomeFantasia,
         razaoSocial: perfil.razaoSocial,
-        cnpj: perfil.cnpj,
+        cnpj: formatarCnpj(perfil.cnpj),
         inscricaoEstadual:
             perfil.inscricaoEstadual != null ? String(perfil.inscricaoEstadual) : "",
     };
@@ -275,8 +276,11 @@ export function PainelMinhaLoja() {
                             <input
                                 value={form.cnpj}
                                 onChange={(e) =>
-                                    setForm((a) => ({ ...a, cnpj: e.target.value }))
+                                    setForm((a) => ({ ...a, cnpj: mascararCnpj(e.target.value) }))
                                 }
+                                inputMode="numeric"
+                                placeholder="00.000.000/0000-00"
+                                maxLength={18}
                                 className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
                                 required
                             />
@@ -401,7 +405,10 @@ function FormularioEdicao({
                 CNPJ
                 <input
                     value={form.cnpj}
-                    onChange={(e) => onChange((a) => ({ ...a, cnpj: e.target.value }))}
+                    onChange={(e) => onChange((a) => ({ ...a, cnpj: mascararCnpj(e.target.value) }))}
+                    inputMode="numeric"
+                    placeholder="00.000.000/0000-00"
+                    maxLength={18}
                     className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-white px-3 py-2 text-navy outline-none focus:border-primary"
                     required
                 />
@@ -481,7 +488,7 @@ function StatusPerfil({ loja, onEditar, onReenviar }: {
                     <h3>{loja.nomeFantasia}</h3>
                     <p>{loja.razaoSocial}</p>
                     <div className={estilos.cnpj}>
-                        <span>CNPJ: {loja.cnpj}</span>
+                        <span>CNPJ: {formatarCnpj(loja.cnpj)}</span>
                         <button type="button" onClick={() => void copiarCnpj()} aria-label="Copiar CNPJ" title="Copiar CNPJ">
                             {copiado ? <Check size={17} /> : <Copy size={17} />}
                         </button>

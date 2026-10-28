@@ -2,7 +2,9 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import {
     atualizarRecompensa,
     criarRecompensa,
@@ -44,6 +46,7 @@ function rotuloEstoque(estoque: number | null) {
 export function CrudRecompensas() {
     const [aba, setAba] = useState<"recompensas" | "resgates">("recompensas");
     const [lista, setLista] = useState<Recompensa[]>([]);
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [erro, setErro] = useState("");
@@ -54,6 +57,16 @@ export function CrudRecompensas() {
     const tituloModal = useMemo(
         () => (editando ? "Editar recompensa" : "Nova recompensa"),
         [editando],
+    );
+
+    const filtradas = useMemo(
+        () =>
+            lista.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [item.nome, item.descricao, rotuloSituacao(item.situacao)],
+                }),
+            ),
+        [busca, lista],
     );
 
     useEffect(() => {
@@ -228,6 +241,13 @@ export function CrudRecompensas() {
             {aba === "resgates" ? (
                 <PainelResgatesLoja />
             ) : (
+            <>
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por nome, descrição ou situação…"
+                rotuloContagem={rotularContagem(filtradas.length, "recompensa", "recompensas")}
+            />
             <div className="painel-card overflow-hidden">
                 <table className="w-full min-w-[800px] text-sm">
                     <thead className="bg-[#f7faf8] text-muted">
@@ -247,15 +267,17 @@ export function CrudRecompensas() {
                                 </td>
                             </tr>
                         )}
-                        {!carregando && lista.length === 0 && (
+                        {!carregando && filtradas.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="px-4 py-10 text-center text-muted">
-                                    Nenhuma recompensa cadastrada.
+                                    {lista.length > 0
+                                        ? "Nenhuma recompensa encontrada para essa busca."
+                                        : "Nenhuma recompensa cadastrada."}
                                 </td>
                             </tr>
                         )}
                         {!carregando &&
-                            lista.map((item) => (
+                            filtradas.map((item) => (
                                 <tr key={item.id} className="hover:bg-[#f7faf8]">
                                     <td className="px-4 py-3 font-medium">
                                         {item.nome}
@@ -306,6 +328,7 @@ export function CrudRecompensas() {
                     </tbody>
                 </table>
             </div>
+            </>
             )}
 
             {modalAberto && (

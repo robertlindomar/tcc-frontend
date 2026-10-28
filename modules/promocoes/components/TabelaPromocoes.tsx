@@ -9,6 +9,7 @@ interface TabelaPromocoesProps {
     onExcluir: (promocao: Promocao) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
     desativandoId?: number | null;
     reativandoId?: number | null;
 }
@@ -49,6 +50,7 @@ export function TabelaPromocoes({
     excluindoId = null,
     desativandoId = null,
     reativandoId = null,
+    mensagemVazia = "Nenhuma promoção cadastrada.",
 }: TabelaPromocoesProps) {
     return (
         <div className="painel-card overflow-hidden">
@@ -76,7 +78,7 @@ export function TabelaPromocoes({
                     {!carregando && promocoes.length === 0 && (
                         <tr>
                             <td colSpan={6} className="px-4 py-10 text-center text-muted">
-                                Nenhuma promoção cadastrada.
+                                {mensagemVazia}
                             </td>
                         </tr>
                     )}

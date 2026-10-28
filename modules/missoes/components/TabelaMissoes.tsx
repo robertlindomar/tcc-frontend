@@ -11,6 +11,7 @@ interface TabelaMissoesProps {
     onVerQr: (missao: Missao) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
 }
 
 export function TabelaMissoes({
@@ -20,6 +21,7 @@ export function TabelaMissoes({
     onVerQr,
     carregando = false,
     excluindoId = null,
+    mensagemVazia = "Nenhuma missão cadastrada.",
 }: TabelaMissoesProps) {
     return (
         <div className="painel-card overflow-hidden">
@@ -50,7 +52,7 @@ export function TabelaMissoes({
                     {!carregando && missoes.length === 0 && (
                         <tr>
                             <td colSpan={5} className="px-4 py-10 text-center text-muted">
-                                Nenhuma missão cadastrada.
+                                {mensagemVazia}
                             </td>
                         </tr>
                     )}

@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarMissao,
@@ -41,6 +43,7 @@ function parsePontoRecompensa(valor: string): number | undefined {
 
 export function CrudMissoes() {
     const [missoes, setMissoes] = useState<Missao[]>([]);
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -54,6 +57,16 @@ export function CrudMissoes() {
     const tituloModal = useMemo(
         () => (missaoEditando ? "Editar missão" : "Nova missão"),
         [missaoEditando],
+    );
+
+    const missoesFiltrados = useMemo(
+        () =>
+            missoes.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [item.nome, item.descricao],
+                }),
+            ),
+        [busca, missoes],
     );
 
     useEffect(() => {
@@ -203,9 +216,21 @@ export function CrudMissoes() {
                 </div>
             )}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por nome ou descrição…"
+                rotuloContagem={rotularContagem(missoesFiltrados.length, "missão", "missões")}
+            />
+
             <div className="overflow-x-auto">
                 <TabelaMissoes
-                    missoes={missoes}
+                    missoes={missoesFiltrados}
+                    mensagemVazia={
+                        missoes.length > 0
+                            ? "Nenhuma missão encontrada para essa busca."
+                            : undefined
+                    }
                     onEditar={abrirEdicao}
                     onExcluir={setMissaoExcluindo}
                     onVerQr={setMissaoQr}

@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca } from "@/shared/utils/buscaTexto";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { listarConsumidores } from "../services/servicoConsumidor";
 import { ListagemVisitantesLoja } from "../types/consumidor.types";
@@ -16,6 +18,7 @@ export function PainelConsumidoresDaLoja() {
         consumidoresUnicos: 0,
         totalVisitas: 0,
     });
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
 
@@ -46,6 +49,14 @@ export function PainelConsumidoresDaLoja() {
         };
     }, []);
 
+    const consumidoresFiltrados = useMemo(
+        () =>
+            listagem.consumidores.filter((item) =>
+                correspondeBusca(busca, { textos: [item.nome] }),
+            ),
+        [busca, listagem.consumidores],
+    );
+
     const resumo =
         listagem.consumidoresUnicos === 1
             ? `1 consumidor · ${listagem.totalVisitas} ${listagem.totalVisitas === 1 ? "visita" : "visitas"}`
@@ -70,9 +81,20 @@ export function PainelConsumidoresDaLoja() {
                 </div>
             ) : null}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar consumidor pelo nome…"
+            />
+
             <div className="overflow-x-auto">
                 <TabelaConsumidores
-                    consumidores={listagem.consumidores}
+                    consumidores={consumidoresFiltrados}
+                    mensagemVazia={
+                        listagem.consumidores.length > 0
+                            ? "Nenhum consumidor encontrado para essa busca."
+                            : undefined
+                    }
                     carregando={carregando}
                 />
             </div>

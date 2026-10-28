@@ -6,6 +6,7 @@ interface TabelaCampanhasProps {
     onExcluir: (campanha: Campanha) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
 }
 
 function formatarMoeda(valor: number) {
@@ -29,6 +30,7 @@ export function TabelaCampanhas({
     onExcluir,
     carregando = false,
     excluindoId = null,
+    mensagemVazia = "Nenhuma campanha cadastrada.",
 }: TabelaCampanhasProps) {
     return (
         <div className="painel-card overflow-hidden">
@@ -66,7 +68,7 @@ export function TabelaCampanhas({
                                     colSpan={5}
                                     className="px-5 py-10 text-center text-muted"
                                 >
-                                    Nenhuma campanha cadastrada.
+                                    {mensagemVazia}
                                 </td>
                             </tr>
                         ) : null}

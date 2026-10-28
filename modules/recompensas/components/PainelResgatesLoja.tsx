@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca } from "@/shared/utils/buscaTexto";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     confirmarEntregaResgate,
@@ -17,6 +19,7 @@ function formatarData(data: Date) {
 
 export function PainelResgatesLoja() {
     const [resgates, setResgates] = useState<ResgateRecompensa[]>([]);
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [acaoId, setAcaoId] = useState<number | null>(null);
     const [erro, setErro] = useState("");
@@ -75,9 +78,14 @@ export function PainelResgatesLoja() {
         }
     }
 
-    const pendentes = resgates.filter((item) => item.status === "PENDENTE_ENTREGA");
-    const entregues = resgates.filter((item) => item.status === "ENTREGUE");
-    const recusados = resgates.filter((item) => item.status === "RECUSADO");
+    const filtrados = resgates.filter((item) =>
+        correspondeBusca(busca, {
+            textos: [item.nomeConsumidor, item.nomeRecompensaSnapshot],
+        }),
+    );
+    const pendentes = filtrados.filter((item) => item.status === "PENDENTE_ENTREGA");
+    const entregues = filtrados.filter((item) => item.status === "ENTREGUE");
+    const recusados = filtrados.filter((item) => item.status === "RECUSADO");
 
     return (
         <section className="space-y-5">
@@ -87,6 +95,12 @@ export function PainelResgatesLoja() {
                 </div>
             ) : null}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por consumidor ou recompensa…"
+            />
+
             {carregando ? (
                 <p className="text-sm text-muted">Carregando resgates...</p>
             ) : (
@@ -94,7 +108,7 @@ export function PainelResgatesLoja() {
                     <div>
                         <h2 className="mb-2 text-lg font-semibold text-navy">Pendentes de entrega</h2>
                         {pendentes.length === 0 ? (
-                            <div className="painel-card px-4 py-8 text-center text-sm text-muted">Nenhum resgate aguardando entrega.</div>
+                            <div className="painel-card px-4 py-8 text-center text-sm text-muted">{busca.trim() ? "Nenhum resgate pendente encontrado para essa busca." : "Nenhum resgate aguardando entrega."}</div>
                         ) : (
                             <ul className="painel-card divide-y divide-border overflow-hidden">
                                 {pendentes.map((item) => (

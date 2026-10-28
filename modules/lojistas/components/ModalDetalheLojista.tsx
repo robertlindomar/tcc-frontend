@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
+import { formatarCnpj } from "@/shared/utils/buscaTexto";
 import { Lojista, StatusLojista } from "../types/lojista.types";
 
 const ROTULO_STATUS: Record<StatusLojista, string> = {
@@ -46,7 +47,7 @@ export function ModalDetalheLojista({
                 </div>
                 <div>
                     <dt className="text-muted">CNPJ</dt>
-                    <dd className="font-medium">{lojista.cnpj}</dd>
+                    <dd className="font-medium">{formatarCnpj(lojista.cnpj)}</dd>
                 </div>
                 <div>
                     <dt className="text-muted">E-mail</dt>

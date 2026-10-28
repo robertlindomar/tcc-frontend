@@ -8,6 +8,7 @@ interface TabelaSorteiosProps {
     onAbrirResultado: (sorteio: Sorteio) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
 }
 
 function formatarData(data: Date) {
@@ -37,6 +38,7 @@ export function TabelaSorteios({
     onAbrirResultado,
     carregando = false,
     excluindoId = null,
+    mensagemVazia = "Nenhum sorteio cadastrado.",
 }: TabelaSorteiosProps) {
     return (
         <div className="painel-card overflow-hidden">
@@ -81,7 +83,7 @@ export function TabelaSorteios({
                                     colSpan={6}
                                     className="px-5 py-10 text-center text-muted"
                                 >
-                                    Nenhum sorteio cadastrado.
+                                    {mensagemVazia}
                                 </td>
                             </tr>
                         ) : null}

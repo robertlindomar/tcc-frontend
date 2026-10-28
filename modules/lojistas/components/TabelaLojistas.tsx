@@ -1,3 +1,4 @@
+import { formatarCnpj } from "@/shared/utils/buscaTexto";
 import { Lojista, StatusLojista } from "../types/lojista.types";
 
 interface TabelaLojistasProps {
@@ -8,6 +9,7 @@ interface TabelaLojistasProps {
     onRejeitar: (lojista: Lojista) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
     acaoStatusId?: number | null;
 }
 
@@ -34,6 +36,7 @@ export function TabelaLojistas({
     carregando = false,
     excluindoId = null,
     acaoStatusId = null,
+    mensagemVazia = "Nenhum lojista cadastrado.",
 }: TabelaLojistasProps) {
     return (
         <div className="overflow-hidden border border-slate-200 bg-white shadow-sm">
@@ -61,7 +64,7 @@ export function TabelaLojistas({
                     {!carregando && lojistas.length === 0 && (
                         <tr>
                             <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                                Nenhum lojista cadastrado.
+                                {mensagemVazia}
                             </td>
                         </tr>
                     )}
@@ -72,7 +75,7 @@ export function TabelaLojistas({
                                 <td className="px-4 py-3 font-medium">
                                     {lojista.nomeFantasia}
                                 </td>
-                                <td className="px-4 py-3">{lojista.cnpj}</td>
+                                <td className="px-4 py-3">{formatarCnpj(lojista.cnpj)}</td>
                                 <td className="px-4 py-3">{statusLabel[lojista.status]}</td>
                                 <td className="px-4 py-3">{lojista.associacaoId}</td>
                                 <td className="px-4 py-3">

@@ -8,6 +8,7 @@ interface TabelaProdutosProps {
     onExcluir: (produto: Produto) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
 }
 
 function formatarData(data: Date) {
@@ -32,6 +33,7 @@ export function TabelaProdutos({
     onExcluir,
     carregando = false,
     excluindoId = null,
+    mensagemVazia = "Nenhum produto cadastrado.",
 }: TabelaProdutosProps) {
     return (
         <div className="painel-card overflow-hidden">
@@ -59,7 +61,7 @@ export function TabelaProdutos({
                     {!carregando && produtos.length === 0 && (
                         <tr>
                             <td colSpan={6} className="px-4 py-10 text-center text-muted">
-                                Nenhum produto cadastrado.
+                                {mensagemVazia}
                             </td>
                         </tr>
                     )}

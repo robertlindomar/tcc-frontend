@@ -12,6 +12,8 @@ import {
 } from "@/shared/utils/valorNumerico";
 import { listarProdutos } from "@/modules/produtos/services/servicoProduto";
 import { Produto } from "@/modules/produtos/types/produto.types";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     atualizarPromocao,
@@ -40,6 +42,7 @@ const formInicial: FormState = {
 
 export function CrudPromocoes() {
     const [promocoes, setPromocoes] = useState<Promocao[]>([]);
+    const [busca, setBusca] = useState("");
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
@@ -67,6 +70,16 @@ export function CrudPromocoes() {
         }
         return mapa;
     }, [produtos]);
+
+    const promocoesFiltrados = useMemo(
+        () =>
+            promocoes.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [item.descricao, nomeProdutoPorId[item.produtoId], item.statusVigencia],
+                }),
+            ),
+        [busca, promocoes, nomeProdutoPorId],
+    );
 
     useEffect(() => {
         let cancelado = false;
@@ -269,9 +282,21 @@ export function CrudPromocoes() {
                 </div>
             )}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por produto, descrição ou status…"
+                rotuloContagem={rotularContagem(promocoesFiltrados.length, "promoção", "promoções")}
+            />
+
             <div className="overflow-x-auto">
                 <TabelaPromocoes
-                    promocoes={promocoes}
+                    promocoes={promocoesFiltrados}
+                    mensagemVazia={
+                        promocoes.length > 0
+                            ? "Nenhuma promoção encontrada para essa busca."
+                            : undefined
+                    }
                     nomeProdutoPorId={nomeProdutoPorId}
                     onEditar={abrirEdicao}
                     onDesativar={setPromocaoDesativando}

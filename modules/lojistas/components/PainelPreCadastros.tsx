@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Check, Eye, Search, X } from "lucide-react";
+import { correspondeBusca, formatarCnpj } from "@/shared/utils/buscaTexto";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     aprovarLojista,
@@ -77,13 +78,11 @@ export function PainelPreCadastros({
     }, [lojistaInicialId]);
 
     const filtrados = useMemo(() => {
-        const termo = busca.trim().toLowerCase();
-        if (!termo) return lojistas;
-        return lojistas.filter(
-            (item) =>
-                item.nomeFantasia.toLowerCase().includes(termo) ||
-                item.razaoSocial.toLowerCase().includes(termo) ||
-                item.cnpj.toLowerCase().includes(termo),
+        return lojistas.filter((item) =>
+            correspondeBusca(busca, {
+                textos: [item.nomeFantasia, item.razaoSocial],
+                documentos: [item.cnpj],
+            }),
         );
     }, [busca, lojistas]);
 
@@ -189,7 +188,9 @@ export function PainelPreCadastros({
                                         colSpan={5}
                                         className="px-5 py-10 text-center text-muted"
                                     >
-                                        Nenhum pré-cadastro aguardando análise.
+                                        {lojistas.length > 0
+                                            ? "Nenhum pré-cadastro encontrado para essa busca."
+                                            : "Nenhum pré-cadastro aguardando análise."}
                                     </td>
                                 </tr>
                             ) : null}
@@ -206,7 +207,7 @@ export function PainelPreCadastros({
                                             {lojista.nomeFantasia}
                                         </td>
                                         <td className="px-5 py-3.5 text-navy">
-                                            {lojista.cnpj}
+                                            {formatarCnpj(lojista.cnpj)}
                                         </td>
                                         <td className="px-5 py-3.5">
                                             <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800">

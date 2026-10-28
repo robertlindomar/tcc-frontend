@@ -7,6 +7,7 @@ interface TabelaEventosProps {
     onExcluir: (evento: Evento) => void;
     carregando?: boolean;
     excluindoId?: number | null;
+    mensagemVazia?: string;
 }
 
 function formatarData(data: Date) {
@@ -23,6 +24,7 @@ export function TabelaEventos({
     onExcluir,
     carregando = false,
     excluindoId = null,
+    mensagemVazia = "Nenhum evento cadastrado.",
 }: TabelaEventosProps) {
     return (
         <div className="painel-card overflow-hidden">
@@ -49,7 +51,7 @@ export function TabelaEventos({
                     {!carregando && eventos.length === 0 && (
                         <tr>
                             <td colSpan={5} className="px-4 py-10 text-center text-muted">
-                                Nenhum evento cadastrado.
+                                {mensagemVazia}
                             </td>
                         </tr>
                     )}

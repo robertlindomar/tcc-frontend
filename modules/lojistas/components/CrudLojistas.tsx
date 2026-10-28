@@ -2,7 +2,14 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { buscarUsuarioLogadoAtual } from "@/modules/auth/services/servicoAuth";
+import {
+    correspondeBusca,
+    formatarCnpj,
+    mascararCnpj,
+    rotularContagem,
+} from "@/shared/utils/buscaTexto";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import {
     aprovarLojista,
@@ -46,6 +53,7 @@ export function CrudLojistas() {
     const ehAssociacao = papel === "ASSOCIACAO";
 
     const [lojistas, setLojistas] = useState<Lojista[]>([]);
+    const [busca, setBusca] = useState("");
     const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>(
         ehAssociacao ? "PENDENTE" : "",
     );
@@ -63,6 +71,17 @@ export function CrudLojistas() {
     const tituloModal = useMemo(
         () => (lojistaEditando ? "Editar lojista" : "Novo lojista"),
         [lojistaEditando],
+    );
+
+    const lojistasFiltrados = useMemo(
+        () =>
+            lojistas.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [item.nomeFantasia, item.razaoSocial, item.email],
+                    documentos: [item.cnpj],
+                }),
+            ),
+        [busca, lojistas],
     );
 
     useEffect(() => {
@@ -111,7 +130,7 @@ export function CrudLojistas() {
         setForm({
             nomeFantasia: lojista.nomeFantasia,
             razaoSocial: lojista.razaoSocial,
-            cnpj: lojista.cnpj,
+            cnpj: formatarCnpj(lojista.cnpj),
             inscricaoEstadual:
                 lojista.inscricaoEstadual != null
                     ? String(lojista.inscricaoEstadual)
@@ -278,9 +297,21 @@ export function CrudLojistas() {
                 </div>
             )}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por nome, e-mail ou CNPJ…"
+                rotuloContagem={rotularContagem(lojistasFiltrados.length, "lojista", "lojistas")}
+            />
+
             <div className="overflow-x-auto">
                 <TabelaLojistas
-                    lojistas={lojistas}
+                    lojistas={lojistasFiltrados}
+                    mensagemVazia={
+                        lojistas.length > 0
+                            ? "Nenhum lojista encontrado para essa busca."
+                            : undefined
+                    }
                     onEditar={abrirEdicao}
                     onExcluir={setLojistaExcluindo}
                     onAprovar={handleAprovar}
@@ -355,9 +386,12 @@ export function CrudLojistas() {
                                 onChange={(event) =>
                                     setForm((atual) => ({
                                         ...atual,
-                                        cnpj: event.target.value,
+                                        cnpj: mascararCnpj(event.target.value),
                                     }))
                                 }
+                                inputMode="numeric"
+                                placeholder="00.000.000/0000-00"
+                                maxLength={18}
                                 className="mt-1 w-full border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
                                 required
                             />

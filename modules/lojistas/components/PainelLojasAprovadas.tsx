@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Eye, Search } from "lucide-react";
+import { correspondeBusca, formatarCnpj } from "@/shared/utils/buscaTexto";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import { listarLojistas } from "../services/servicoLojista";
 import { Lojista } from "../types/lojista.types";
@@ -49,13 +50,11 @@ export function PainelLojasAprovadas() {
     }, []);
 
     const filtrados = useMemo(() => {
-        const termo = busca.trim().toLowerCase();
-        if (!termo) return lojistas;
-        return lojistas.filter(
-            (item) =>
-                item.nomeFantasia.toLowerCase().includes(termo) ||
-                item.razaoSocial.toLowerCase().includes(termo) ||
-                item.cnpj.toLowerCase().includes(termo),
+        return lojistas.filter((item) =>
+            correspondeBusca(busca, {
+                textos: [item.nomeFantasia, item.razaoSocial],
+                documentos: [item.cnpj],
+            }),
         );
     }, [busca, lojistas]);
 
@@ -126,7 +125,9 @@ export function PainelLojasAprovadas() {
                                         colSpan={4}
                                         className="px-5 py-10 text-center text-muted"
                                     >
-                                        Nenhuma loja aprovada ainda.
+                                        {lojistas.length > 0
+                                            ? "Nenhuma loja encontrada para essa busca."
+                                            : "Nenhuma loja aprovada ainda."}
                                     </td>
                                 </tr>
                             ) : null}
@@ -140,7 +141,7 @@ export function PainelLojasAprovadas() {
                                             {lojista.nomeFantasia}
                                         </td>
                                         <td className="px-5 py-3.5 text-navy">
-                                            {lojista.cnpj}
+                                            {formatarCnpj(lojista.cnpj)}
                                         </td>
                                         <td className="px-5 py-3.5">
                                             <span className="inline-flex rounded-full bg-primary-muted px-2.5 py-0.5 text-xs font-medium text-primary">

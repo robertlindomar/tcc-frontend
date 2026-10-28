@@ -4,7 +4,9 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { listarCategorias } from "@/modules/categorias/services/servicoCategoria";
 import { Categoria } from "@/modules/categorias/types/categoria.types";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     converterMoedaParaNumero,
@@ -47,6 +49,7 @@ function parseCategoriaId(valor: string): number | null | undefined {
 export function CrudProdutos() {
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
+    const [busca, setBusca] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -70,6 +73,21 @@ export function CrudProdutos() {
         }
         return mapa;
     }, [categorias]);
+
+    const produtosFiltrados = useMemo(
+        () =>
+            produtos.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [
+                        item.nome,
+                        item.categoriaId != null
+                            ? nomeCategoriaPorId.get(item.categoriaId)
+                            : null,
+                    ],
+                }),
+            ),
+        [busca, produtos, nomeCategoriaPorId],
+    );
 
     useEffect(() => {
         let cancelado = false;
@@ -249,9 +267,21 @@ export function CrudProdutos() {
                 </div>
             ) : null}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por nome ou categoria…"
+                rotuloContagem={rotularContagem(produtosFiltrados.length, "produto", "produtos")}
+            />
+
             <div className="overflow-x-auto">
                 <TabelaProdutos
-                    produtos={produtos}
+                    produtos={produtosFiltrados}
+                    mensagemVazia={
+                        produtos.length > 0
+                            ? "Nenhum produto encontrado para essa busca."
+                            : undefined
+                    }
                     nomeCategoriaPorId={nomeCategoriaPorId}
                     onEditar={abrirEdicao}
                     onExcluir={setProdutoExcluindo}

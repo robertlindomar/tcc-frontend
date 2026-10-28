@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { listarCampanhas } from "@/modules/campanhas/services/servicoCampanha";
 import { Campanha } from "@/modules/campanhas/types/campanha.types";
+import { CampoBusca } from "@/shared/components/ui/CampoBusca";
+import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
 import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
@@ -27,6 +29,7 @@ const formInicial: FormState = {
 
 export function CrudSorteios() {
     const [sorteios, setSorteios] = useState<Sorteio[]>([]);
+    const [busca, setBusca] = useState("");
     const [campanhas, setCampanhas] = useState<Campanha[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
@@ -51,6 +54,16 @@ export function CrudSorteios() {
         }
         return mapa;
     }, [campanhas]);
+
+    const sorteiosFiltrados = useMemo(
+        () =>
+            sorteios.filter((item) =>
+                correspondeBusca(busca, {
+                    textos: [nomeCampanhaPorId[item.campanhaId], item.resultadoAtual?.vencedor.nome],
+                }),
+            ),
+        [busca, sorteios, nomeCampanhaPorId],
+    );
 
     useEffect(() => {
         let cancelado = false;
@@ -197,8 +210,20 @@ export function CrudSorteios() {
                 </div>
             ) : null}
 
+            <CampoBusca
+                valor={busca}
+                onChange={setBusca}
+                placeholder="Buscar por campanha ou vencedor…"
+                rotuloContagem={rotularContagem(sorteiosFiltrados.length, "sorteio", "sorteios")}
+            />
+
             <TabelaSorteios
-                sorteios={sorteios}
+                sorteios={sorteiosFiltrados}
+                mensagemVazia={
+                    sorteios.length > 0
+                        ? "Nenhum sorteio encontrado para essa busca."
+                        : undefined
+                }
                 nomeCampanhaPorId={nomeCampanhaPorId}
                 onEditar={abrirEdicao}
                 onExcluir={setSorteioExcluindo}
