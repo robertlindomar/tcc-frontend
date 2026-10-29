@@ -1,6 +1,7 @@
 import {
     RequisicaoAtualizarCampanha,
     RequisicaoCriarCampanha,
+    RequisicaoReativarCampanha,
 } from "../types/campanha.types";
 import { repositorioCampanha } from "../repositories";
 
@@ -23,6 +24,18 @@ export async function atualizarCampanha(
     return repositorioCampanha.atualizar(id, dados);
 }
 
-export async function deletarCampanha(id: number) {
-    return repositorioCampanha.deletar(id);
+export async function deletarCampanha(id: number, forcar = false) {
+    return repositorioCampanha.deletar(id, forcar);
+}
+
+export async function inativarCampanha(id: number) {
+    return repositorioCampanha.inativar(id);
+}
+
+export async function reativarCampanha(id: number, dados: RequisicaoReativarCampanha) {
+    return repositorioCampanha.reativar(id, dados);
+}
+
+export async function listarEdicoesCampanha(id: number) {
+    return repositorioCampanha.listarEdicoes(id);
 }

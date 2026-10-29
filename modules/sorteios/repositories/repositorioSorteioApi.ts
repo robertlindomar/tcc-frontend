@@ -1,7 +1,5 @@
 import { clienteHttp } from "@/shared/services/clienteHttp";
 import {
-    RequisicaoAtualizarSorteio,
-    RequisicaoCriarSorteio,
     ResultadoSorteio,
     SituacaoResultadoSorteio,
     Sorteio,
@@ -25,6 +23,10 @@ type SorteioApiResponse = {
     id: number;
     qrcode: string | null;
     campanhaId: number;
+    edicao: number;
+    dataInicioEdicao: string;
+    dataFimEdicao: string;
+    valorPorTicketEdicao: number;
     totalTickets: number;
     campanhaEncerrada: boolean;
     resultadoAtual: ResultadoSorteioApiResponse | null;
@@ -53,6 +55,10 @@ function mapSorteioApi(item: SorteioApiResponse): Sorteio {
         id: item.id,
         qrcode: item.qrcode,
         campanhaId: item.campanhaId,
+        edicao: item.edicao,
+        dataInicioEdicao: new Date(item.dataInicioEdicao),
+        dataFimEdicao: new Date(item.dataFimEdicao),
+        valorPorTicketEdicao: item.valorPorTicketEdicao,
         totalTickets: item.totalTickets,
         campanhaEncerrada: item.campanhaEncerrada,
         resultadoAtual: item.resultadoAtual ? mapResultadoApi(item.resultadoAtual) : null,
@@ -71,26 +77,6 @@ export const repositorioSorteioApi: RepositorioSorteio = {
     async buscarPorId(id: number): Promise<Sorteio | null> {
         const response = await clienteHttp.get<SorteioApiResponse>(`/sorteio/${id}`);
         return mapSorteioApi(response.data);
-    },
-
-    async criar(dados: RequisicaoCriarSorteio): Promise<Sorteio> {
-        const response = await clienteHttp.post<SorteioApiResponse>("/sorteio", dados);
-        return mapSorteioApi(response.data);
-    },
-
-    async atualizar(
-        id: number,
-        dados: RequisicaoAtualizarSorteio,
-    ): Promise<Sorteio> {
-        const response = await clienteHttp.put<SorteioApiResponse>(
-            `/sorteio/${id}`,
-            dados,
-        );
-        return mapSorteioApi(response.data);
-    },
-
-    async deletar(id: number): Promise<void> {
-        await clienteHttp.delete(`/sorteio/${id}`);
     },
 
     async sortear(id: number): Promise<Sorteio> {

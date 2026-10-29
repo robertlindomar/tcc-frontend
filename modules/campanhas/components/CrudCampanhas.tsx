@@ -6,7 +6,6 @@ import { CampoData } from "@/shared/components/ui/CampoData";
 import { validarDataNaoPassada } from "@/shared/utils/dataCivil";
 import { correspondeBusca, rotularContagem } from "@/shared/utils/buscaTexto";
 import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
-import { obterMensagemErroApi } from "@/shared/utils/erroApi";
 import {
     atualizarCampanha,
     criarCampanha,
@@ -14,6 +13,19 @@ import {
     listarCampanhas,
 } from "../services/servicoCampanha";
 import { Campanha } from "../types/campanha.types";
+import { obterCodigoErroApi, obterNumeroErroApi } from "@/shared/utils/erroApi";
+import {
+    CampoFormCampanha,
+    CODIGOS_EXCLUSAO_COM_HISTORICO,
+    descreverRiscoExclusao,
+    HistoricoExclusao,
+} from "../utils/campanhaEdicao";
+import {
+    ErroFormCampanha,
+    obterErroFormCampanha,
+    obterMensagemErroCampanha,
+} from "../utils/erroCampanha";
+import { ModalCampanha } from "./ModalCampanha";
 import { TabelaCampanhas } from "./TabelaCampanhas";
 
 type FormState = {
@@ -41,9 +53,14 @@ export function CrudCampanhas() {
     const [salvando, setSalvando] = useState(false);
     const [excluindoId, setExcluindoId] = useState<number | null>(null);
     const [erro, setErro] = useState("");
+    const [erroForm, setErroForm] = useState<ErroFormCampanha | null>(null);
+    const [erroExclusao, setErroExclusao] = useState("");
+    const [historicoExclusao, setHistoricoExclusao] = useState<HistoricoExclusao | null>(null);
+    const [cienteRisco, setCienteRisco] = useState(false);
     const [modalAberto, setModalAberto] = useState(false);
     const [campanhaEditando, setCampanhaEditando] = useState<Campanha | null>(null);
     const [campanhaExcluindo, setCampanhaExcluindo] = useState<Campanha | null>(null);
+    const [campanhaAberta, setCampanhaAberta] = useState<Campanha | null>(null);
     const [form, setForm] = useState<FormState>(formInicial);
 
     const tituloModal = useMemo(
@@ -72,7 +89,7 @@ export function CrudCampanhas() {
             })
             .catch((error: unknown) => {
                 if (!cancelado) {
-                    setErro(obterMensagemErroApi(error, "Erro ao carregar campanhas."));
+                    setErro(obterMensagemErroCampanha(error, "Erro ao carregar campanhas."));
                 }
             })
             .finally(() => {
@@ -89,11 +106,19 @@ export function CrudCampanhas() {
     function abrirCriacao() {
         setCampanhaEditando(null);
         setForm(formInicial);
-        setErro("");
+        setErroForm(null);
         setModalAberto(true);
     }
 
+    function aplicarCampanhaAtualizada(atualizada: Campanha) {
+        setCampanhas((lista) =>
+            lista.map((item) => (item.id === atualizada.id ? atualizada : item)),
+        );
+        setCampanhaAberta((aberta) => (aberta?.id === atualizada.id ? atualizada : aberta));
+    }
+
     function abrirEdicao(campanha: Campanha) {
+        setCampanhaAberta(null);
         setCampanhaEditando(campanha);
         setForm({
             nome: campanha.nome,
@@ -103,7 +128,7 @@ export function CrudCampanhas() {
             dataFim: campanha.dataFimCivil,
             valorPorTicket: String(campanha.valorPorTicket),
         });
-        setErro("");
+        setErroForm(null);
         setModalAberto(true);
     }
 
@@ -119,15 +144,17 @@ export function CrudCampanhas() {
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        setErro("");
+        setErroForm(null);
+        const falhar = (campo: CampoFormCampanha | null, mensagem: string) =>
+            setErroForm({ campo, mensagem });
 
         const nome = form.nome.trim();
         if (!nome) {
-            setErro("Nome é obrigatório.");
+            falhar("nome", "Nome é obrigatório.");
             return;
         }
         if (!form.dataInicio || !form.dataFim) {
-            setErro("Informe início e fim da campanha.");
+            falhar("periodo", "Informe início e fim da campanha.");
             return;
         }
         const erroData =
@@ -142,16 +169,16 @@ export function CrudCampanhas() {
                 valorOriginal: campanhaEditando?.dataFimCivil,
             });
         if (erroData) {
-            setErro(erroData);
+            falhar("periodo", erroData);
             return;
         }
         if (form.dataFim < form.dataInicio) {
-            setErro("A data de fim deve ser maior ou igual à data de início.");
+            falhar("periodo", "A data de fim deve ser maior ou igual à data de início.");
             return;
         }
         const valorPorTicket = Number(form.valorPorTicket.replace(",", "."));
         if (!Number.isFinite(valorPorTicket) || valorPorTicket <= 0) {
-            setErro("Valor por ticket deve ser maior que zero.");
+            falhar("valor", "Valor por ticket deve ser maior que zero.");
             return;
         }
 
@@ -168,12 +195,7 @@ export function CrudCampanhas() {
             };
 
             if (campanhaEditando) {
-                const atualizado = await atualizarCampanha(campanhaEditando.id, dados);
-                setCampanhas((lista) =>
-                    lista.map((item) =>
-                        item.id === atualizado.id ? atualizado : item,
-                    ),
-                );
+                aplicarCampanhaAtualizada(await atualizarCampanha(campanhaEditando.id, dados));
             } else {
                 const criado = await criarCampanha(dados);
                 setCampanhas((lista) => [criado, ...lista]);
@@ -181,28 +203,44 @@ export function CrudCampanhas() {
 
             fecharModal();
         } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao salvar campanha."));
+            setErroForm(obterErroFormCampanha(error, "Erro ao salvar campanha."));
         } finally {
             setSalvando(false);
         }
     }
 
-    async function confirmarExclusao() {
+    function abrirExclusao(campanha: Campanha | null) {
+        setErroExclusao("");
+        setHistoricoExclusao(null);
+        setCienteRisco(false);
+        setCampanhaExcluindo(campanha);
+    }
+
+    async function confirmarExclusao(forcar = false) {
         if (!campanhaExcluindo) {
             return;
         }
 
         setExcluindoId(campanhaExcluindo.id);
-        setErro("");
+        setErroExclusao("");
 
         try {
-            await deletarCampanha(campanhaExcluindo.id);
+            await deletarCampanha(campanhaExcluindo.id, forcar);
             setCampanhas((lista) =>
                 lista.filter((item) => item.id !== campanhaExcluindo.id),
             );
-            setCampanhaExcluindo(null);
+            abrirExclusao(null);
         } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao excluir campanha."));
+            const codigo = obterCodigoErroApi(error);
+            if (!forcar && codigo && CODIGOS_EXCLUSAO_COM_HISTORICO.includes(codigo)) {
+                setHistoricoExclusao({
+                    totalTickets: obterNumeroErroApi(error, "totalTickets") ?? 0,
+                    totalNotas: obterNumeroErroApi(error, "totalNotas") ?? 0,
+                    totalResultados: obterNumeroErroApi(error, "totalResultados") ?? 0,
+                });
+            } else {
+                setErroExclusao(obterMensagemErroCampanha(error, "Erro ao excluir campanha."));
+            }
         } finally {
             setExcluindoId(null);
         }
@@ -210,6 +248,12 @@ export function CrudCampanhas() {
 
     const classeCampo =
         "mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-navy outline-none focus:border-primary";
+    const classeCampoInvalido =
+        "mt-1 w-full rounded-xl border border-red-400 bg-surface px-3 py-2 text-navy outline-none focus:border-red-500";
+    const erroDoCampo = (campo: CampoFormCampanha) =>
+        erroForm?.campo === campo ? erroForm.mensagem : null;
+    const classeDoCampo = (campo: CampoFormCampanha) =>
+        erroDoCampo(campo) ? classeCampoInvalido : classeCampo;
 
     return (
         <div className="painel-pagina space-y-6">
@@ -219,7 +263,8 @@ export function CrudCampanhas() {
                     <h1 className="painel-titulo">Campanhas</h1>
                     <p className="painel-subtitulo">
                         Defina período e quanto cada ticket custa em reais. Todas as lojas
-                        aprovadas participam automaticamente.
+                        aprovadas participam automaticamente. Cada edição tem seu sorteio:
+                        clique na campanha para ver os tickets, sortear ou reativá-la.
                     </p>
                 </div>
 
@@ -248,8 +293,9 @@ export function CrudCampanhas() {
                         ? "Nenhuma campanha encontrada para essa busca."
                         : undefined
                 }
+                onAbrir={setCampanhaAberta}
                 onEditar={abrirEdicao}
-                onExcluir={setCampanhaExcluindo}
+                onExcluir={abrirExclusao}
                 carregando={carregando}
                 excluindoId={excluindoId}
             />
@@ -278,7 +324,16 @@ export function CrudCampanhas() {
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                        {erroForm && erroForm.campo === null ? (
+                            <div
+                                role="alert"
+                                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                            >
+                                {erroForm.mensagem}
+                            </div>
+                        ) : null}
+
                         <label className="block text-sm font-medium text-navy">
                             Nome
                             <input
@@ -290,33 +345,38 @@ export function CrudCampanhas() {
                                         nome: event.target.value,
                                     }))
                                 }
-                                className={classeCampo}
+                                className={classeDoCampo("nome")}
+                                aria-invalid={Boolean(erroDoCampo("nome"))}
                                 required
                             />
+                            <AvisoCampo mensagem={erroDoCampo("nome")} />
                         </label>
 
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <CampoData
-                                rotulo="Início"
-                                valor={form.dataInicio}
-                                onChange={(dataInicio) =>
-                                    setForm((atual) => ({ ...atual, dataInicio }))
-                                }
-                                valorOriginal={campanhaEditando?.dataInicioCivil}
-                                className={classeCampo}
-                                obrigatorio
-                            />
-                            <CampoData
-                                rotulo="Fim"
-                                valor={form.dataFim}
-                                onChange={(dataFim) =>
-                                    setForm((atual) => ({ ...atual, dataFim }))
-                                }
-                                valorOriginal={campanhaEditando?.dataFimCivil}
-                                minimo={form.dataInicio}
-                                className={classeCampo}
-                                obrigatorio
-                            />
+                        <div>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <CampoData
+                                    rotulo="Início"
+                                    valor={form.dataInicio}
+                                    onChange={(dataInicio) =>
+                                        setForm((atual) => ({ ...atual, dataInicio }))
+                                    }
+                                    valorOriginal={campanhaEditando?.dataInicioCivil}
+                                    className={classeDoCampo("periodo")}
+                                    obrigatorio
+                                />
+                                <CampoData
+                                    rotulo="Fim"
+                                    valor={form.dataFim}
+                                    onChange={(dataFim) =>
+                                        setForm((atual) => ({ ...atual, dataFim }))
+                                    }
+                                    valorOriginal={campanhaEditando?.dataFimCivil}
+                                    minimo={form.dataInicio}
+                                    className={classeDoCampo("periodo")}
+                                    obrigatorio
+                                />
+                            </div>
+                            <AvisoCampo mensagem={erroDoCampo("periodo")} />
                         </div>
 
                         <label className="block text-sm font-medium text-navy">
@@ -332,9 +392,11 @@ export function CrudCampanhas() {
                                         valorPorTicket: event.target.value,
                                     }))
                                 }
-                                className={classeCampo}
+                                className={classeDoCampo("valor")}
+                                aria-invalid={Boolean(erroDoCampo("valor"))}
                                 required
                             />
+                            <AvisoCampo mensagem={erroDoCampo("valor")} />
                             <span className="mt-1 block text-xs font-normal text-muted">
                                 Ex.: 10 = a cada R$ 10 em notas válidas, 1 ticket.
                             </span>
@@ -391,44 +453,119 @@ export function CrudCampanhas() {
                 </ModalOverlay>
             ) : null}
 
+            {campanhaAberta ? (
+                <ModalCampanha
+                    key={campanhaAberta.id}
+                    campanha={campanhaAberta}
+                    onFechar={() => setCampanhaAberta(null)}
+                    onAtualizada={aplicarCampanhaAtualizada}
+                    onEditar={abrirEdicao}
+                />
+            ) : null}
+
             {campanhaExcluindo ? (
                 <ModalOverlay
                     onFechar={() => {
                         if (excluindoId === null) {
-                            setCampanhaExcluindo(null);
+                            abrirExclusao(null);
                         }
                     }}
                     bloqueado={excluindoId !== null}
                     largura="sm"
                 >
                     <h2 className="text-xl font-semibold text-navy">
-                        Excluir campanha
+                        {historicoExclusao ? "Atenção: exclusão definitiva" : "Excluir campanha"}
                     </h2>
-                    <p className="mt-2 text-sm text-muted">
-                        Confirma a exclusão de {campanhaExcluindo.nome}? Essa ação
-                        não poderá ser desfeita.
-                    </p>
+                    {historicoExclusao ? (
+                        <div className="mt-3 space-y-3 text-sm">
+                            <div
+                                role="alert"
+                                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+                            >
+                                <p className="font-semibold">
+                                    {campanhaExcluindo.nome} já tem histórico. Excluir vai apagar
+                                    permanentemente, em todas as edições:
+                                </p>
+                                <ul className="mt-2 list-disc space-y-1 pl-5">
+                                    {descreverRiscoExclusao(historicoExclusao).map((item) => (
+                                        <li key={item}>{item}</li>
+                                    ))}
+                                </ul>
+                                <p className="mt-2">
+                                    Os consumidores perdem esses tickets e não será possível
+                                    recuperar nada. Se quiser só tirar a campanha do ar, use
+                                    Inativar.
+                                </p>
+                            </div>
+                            <label className="flex items-start gap-2 text-navy">
+                                <input
+                                    type="checkbox"
+                                    checked={cienteRisco}
+                                    onChange={(event) => setCienteRisco(event.target.checked)}
+                                    className="mt-0.5"
+                                />
+                                Entendo que esta ação é permanente e quero apagar a campanha
+                                com todo o histórico.
+                            </label>
+                        </div>
+                    ) : (
+                        <p className="mt-2 text-sm text-muted">
+                            Confirma a exclusão de {campanhaExcluindo.nome}? Essa ação
+                            não poderá ser desfeita.
+                        </p>
+                    )}
+
+                    {erroExclusao ? (
+                        <div
+                            role="alert"
+                            className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                        >
+                            {erroExclusao}
+                        </div>
+                    ) : null}
 
                     <div className="mt-6 flex justify-end gap-2">
                         <button
                             type="button"
-                            onClick={() => setCampanhaExcluindo(null)}
+                            onClick={() => abrirExclusao(null)}
                             disabled={excluindoId !== null}
                             className="btn-secundario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             Cancelar
                         </button>
-                        <button
-                            type="button"
-                            onClick={confirmarExclusao}
-                            disabled={excluindoId !== null}
-                            className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            {excluindoId ? "Excluindo..." : "Excluir"}
-                        </button>
+                        {historicoExclusao ? (
+                            <button
+                                type="button"
+                                onClick={() => void confirmarExclusao(true)}
+                                disabled={excluindoId !== null || !cienteRisco}
+                                className="rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {excluindoId ? "Apagando..." : "Apagar tudo definitivamente"}
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => void confirmarExclusao()}
+                                disabled={excluindoId !== null}
+                                className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {excluindoId ? "Excluindo..." : "Excluir"}
+                            </button>
+                        )}
                     </div>
                 </ModalOverlay>
             ) : null}
         </div>
+    );
+}
+
+function AvisoCampo({ mensagem }: { mensagem: string | null }) {
+    if (!mensagem) {
+        return null;
+    }
+    return (
+        <span role="alert" className="mt-1 block text-xs font-medium text-red-600">
+            {mensagem}
+        </span>
     );
 }

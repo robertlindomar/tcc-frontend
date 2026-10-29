@@ -29,7 +29,6 @@ const NAV_POR_PAPEL: Record<PapelUsuario, ItemNavegacao[]> = {
         { href: "/pre-cadastros", label: "Pré-Cadastros", icone: FileText },
         { href: "/lojas-aprovadas", label: "Lojas aprovadas", icone: CheckCircle2 },
         { href: "/campanhas", label: "Campanhas", icone: Megaphone },
-        { href: "/sorteios", label: "Sorteios", icone: Gift },
         { href: "/associacoes", label: "Minha associação", icone: Building2 },
     ],
     LOJISTA: [

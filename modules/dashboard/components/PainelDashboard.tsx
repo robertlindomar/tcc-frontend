@@ -88,10 +88,10 @@ export function PainelDashboard() {
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.sorteiosCadastrados}
-                            rotulo="Sorteios cadastrados"
+                            rotulo="Edições com sorteio"
                             icone={ICONES_METRICA.sorteios}
                             tom="ambar"
-                            href="/sorteios"
+                            href="/campanhas"
                         />
                         <CartaoMetrica
                             valor={resumo.metricas.totalLojasParticipantes}

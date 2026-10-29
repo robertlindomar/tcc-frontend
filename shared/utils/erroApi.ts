@@ -59,6 +59,32 @@ export function obterMensagemErroApi(error: unknown, fallback: string): string {
     return fallback;
 }
 
+/** Campo numérico extra do corpo de erro da API (ex.: contagens), se houver. */
+export function obterNumeroErroApi(error: unknown, campo: string): number | null {
+    if (!axios.isAxiosError(error)) {
+        return null;
+    }
+    const data = error.response?.data;
+    if (data && typeof data === "object" && campo in data) {
+        const valor = (data as Record<string, unknown>)[campo];
+        return typeof valor === "number" ? valor : null;
+    }
+    return null;
+}
+
+/** Código de negócio (`response.data.codigo`) devolvido pela API, se houver. */
+export function obterCodigoErroApi(error: unknown): string | null {
+    if (!axios.isAxiosError(error)) {
+        return null;
+    }
+    const data = error.response?.data;
+    if (data && typeof data === "object" && "codigo" in data) {
+        const codigo = (data as { codigo: unknown }).codigo;
+        return typeof codigo === "string" ? codigo : null;
+    }
+    return null;
+}
+
 /**
  * Separa sessão inválida (401) de permissão/status negados (403) para a UI
  * decidir entre reautenticar e mostrar aviso.

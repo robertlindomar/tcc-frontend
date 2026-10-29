@@ -6,7 +6,35 @@ import {
     ehDataIsoValida,
     hojeIsoCivil,
     validarDataNaoPassada,
+    isoParaBr,
+    mascararDataBr,
+    brParaIso,
+    montarGradeMes,
+    somarMeses,
 } from "./dataCivil.ts";
+
+test("conversão e máscara dd/mm/aaaa", () => {
+    assert.equal(isoParaBr("2026-10-28"), "28/10/2026");
+    assert.equal(isoParaBr(""), "");
+    assert.equal(mascararDataBr("28"), "28");
+    assert.equal(mascararDataBr("2810"), "28/10");
+    assert.equal(mascararDataBr("28a10b2026999"), "28/10/2026");
+    assert.equal(brParaIso("28/10/2026"), "2026-10-28");
+    assert.equal(brParaIso("28/10/26"), null);
+});
+
+test("grade do mês começa no domingo e tem 6 semanas", () => {
+    const grade = montarGradeMes("2026-10");
+    assert.equal(grade.length, 42);
+    assert.deepEqual(grade[0], { iso: "2026-09-27", dia: 27, doMes: false });
+    assert.deepEqual(grade[4], { iso: "2026-10-01", dia: 1, doMes: true });
+    assert.equal(grade.filter((dia) => dia.doMes).length, 31);
+});
+
+test("somarMeses atravessa o ano", () => {
+    assert.equal(somarMeses("2026-12", 1), "2027-01");
+    assert.equal(somarMeses("2026-01", -1), "2025-12");
+});
 
 const agora = new Date("2026-10-27T15:00:00Z");
 

@@ -1,10 +1,6 @@
-import { CrudSorteios } from "@/modules/sorteios/components/CrudSorteios";
-import { ExigirPapel } from "@/shared/components/acesso/ExigirPapel";
+import { redirect } from "next/navigation";
 
+/** Sorteio agora vive dentro da campanha (um por edição); rota antiga preservada para links salvos. */
 export default function Page() {
-    return (
-        <ExigirPapel papeis={["ASSOCIACAO"]}>
-            <CrudSorteios />
-        </ExigirPapel>
-    );
+    redirect("/campanhas");
 }

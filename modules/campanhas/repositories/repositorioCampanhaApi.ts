@@ -1,8 +1,11 @@
 import { clienteHttp } from "@/shared/services/clienteHttp";
 import {
     Campanha,
+    EdicaoCampanha,
     RequisicaoAtualizarCampanha,
     RequisicaoCriarCampanha,
+    RequisicaoReativarCampanha,
+    SituacaoSorteioEdicao,
 } from "../types/campanha.types";
 import { RepositorioCampanha } from "./repositorioCampanha";
 
@@ -19,6 +22,16 @@ type CampanhaApiResponse = {
     associacaoId: number;
     dataCriacao: string;
     dataAtualizacao: string;
+    ativa: boolean;
+    edicao: number;
+    totalTickets: number;
+    sorteioId: number | null;
+    periodoEncerrado: boolean;
+    situacaoSorteio: SituacaoSorteioEdicao;
+};
+
+type EdicaoCampanhaApiResponse = Omit<EdicaoCampanha, "dataSorteio"> & {
+    dataSorteio: string | null;
 };
 
 function mapCampanhaApi(item: CampanhaApiResponse): Campanha {
@@ -35,6 +48,27 @@ function mapCampanhaApi(item: CampanhaApiResponse): Campanha {
         associacaoId: item.associacaoId,
         dataCriacao: new Date(item.dataCriacao),
         dataAtualizacao: new Date(item.dataAtualizacao),
+        ativa: item.ativa,
+        edicao: item.edicao,
+        totalTickets: item.totalTickets,
+        sorteioId: item.sorteioId,
+        periodoEncerrado: item.periodoEncerrado,
+        situacaoSorteio: item.situacaoSorteio,
+    };
+}
+
+function mapEdicaoApi(item: EdicaoCampanhaApiResponse): EdicaoCampanha {
+    return {
+        edicao: item.edicao,
+        atual: item.atual,
+        dataInicioCivil: item.dataInicioCivil,
+        dataFimCivil: item.dataFimCivil,
+        valorPorTicket: item.valorPorTicket,
+        totalTickets: item.totalTickets,
+        sorteioId: item.sorteioId,
+        periodoEncerrado: item.periodoEncerrado,
+        situacaoSorteio: item.situacaoSorteio,
+        dataSorteio: item.dataSorteio ? new Date(item.dataSorteio) : null,
     };
 }
 
@@ -65,7 +99,27 @@ export const repositorioCampanhaApi: RepositorioCampanha = {
         return mapCampanhaApi(response.data);
     },
 
-    async deletar(id: number): Promise<void> {
-        await clienteHttp.delete(`/campanha/${id}`);
+    async deletar(id: number, forcar = false): Promise<void> {
+        await clienteHttp.delete(`/campanha/${id}`, forcar ? { params: { forcar: true } } : undefined);
+    },
+
+    async inativar(id: number): Promise<Campanha> {
+        const response = await clienteHttp.patch<CampanhaApiResponse>(`/campanha/${id}/inativar`);
+        return mapCampanhaApi(response.data);
+    },
+
+    async reativar(id: number, dados: RequisicaoReativarCampanha): Promise<Campanha> {
+        const response = await clienteHttp.patch<CampanhaApiResponse>(
+            `/campanha/${id}/reativar`,
+            dados,
+        );
+        return mapCampanhaApi(response.data);
+    },
+
+    async listarEdicoes(id: number): Promise<EdicaoCampanha[]> {
+        const response = await clienteHttp.get<EdicaoCampanhaApiResponse[]>(
+            `/campanha/${id}/edicoes`,
+        );
+        return response.data.map(mapEdicaoApi);
     },
 };

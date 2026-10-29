@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ModalOverlay } from "@/shared/components/ui/ModalOverlay";
-import { obterMensagemErroApi } from "@/shared/utils/erroApi";
+import { obterMensagemErroCampanha } from "@/modules/campanhas/utils/erroCampanha";
 import {
     confirmarEntregaSorteio,
     refazerSorteio,
@@ -10,11 +9,11 @@ import {
 } from "../services/servicoSorteio";
 import { SituacaoResultadoSorteio, Sorteio } from "../types/sorteio.types";
 
-interface PainelResultadoSorteioProps {
+interface ConteudoResultadoSorteioProps {
     sorteio: Sorteio;
-    nomeCampanha: string;
-    onFechar: () => void;
     onAtualizado: (sorteio: Sorteio) => void;
+    /** Informa o container (modal) para bloquear o fechamento durante a ação. */
+    onProcessandoChange?: (processando: boolean) => void;
 }
 
 type Acao = "sortear" | "refazer" | "confirmar";
@@ -35,13 +34,21 @@ function formatarDataHora(data: Date) {
     });
 }
 
-/** G17: associação sorteia 1..N tickets, confirma a entrega ou refaz o sorteio. */
-export function PainelResultadoSorteio({
+function formatarDataNegocio(data: Date) {
+    return data.toLocaleDateString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
+}
+
+/** G17: sorteio da edição — gera 1..N, confirma a entrega ou refaz. Sem modal próprio. */
+export function ConteudoResultadoSorteio({
     sorteio,
-    nomeCampanha,
-    onFechar,
     onAtualizado,
-}: PainelResultadoSorteioProps) {
+    onProcessandoChange,
+}: ConteudoResultadoSorteioProps) {
     const [acao, setAcao] = useState<Acao | null>(null);
     const [erro, setErro] = useState("");
     const [agora, setAgora] = useState(() => Date.now());
@@ -68,6 +75,7 @@ export function PainelResultadoSorteio({
 
         setErro("");
         setAcao(tipo);
+        onProcessandoChange?.(true);
         try {
             const operacoes = {
                 sortear: sortearSorteio,
@@ -76,38 +84,24 @@ export function PainelResultadoSorteio({
             };
             onAtualizado(await operacoes[tipo](sorteio.id));
         } catch (error) {
-            setErro(obterMensagemErroApi(error, "Erro ao processar o sorteio."));
+            setErro(obterMensagemErroCampanha(error, "Erro ao processar o sorteio."));
         } finally {
             setAcao(null);
+            onProcessandoChange?.(false);
         }
     }
 
     return (
-        <ModalOverlay onFechar={onFechar} bloqueado={processando} largura="lg">
-            <div className="mb-5 flex items-start justify-between gap-4">
-                <div>
-                    <p className="painel-eyebrow">Sorteio</p>
-                    <h2 className="text-xl font-semibold text-navy">{nomeCampanha}</h2>
-                    <p className="mt-1 text-sm text-muted">
-                        {sorteio.totalTickets} ticket(s) participando · número sorteado entre 1 e{" "}
-                        {sorteio.totalTickets || "—"}
-                    </p>
-                </div>
-                <button
-                    type="button"
-                    onClick={onFechar}
-                    disabled={processando}
-                    className="px-2 py-1 text-2xl leading-none text-muted hover:text-navy disabled:opacity-50"
-                    aria-label="Fechar modal"
-                >
-                    ×
-                </button>
-            </div>
+        <div className="space-y-4">
+            <p className="text-sm text-muted">
+                {sorteio.totalTickets} ticket(s) na edição {sorteio.edicao} · número sorteado entre 1 e{" "}
+                {sorteio.totalTickets || "—"}
+            </p>
 
             {erro ? (
                 <div
                     role="alert"
-                    className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
                 >
                     {erro}
                 </div>
@@ -162,11 +156,12 @@ export function PainelResultadoSorteio({
                 <div className="painel-card space-y-3 px-5 py-6 text-center">
                     {!sorteio.campanhaEncerrada ? (
                         <p className="text-sm text-muted">
-                            O sorteio só fica disponível depois do término da campanha.
+                            Disponível após {formatarDataNegocio(sorteio.dataFimEdicao)}, quando o
+                            período da edição terminar.
                         </p>
                     ) : sorteio.totalTickets === 0 ? (
                         <p className="text-sm text-muted">
-                            Esta campanha não tem tickets para sortear.
+                            Esta edição não tem tickets para sortear.
                         </p>
                     ) : (
                         <p className="text-sm text-muted">
@@ -180,14 +175,14 @@ export function PainelResultadoSorteio({
                         disabled={!podeSortear || processando}
                         className="btn-primario text-sm disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {acao === "sortear" ? "Sorteando..." : "Gerar número aleatório"}
+                        {acao === "sortear" ? "Sorteando..." : "Sortear"}
                     </button>
                 </div>
             )}
 
             {cancelados.length > 0 ? (
-                <div className="mt-5">
-                    <h3 className="mb-2 text-sm font-semibold text-navy">Sorteios refeitos</h3>
+                <div>
+                    <h4 className="mb-2 text-sm font-semibold text-navy">Sorteios refeitos</h4>
                     <ul className="painel-card divide-y divide-border overflow-hidden text-sm">
                         {cancelados.map((item) => (
                             <li key={item.id} className="px-4 py-2.5 text-muted">
@@ -201,6 +196,6 @@ export function PainelResultadoSorteio({
                     </ul>
                 </div>
             ) : null}
-        </ModalOverlay>
+        </div>
     );
 }
